@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Lớp Học Tinh Gọn</title>
+    <title>Hệ Thống Quản Lý Lớp Học</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- MathJax v3 CDN cho render MathML & LaTeX -->
+    <!-- MathJax v3 CDN -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -17,219 +17,407 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800" x-data="classroomApp()" x-init="initData()">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased" x-data="classroomApp()" x-init="initData()">
 
-    <!-- Header & Navigation -->
-    <header class="bg-indigo-600 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-            <h1 class="text-xl font-bold">Lớp Học Trực Tuyến</h1>
-            <div class="flex items-center space-x-3">
-                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full" x-text="role === 'teacher' ? 'Quyền: Giáo Viên' : 'Quyền: Học Sinh'"></span>
-                <button @click="role = (role === 'teacher' ? 'student' : 'teacher')" class="bg-white text-indigo-600 px-3 py-1 rounded text-sm font-semibold hover:bg-indigo-50">
-                    Đổi Quyền
-                </button>
-            </div>
-        </div>
-        <nav class="max-w-7xl mx-auto px-4 flex space-x-4 border-t border-indigo-500 text-sm font-medium overflow-x-auto">
-            <button @click="activeTab = 'videos'" :class="activeTab === 'videos' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Video Bài Giảng</button>
-            <button @click="activeTab = 'attendance'" :class="activeTab === 'attendance' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Điểm Danh</button>
-            <button @click="activeTab = 'assignments'" :class="activeTab === 'assignments' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Bài Tập Về Nhà</button>
-            <button @click="activeTab = 'documents'" :class="activeTab === 'documents' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Tài Liệu PDF</button>
-            <button @click="activeTab = 'exams'" :class="activeTab === 'exams' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Đề Thi & MathML</button>
-            <button x-show="role === 'teacher'" @click="activeTab = 'students'" :class="activeTab === 'students' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Danh Sách Lớp</button>
-        </nav>
-    </header>
+    <div class="flex h-screen overflow-hidden">
 
-    <main class="max-w-7xl mx-auto px-4 py-6">
-
-        <!-- 1. VIDEO BÀI GIẢNG -->
-        <section x-show="activeTab === 'videos'">
-            <div x-show="role === 'teacher'" class="bg-white p-4 rounded-lg shadow mb-6">
-                <h3 class="font-bold mb-3">Thêm Video Bài Giảng (YouTube Unlisted)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng" class="border p-2 rounded w-full">
-                    <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID (vd: dQw4w9WgXcQ)" class="border p-2 rounded w-full">
-                    <button @click="addVideo()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Thêm Video</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2 bg-white p-4 rounded-lg shadow" x-show="currentVideoId">
-                    <div class="aspect-w-16 aspect-h-9 mb-4">
-                        <iframe :src="'https://www.youtube.com/embed/' + currentVideoId" class="w-full h-80 rounded" frameborder="0" allowfullscreen></iframe>
+        <!-- THANH TAB BÊN TRÁI (SIDEBAR) -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 select-none">
+            <div class="p-4">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 px-2 py-3 mb-4">
+                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                        C
                     </div>
-                    <h2 class="text-xl font-bold" x-text="currentVideoTitle"></h2>
+                    <div>
+                        <div class="font-bold text-slate-900 leading-tight">ClassStu</div>
+                        <div class="text-xs text-slate-400">Quản lý lớp học</div>
+                    </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow">
-                    <h3 class="font-bold mb-3 text-gray-700">Danh Sách Bài Giảng</h3>
-                    <ul class="divide-y">
-                        <template x-for="v in videos" :key="v.id">
-                            <li @click="selectVideo(v)" class="py-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                                <span class="font-medium text-indigo-600" x-text="v.title"></span>
-                            </li>
-                        </template>
-                    </ul>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-6">
+                    <!-- Nhóm CHÍNH -->
+                    <div>
+                        <div class="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">Chính</div>
+                        <div class="space-y-1">
+                            <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                                <span>Tổng quan</span>
+                            </button>
+
+                            <button @click="activeTab = 'attendance'" :class="activeTab === 'attendance' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                <span>Điểm danh</span>
+                            </button>
+
+                            <button x-show="role === 'teacher'" @click="activeTab = 'students'" :class="activeTab === 'students' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                <span>Học sinh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm GIẢNG DẠY -->
+                    <div>
+                        <div class="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">Giảng dạy</div>
+                        <div class="space-y-1">
+                            <button @click="activeTab = 'videos'" :class="activeTab === 'videos' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                <span>Bài giảng Video</span>
+                            </button>
+
+                            <button @click="activeTab = 'assignments'" :class="activeTab === 'assignments' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span>Bài tập về nhà</span>
+                            </button>
+
+                            <button @click="activeTab = 'documents'" :class="activeTab === 'documents' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                <span>Tài liệu PDF</span>
+                            </button>
+
+                            <button @click="activeTab = 'exams'" :class="activeTab === 'exams' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <span>Đề thi & MathML</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Profile & Role Switcher ở đáy Sidebar -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3 min-w-0">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0" x-text="role === 'teacher' ? 'GV' : 'HS'"></div>
+                        <div class="min-w-0">
+                            <div class="text-xs font-semibold text-slate-800 truncate" x-text="role === 'teacher' ? 'Giáo viên' : 'Học sinh'"></div>
+                            <div class="text-[10px] text-slate-500 truncate" x-text="role === 'teacher' ? 'Toàn quyền quản lý' : 'Quyền truy cập học tập'"></div>
+                        </div>
+                    </div>
+                    <button @click="role = (role === 'teacher' ? 'student' : 'teacher')" class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-white border border-slate-200 transition shrink-0" title="Đổi quyền">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    </button>
                 </div>
             </div>
-        </section>
+        </aside>
 
-        <!-- 2. ĐIỂM DANH -->
-        <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-lg shadow overflow-x-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Bảng Điểm Danh Lớp Học</h2>
-                <input type="date" x-model="selectedDate" class="border p-2 rounded">
-            </div>
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-100 border-b">
-                        <th class="p-3">Mã HS</th>
-                        <th class="p-3">Họ và Tên</th>
-                        <th class="p-3 text-center">Trạng Thái (Ngày: <span x-text="selectedDate"></span>)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="s in students" :key="s.id">
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3 font-mono" x-text="s.student_code"></td>
-                            <td class="p-3" x-text="s.full_name"></td>
-                            <td class="p-3 text-center">
-                                <select :disabled="role !== 'teacher'" :value="getAttendanceStatus(s.id, selectedDate)" @change="updateAttendance(s.id, selectedDate, $event.target.value)" class="border p-1 rounded">
-                                    <option value="Có mặt">Có mặt</option>
-                                    <option value="Vắng">Vắng</option>
-                                    <option value="Có phép">Có phép</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </section>
+        <!-- NỘI DUNG CHÍNH (MAIN CONTENT) -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
-        <!-- 3. BÀI TẬP VỀ NHÀ -->
-        <section x-show="activeTab === 'assignments'">
-            <div x-show="role === 'teacher'" class="bg-white p-6 rounded-lg shadow mb-6">
-                <h3 class="font-bold mb-3">Tạo Form Bài Tập Mới</h3>
-                <input type="text" x-model="newAssignment.title" placeholder="Tên bài tập" class="border p-2 rounded w-full mb-3">
-                <textarea x-model="newAssignment.content" placeholder="Nội dung câu hỏi hoặc yêu cầu" class="border p-2 rounded w-full mb-3" rows="3"></textarea>
-                <button @click="addAssignment()" class="bg-indigo-600 text-white px-4 py-2 rounded">Đăng Bài Tập</button>
-            </div>
+            <!-- Top Header Navbar -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
+                <h1 class="text-lg font-bold text-slate-900" x-text="getTabTitle()"></h1>
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" :class="role === 'teacher' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
+                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="role === 'teacher' ? 'bg-blue-600' : 'bg-green-600'"></span>
+                        <span x-text="role === 'teacher' ? 'Chế độ Giáo viên' : 'Chế độ Học sinh'"></span>
+                    </span>
+                </div>
+            </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <template x-for="a in assignments" :key="a.id">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-bold text-indigo-600 mb-2" x-text="a.title"></h3>
-                        <p class="text-gray-700 mb-4 whitespace-pre-line" x-text="a.content"></p>
-                        
-                        <!-- Form nộp bài phía học sinh -->
-                        <div x-show="role === 'student'" class="border-t pt-4">
-                            <h4 class="font-semibold text-sm mb-2">Nộp câu trả lời:</h4>
-                            <input type="text" x-model="submissionForms[a.id].student_name" placeholder="Họ và tên học sinh" class="border p-2 rounded w-full mb-2 text-sm">
-                            <textarea x-model="submissionForms[a.id].answer_text" placeholder="Nhập đáp án..." class="border p-2 rounded w-full mb-2 text-sm" rows="2"></textarea>
-                            <button @click="submitHomework(a.id)" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Nộp Bài</button>
+            <!-- Main Workspace Area -->
+            <main class="p-8 space-y-6 max-w-7xl w-full mx-auto">
+
+                <!-- 0. TỔNG QUAN (DASHBOARD STATS) -->
+                <section x-show="activeTab === 'dashboard'" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="text-xs text-slate-500 font-medium">Tổng số học sinh</div>
+                                    <div class="text-2xl font-bold text-slate-900 mt-1" x-text="students.length"></div>
+                                </div>
+                                <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Danh sách học sinh đã nộp (Giáo viên xem) -->
-                        <div x-show="role === 'teacher'" class="border-t pt-4">
-                            <button @click="loadSubmissions(a.id)" class="text-sm text-indigo-600 underline mb-2">Xem danh sách bài nộp</button>
-                            <ul class="text-sm divide-y max-h-40 overflow-y-auto">
-                                <template x-for="sub in currentSubmissions[a.id] || []" :key="sub.id">
-                                    <li class="py-2">
-                                        <span class="font-bold" x-text="sub.student_name"></span>: 
-                                        <span class="text-gray-600" x-text="sub.answer_text"></span>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="text-xs text-slate-500 font-medium">Video bài giảng</div>
+                                    <div class="text-2xl font-bold text-slate-900 mt-1" x-text="videos.length"></div>
+                                </div>
+                                <div class="p-2.5 bg-purple-50 text-purple-600 rounded-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="text-xs text-slate-500 font-medium">Bài tập đã giao</div>
+                                    <div class="text-2xl font-bold text-slate-900 mt-1" x-text="assignments.length"></div>
+                                </div>
+                                <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="text-xs text-slate-500 font-medium">Tài liệu & Đề thi</div>
+                                    <div class="text-2xl font-bold text-slate-900 mt-1" x-text="documents.length + exams.length"></div>
+                                </div>
+                                <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Navigation Cards -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900 mb-4">Lối truy cập nhanh</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <button @click="activeTab = 'attendance'" class="p-4 rounded-xl border border-slate-200 text-left hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                <div class="font-bold text-slate-800 text-sm">Bảng điểm danh ma trận</div>
+                                <div class="text-xs text-slate-500 mt-1">Theo dõi chuyên cần theo cột ngày dạy</div>
+                            </button>
+                            <button @click="activeTab = 'videos'" class="p-4 rounded-xl border border-slate-200 text-left hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                <div class="font-bold text-slate-800 text-sm">Xem video bài giảng</div>
+                                <div class="text-xs text-slate-500 mt-1">Hệ thống bài giảng YouTube Unlisted</div>
+                            </button>
+                            <button @click="activeTab = 'exams'" class="p-4 rounded-xl border border-slate-200 text-left hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                <div class="font-bold text-slate-800 text-sm">Ngân hàng đề & MathML</div>
+                                <div class="text-xs text-slate-500 mt-1">Hiển thị công thức toán KaTeX / MathJax</div>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 1. BẢNG ĐIỂM DANH MA TRẬN -->
+                <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Bảng Điểm Danh Tổng Thể</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Theo dõi lịch sử chuyên cần của lớp học theo các buổi</p>
+                        </div>
+                        
+                        <div x-show="role === 'teacher'" class="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                            <input type="date" x-model="newAttendanceDate" class="border border-slate-200 p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button @click="addAttendanceDate()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">
+                                + Thêm ngày học
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left border-collapse min-w-max">
+                            <thead>
+                                <tr class="bg-blue-600 text-white text-xs">
+                                    <th class="p-3 border-r border-blue-500 w-12 text-center font-bold">STT</th>
+                                    <th class="p-3 border-r border-blue-500 min-w-[200px] font-bold">Họ và tên HS</th>
+                                    <template x-for="d in attendanceDates" :key="d">
+                                        <th class="p-3 text-center border-r border-blue-500 min-w-[140px]">
+                                            <div x-text="formatDateDisplay(d)" class="font-bold text-xs"></div>
+                                            <div class="text-[10px] font-normal text-blue-100">Điểm danh</div>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs divide-y divide-slate-200">
+                                <template x-for="(s, index) in students" :key="s.id">
+                                    <tr class="hover:bg-slate-50/80">
+                                        <td class="p-3 text-center border-r font-mono text-slate-400" x-text="index + 1"></td>
+                                        <td class="p-3 font-semibold border-r text-slate-800" x-text="s.full_name"></td>
+                                        <template x-for="d in attendanceDates" :key="d">
+                                            <td class="p-2 text-center border-r">
+                                                <template x-if="role === 'teacher'">
+                                                    <select 
+                                                        :value="getAttendanceStatus(s.id, d)" 
+                                                        @change="updateAttendance(s.id, d, $event.target.value)"
+                                                        :class="getStatusColorClass(getAttendanceStatus(s.id, d))"
+                                                        class="w-full p-1.5 rounded-lg border text-xs font-medium text-center cursor-pointer transition focus:outline-none">
+                                                        <option value="">-- Chưa nhập --</option>
+                                                        <option value="Có mặt">Có mặt</option>
+                                                        <option value="Vắng phép">Vắng phép</option>
+                                                        <option value="Vắng không phép">Vắng không phép</option>
+                                                    </select>
+                                                </template>
+                                                
+                                                <template x-if="role === 'student'">
+                                                    <span 
+                                                        :class="getStatusBadgeClass(getAttendanceStatus(s.id, d))"
+                                                        class="inline-block w-full py-1.5 px-2 rounded-lg text-xs font-semibold text-center shadow-xs"
+                                                        x-text="getAttendanceStatus(s.id, d) || '—'">
+                                                    </span>
+                                                </template>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 2. BÀI GIẢNG VIDEO -->
+                <section x-show="activeTab === 'videos'" class="space-y-6">
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Video Bài Giảng (YouTube Unlisted)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng" class="border border-slate-200 p-2 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID (vd: dQw4w9WgXcQ)" class="border border-slate-200 p-2 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <button @click="addVideo()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition">Thêm Video</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm" x-show="currentVideoId">
+                            <div class="aspect-video mb-4 rounded-xl overflow-hidden bg-slate-900">
+                                <iframe :src="'https://www.youtube.com/embed/' + currentVideoId" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                            <h2 class="text-base font-bold text-slate-900" x-text="currentVideoTitle"></h2>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-slate-900 mb-3 text-sm">Danh Sách Bài Giảng</h3>
+                            <ul class="divide-y divide-slate-100">
+                                <template x-for="v in videos" :key="v.id">
+                                    <li @click="selectVideo(v)" class="py-3 cursor-pointer hover:bg-slate-50 flex items-center justify-between rounded-lg px-2 transition">
+                                        <span class="font-medium text-xs text-slate-800 hover:text-blue-600" x-text="v.title"></span>
                                     </li>
                                 </template>
                             </ul>
                         </div>
                     </div>
-                </template>
-            </div>
-        </section>
+                </section>
 
-        <!-- 4. TÀI LIỆU GOOGLE DRIVE -->
-        <section x-show="activeTab === 'documents'">
-            <div x-show="role === 'teacher'" class="bg-white p-6 rounded-lg shadow mb-6">
-                <h3 class="font-bold mb-3">Thêm Tệp PDF Từ Google Drive</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input type="text" x-model="newDoc.title" placeholder="Tên tài liệu" class="border p-2 rounded w-full">
-                    <input type="text" x-model="newDoc.drive_url" placeholder="Link xem PDF (vd: https://drive.google.com/file/d/XYZ/preview)" class="border p-2 rounded w-full">
-                    <button @click="addDocument()" class="bg-indigo-600 text-white px-4 py-2 rounded">Lưu Tài Liệu</button>
-                </div>
-            </div>
+                <!-- 3. BÀI TẬP VỀ NHÀ -->
+                <section x-show="activeTab === 'assignments'" class="space-y-6">
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Tạo Form Bài Tập Mới</h3>
+                        <input type="text" x-model="newAssignment.title" placeholder="Tên bài tập" class="border border-slate-200 p-2 rounded-xl text-xs w-full mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <textarea x-model="newAssignment.content" placeholder="Nội dung câu hỏi hoặc yêu cầu bài tập" class="border border-slate-200 p-2 rounded-xl text-xs w-full mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="3"></textarea>
+                        <button @click="addAssignment()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition">Đăng Bài Tập</button>
+                    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <template x-for="doc in documents" :key="doc.id">
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <h3 class="font-bold text-gray-800 mb-3" x-text="doc.title"></h3>
-                        <div class="h-96 border rounded mb-3">
-                            <iframe :src="doc.drive_url" class="w-full h-full" frameborder="0"></iframe>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <template x-for="a in assignments" :key="a.id">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h3 class="text-sm font-bold text-blue-600 mb-2" x-text="a.title"></h3>
+                                    <p class="text-xs text-slate-600 mb-4 whitespace-pre-line" x-text="a.content"></p>
+                                </div>
+                                
+                                <div x-show="role === 'student'" class="border-t border-slate-100 pt-4">
+                                    <h4 class="font-semibold text-xs mb-2 text-slate-700">Nộp câu trả lời:</h4>
+                                    <input type="text" x-model="submissionForms[a.id].student_name" placeholder="Họ và tên học sinh" class="border border-slate-200 p-2 rounded-xl w-full mb-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <textarea x-model="submissionForms[a.id].answer_text" placeholder="Nhập đáp án..." class="border border-slate-200 p-2 rounded-xl w-full mb-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="2"></textarea>
+                                    <button @click="submitHomework(a.id)" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-700 transition">Nộp Bài</button>
+                                </div>
+
+                                <div x-show="role === 'teacher'" class="border-t border-slate-100 pt-4">
+                                    <button @click="loadSubmissions(a.id)" class="text-xs text-blue-600 font-medium underline mb-2">Xem danh sách bài nộp</button>
+                                    <ul class="text-xs divide-y divide-slate-100 max-h-40 overflow-y-auto">
+                                        <template x-for="sub in currentSubmissions[a.id] || []" :key="sub.id">
+                                            <li class="py-2">
+                                                <span class="font-bold text-slate-800" x-text="sub.student_name"></span>: 
+                                                <span class="text-slate-600" x-text="sub.answer_text"></span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- 4. TÀI LIỆU GOOGLE DRIVE -->
+                <section x-show="activeTab === 'documents'" class="space-y-6">
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Tệp PDF Từ Google Drive</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input type="text" x-model="newDoc.title" placeholder="Tên tài liệu" class="border border-slate-200 p-2 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <input type="text" x-model="newDoc.drive_url" placeholder="Link xem PDF (vd: https://drive.google.com/file/d/XYZ/preview)" class="border border-slate-200 p-2 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <button @click="addDocument()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition">Lưu Tài Liệu</button>
                         </div>
-                        <a :href="doc.drive_url.replace('/preview', '/view')" target="_blank" class="inline-block bg-gray-100 text-indigo-600 text-sm px-3 py-1 rounded border hover:bg-gray-200">
-                            Mở / Tải về qua Google Drive
-                        </a>
                     </div>
-                </template>
-            </div>
-        </section>
 
-        <!-- 5. ĐỀ THI & MATHML -->
-        <section x-show="activeTab === 'exams'">
-            <div x-show="role === 'teacher'" class="bg-white p-6 rounded-lg shadow mb-6">
-                <h3 class="font-bold mb-3">Thêm Câu Hỏi MathML / LaTeX</h3>
-                <input type="text" x-model="newExam.title" placeholder="Tiêu đề bài tập / câu hỏi" class="border p-2 rounded w-full mb-3">
-                <textarea x-model="newExam.question_mathml" placeholder="Dán mã MathML (<math>...</math>) hoặc LaTeX ($...$)" class="border p-2 rounded w-full mb-3 font-mono text-sm" rows="4"></textarea>
-                <button @click="addExam()" class="bg-indigo-600 text-white px-4 py-2 rounded">Thêm Mã Toán Học</button>
-            </div>
-
-            <div class="space-y-4">
-                <template x-for="exam in exams" :key="exam.id">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="font-bold text-indigo-600 mb-2" x-text="exam.title"></h3>
-                        <div class="p-4 bg-gray-50 border rounded math-content" x-html="exam.question_mathml"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <template x-for="doc in documents" :key="doc.id">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                                <h3 class="font-bold text-slate-900 mb-3 text-sm" x-text="doc.title"></h3>
+                                <div class="h-96 border border-slate-200 rounded-xl mb-3 overflow-hidden">
+                                    <iframe :src="doc.drive_url" class="w-full h-full" frameborder="0"></iframe>
+                                </div>
+                                <a :href="doc.drive_url.replace('/preview', '/view')" target="_blank" class="inline-block bg-slate-100 text-blue-600 text-xs px-3 py-1.5 rounded-lg font-medium border border-slate-200 hover:bg-slate-200 transition">
+                                    Mở / Tải về qua Google Drive
+                                </a>
+                            </div>
+                        </template>
                     </div>
-                </template>
-            </div>
-        </section>
+                </section>
 
-        <!-- 6. QUẢN LÝ DANH SÁCH LỚP -->
-        <section x-show="activeTab === 'students' && role === 'teacher'" class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-bold mb-3">Thêm Học Sinh Mới</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh" class="border p-2 rounded">
-                <input type="text" x-model="newStudent.full_name" placeholder="Họ và tên" class="border p-2 rounded">
-                <button @click="addStudent()" class="bg-indigo-600 text-white px-4 py-2 rounded">Thêm Vào Danh Sách</button>
-            </div>
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-100 border-b">
-                        <th class="p-3">Mã HS</th>
-                        <th class="p-3">Họ và Tên</th>
-                        <th class="p-3">Thao Tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="s in students" :key="s.id">
-                        <tr class="border-b">
-                            <td class="p-3 font-mono" x-text="s.student_code"></td>
-                            <td class="p-3" x-text="s.full_name"></td>
-                            <td class="p-3">
-                                <button @click="deleteStudent(s.id)" class="text-red-600 hover:underline text-sm">Xóa</button>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </section>
+                <!-- 5. ĐỀ THI & MATHML -->
+                <section x-show="activeTab === 'exams'" class="space-y-6">
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Câu Hỏi MathML / LaTeX</h3>
+                        <input type="text" x-model="newExam.title" placeholder="Tiêu đề bài tập / câu hỏi" class="border border-slate-200 p-2 rounded-xl text-xs w-full mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <textarea x-model="newExam.question_mathml" placeholder="Dán mã MathML (<math>...</math>) hoặc LaTeX ($...$)" class="border border-slate-200 p-2 rounded-xl text-xs font-mono w-full mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="4"></textarea>
+                        <button @click="addExam()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition">Thêm Mã Toán Học</button>
+                    </div>
 
-    </main>
+                    <div class="space-y-4">
+                        <template x-for="exam in exams" :key="exam.id">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                                <h3 class="font-bold text-blue-600 mb-2 text-sm" x-text="exam.title"></h3>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl math-content text-sm" x-html="exam.question_mathml"></div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- 6. QUẢN LÝ DANH SÁCH LỚP -->
+                <section x-show="activeTab === 'students' && role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Học Sinh Mới</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                        <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh" class="border border-slate-200 p-2 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" x-model="newStudent.full_name" placeholder="Họ và tên" class="border border-slate-200 p-2 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button @click="addStudent()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition">Thêm Vào Danh Sách</button>
+                    </div>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-xs">
+                                    <th class="p-3">Mã HS</th>
+                                    <th class="p-3">Họ và Tên</th>
+                                    <th class="p-3 text-right">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs divide-y divide-slate-100">
+                                <template x-for="s in students" :key="s.id">
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-3 font-mono text-slate-500" x-text="s.student_code"></td>
+                                        <td class="p-3 font-semibold text-slate-800" x-text="s.full_name"></td>
+                                        <td class="p-3 text-right">
+                                            <button @click="deleteStudent(s.id)" class="text-red-600 hover:underline font-medium">Xóa</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
 
     <script>
         function classroomApp() {
             return {
                 role: 'teacher',
-                activeTab: 'videos',
-                selectedDate: new Date().toISOString().split('T')[0],
+                activeTab: 'dashboard',
                 students: [],
                 attendance: [],
+                attendanceDates: [],
                 videos: [],
                 documents: [],
                 assignments: [],
@@ -238,6 +426,7 @@
                 currentVideoTitle: '',
                 submissionForms: {},
                 currentSubmissions: {},
+                newAttendanceDate: new Date().toISOString().split('T')[0],
                 newStudent: { student_code: '', full_name: '' },
                 newVideo: { title: '', youtube_id: '' },
                 newDoc: { title: '', drive_url: '' },
@@ -247,11 +436,25 @@
                 async initData() {
                     await this.fetchStudents();
                     await this.fetchAttendance();
+                    await this.fetchAttendanceDates();
                     await this.fetchVideos();
                     await this.fetchDocuments();
                     await this.fetchAssignments();
                     await this.fetchExams();
                     this.renderMath();
+                },
+
+                getTabTitle() {
+                    const titles = {
+                        'dashboard': 'Tổng quan hệ thống',
+                        'attendance': 'Quản lý điểm danh',
+                        'students': 'Danh sách học sinh',
+                        'videos': 'Bài giảng Video',
+                        'assignments': 'Bài tập về nhà',
+                        'documents': 'Tài liệu PDF',
+                        'exams': 'Đề thi & MathML'
+                    };
+                    return titles[this.activeTab] || 'Quản Lý Lớp Học';
                 },
 
                 renderMath() {
@@ -285,9 +488,25 @@
                     let res = await fetch('/api/attendance');
                     this.attendance = await res.json();
                 },
+                async fetchAttendanceDates() {
+                    let res = await fetch('/api/attendance/dates');
+                    this.attendanceDates = await res.json();
+                },
+                addAttendanceDate() {
+                    if (!this.newAttendanceDate) return;
+                    if (!this.attendanceDates.includes(this.newAttendanceDate)) {
+                        this.attendanceDates.push(this.newAttendanceDate);
+                        this.attendanceDates.sort();
+                    }
+                },
+                formatDateDisplay(dateStr) {
+                    if (!dateStr) return '';
+                    let parts = dateStr.split('-');
+                    return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
+                },
                 getAttendanceStatus(studentId, date) {
                     let rec = this.attendance.find(a => a.student_id === studentId && a.date === date);
-                    return rec ? rec.status : 'Có mặt';
+                    return rec ? rec.status : '';
                 },
                 async updateAttendance(studentId, date, status) {
                     await fetch('/api/attendance', {
@@ -296,6 +515,22 @@
                         body: JSON.stringify({ student_id: studentId, date: date, status: status })
                     });
                     await this.fetchAttendance();
+                },
+                getStatusColorClass(status) {
+                    switch (status) {
+                        case 'Có mặt': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                        case 'Vắng phép': return 'bg-sky-50 text-sky-700 border-sky-200';
+                        case 'Vắng không phép': return 'bg-rose-50 text-rose-700 border-rose-200';
+                        default: return 'bg-slate-50 text-slate-400 border-slate-200';
+                    }
+                },
+                getStatusBadgeClass(status) {
+                    switch (status) {
+                        case 'Có mặt': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                        case 'Vắng phép': return 'bg-sky-50 text-sky-700 border border-sky-200';
+                        case 'Vắng không phép': return 'bg-rose-50 text-rose-700 border border-rose-200';
+                        default: return 'bg-slate-100 text-slate-400 border border-slate-200';
+                    }
                 },
 
                 async fetchVideos() {
