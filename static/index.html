@@ -23,7 +23,7 @@
                 <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl">C</div>
                 <div>
                     <h2 class="text-xl font-bold text-slate-900">ClassStu</h2>
-                    <p class="text-xs text-slate-500">Quản lý lớp học thông minh</p>
+                    <p class="text-xs text-slate-500">Quản lý lớp học</p>
                 </div>
             </div>
 
@@ -514,22 +514,49 @@
                 },
 
                 async fetchStudents() {
-                    let res = await fetch('/api/students');
-                    this.students = await res.json();
+                    try {
+                        let res = await fetch('/api/students');
+                        if (res.ok) {
+                            this.students = await res.json();
+                        }
+                    } catch (e) {
+                        console.error('Lỗi khi tải danh sách học sinh:', e);
+                    }
                 },
                 async addStudent() {
-                    if (!this.newStudent.student_code || !this.newStudent.full_name) return;
-                    await fetch('/api/students', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.newStudent)
-                    });
-                    this.newStudent = { student_code: '', full_name: '' };
-                    await this.fetchStudents();
+                    if (!this.newStudent.student_code || !this.newStudent.full_name) {
+                        alert('Vui lòng nhập đầy đủ Mã học sinh và Họ và tên!');
+                        return;
+                    }
+                    try {
+                        let res = await fetch('/api/students', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newStudent)
+                        });
+                        if (!res.ok) {
+                            let data = await res.json();
+                            alert(data.detail || 'Không thể thêm học sinh! Có thể mã học sinh đã tồn tại.');
+                            return;
+                        }
+                        this.newStudent = { student_code: '', full_name: '' };
+                        await this.fetchStudents();
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
                 },
                 async deleteStudent(id) {
-                    await fetch('/api/students/' + id, { method: 'DELETE' });
-                    await this.fetchStudents();
+                    if (!confirm('Bạn có chắc chắn muốn xóa học sinh này không?')) return;
+                    try {
+                        let res = await fetch('/api/students/' + id, { method: 'DELETE' });
+                        if (!res.ok) {
+                            alert('Xóa thất bại!');
+                            return;
+                        }
+                        await this.fetchStudents();
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
                 },
 
                 async fetchAttendance() {
