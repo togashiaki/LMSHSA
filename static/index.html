@@ -205,7 +205,12 @@
                                     <th class="p-3 border-r border-blue-500 min-w-[200px] font-bold">Họ và tên HS</th>
                                     <template x-for="d in attendanceDates" :key="d">
                                         <th class="p-3 text-center border-r border-blue-500 min-w-[140px]">
-                                            <div x-text="formatDateDisplay(d)" class="font-bold text-xs"></div>
+                                            <div class="flex items-center justify-center space-x-1">
+                                                <span x-text="formatDateDisplay(d)" class="font-bold text-xs"></span>
+                                                <button x-show="role === 'teacher'" @click="deleteAttendanceDate(d)" class="text-blue-200 hover:text-rose-200 p-0.5 rounded transition" title="Xóa ngày học này">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
                                             <div class="text-[10px] font-normal text-blue-100">Điểm danh</div>
                                         </th>
                                     </template>
@@ -541,6 +546,12 @@
                         this.attendanceDates.push(this.newAttendanceDate);
                         this.attendanceDates.sort();
                     }
+                },
+                async deleteAttendanceDate(dateStr) {
+                    if (!confirm(`Bạn có chắc chắn muốn xóa ngày ${this.formatDateDisplay(dateStr)} cùng toàn bộ dữ liệu điểm danh của ngày này không?`)) return;
+                    await fetch('/api/attendance/dates/' + dateStr, { method: 'DELETE' });
+                    await this.fetchAttendanceDates();
+                    await this.fetchAttendance();
                 },
                 formatDateDisplay(dateStr) {
                     if (!dateStr) return '';
