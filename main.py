@@ -160,6 +160,13 @@ def delete_student(student_id: int):
     return {"message": "Đã xóa học sinh"}
 
 # --- ĐIỂM DANH ---
+@app.delete("/api/attendance/dates/{date_str}")
+def delete_attendance_date(date_str: str):
+    conn = get_db()
+    conn.execute("DELETE FROM attendance WHERE date = ?", (date_str,))
+    conn.commit()
+    conn.close()
+    return {"message": f"Đã xóa ngày điểm danh {date_str}"}
 @app.get("/api/attendance")
 def get_attendance():
     conn = get_db()
