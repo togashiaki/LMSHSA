@@ -9,7 +9,7 @@ import os
 
 app = FastAPI(title="Hệ thống Quản lý Lớp học")
 
-# Lấy kết nối từ biến môi trường trên Render, mặc định dùng SQLite local nếu không có
+# Lấy kết nối từ biến môi trường trên Render
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db():
@@ -258,6 +258,16 @@ def create_video(v: VideoCreate):
     cursor.close()
     conn.close()
     return {"message": "Đã thêm video"}
+
+@app.delete("/api/videos/{video_id}")
+def delete_video(video_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM videos WHERE id = %s", (video_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa video"}
 
 # --- TÀI LIỆU GOOGLE DRIVE ---
 @app.get("/api/documents")
