@@ -3,86 +3,96 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 
 app = FastAPI(title="Hệ thống Quản lý Lớp học")
 
-DB_FILE = "classroom.db"
+# Lấy kết nối từ biến môi trường trên Render, mặc định dùng SQLite local nếu không có
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
+    if not DATABASE_URL:
+        raise Exception("Chưa cấu hình DATABASE_URL trong biến môi trường!")
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
 
 def init_db():
+    if not DATABASE_URL:
+        return
     conn = get_db()
     cursor = conn.cursor()
-    cursor.executescript("""
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
         password TEXT NOT NULL,
         full_name TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'student'
+        role VARCHAR(50) NOT NULL DEFAULT 'student'
     );
     CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        student_code TEXT UNIQUE NOT NULL,
+        id SERIAL PRIMARY KEY,
+        student_code VARCHAR(100) UNIQUE NOT NULL,
         full_name TEXT NOT NULL,
         dob TEXT,
-        status TEXT DEFAULT 'Active'
+        status VARCHAR(50) DEFAULT 'Active'
     );
     CREATE TABLE IF NOT EXISTS attendance (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         student_id INTEGER NOT NULL,
         date TEXT NOT NULL,
-        status TEXT NOT NULL,
+        status VARCHAR(50) NOT NULL,
         UNIQUE(student_id, date)
     );
     CREATE TABLE IF NOT EXISTS videos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         youtube_id TEXT NOT NULL,
         description TEXT,
         order_index INTEGER DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS documents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         drive_url TEXT NOT NULL,
-        category TEXT DEFAULT 'Chung'
+        category VARCHAR(100) DEFAULT 'Chung'
     );
     CREATE TABLE IF NOT EXISTS assignments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         due_date TEXT
     );
     CREATE TABLE IF NOT EXISTS submissions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         assignment_id INTEGER NOT NULL,
         student_name TEXT NOT NULL,
         answer_text TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS exams (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         question_mathml TEXT NOT NULL
     );
     """)
     
-    # Tạo tài khoản Admin mặc định khi cơ sở dữ liệu mới khởi tạo lần đầu
-    user_count = cursor.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM users")
+    res = cursor.fetchone()
+    user_count = res['count'] if res else 0
     if user_count == 0:
-        cursor.execute("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, ?)",
+        cursor.execute("INSERT INTO users (username, password, full_name, role) VALUES (%s, %s, %s, %s)",
                        ("admin", "123456", "Giáo viên Admin", "teacher"))
 
     conn.commit()
+    cursor.close()
     conn.close()
 
-init_db()
+try:
+    init_db()
+except Exception as e:
+    print("Lỗi khởi tạo DB:", e)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -104,21 +114,26 @@ class UserLogin(BaseModel):
 @app.post("/api/register")
 def register(u: UserRegister):
     conn = get_db()
+    cursor = conn.cursor()
     try:
-        conn.execute("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, ?)",
-                     (u.username.strip(), u.password, u.full_name.strip(), u.role))
+        cursor.execute("INSERT INTO users (username, password, full_name, role) VALUES (%s, %s, %s, %s)",
+                       (u.username.strip(), u.password, u.full_name.strip(), u.role))
         conn.commit()
-    except sqlite3.IntegrityError:
+    except Exception:
         conn.close()
         raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại!")
+    cursor.close()
     conn.close()
     return {"message": "Đăng ký thành công!"}
 
 @app.post("/api/login")
 def login(u: UserLogin):
     conn = get_db()
-    user = conn.execute("SELECT id, username, full_name, role FROM users WHERE username = ? AND password = ?",
-                        (u.username.strip(), u.password)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username, full_name, role FROM users WHERE username = %s AND password = %s",
+                   (u.username.strip(), u.password))
+    user = cursor.fetchone()
+    cursor.close()
     conn.close()
     if not user:
         raise HTTPException(status_code=401, detail="Tên đăng nhập hoặc mật khẩu không đúng!")
@@ -128,7 +143,10 @@ def login(u: UserLogin):
 @app.get("/api/students")
 def get_students():
     conn = get_db()
-    students = conn.execute("SELECT * FROM students ORDER BY student_code ASC").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM students ORDER BY student_code ASC")
+    students = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(s) for s in students]
 
@@ -141,43 +159,46 @@ class StudentCreate(BaseModel):
 @app.post("/api/students")
 def create_student(s: StudentCreate):
     conn = get_db()
+    cursor = conn.cursor()
     try:
-        conn.execute("INSERT INTO students (student_code, full_name, dob, status) VALUES (?, ?, ?, ?)",
-                     (s.student_code, s.full_name, s.dob, s.status))
+        cursor.execute("INSERT INTO students (student_code, full_name, dob, status) VALUES (%s, %s, %s, %s)",
+                       (s.student_code, s.full_name, s.dob, s.status))
         conn.commit()
-    except sqlite3.IntegrityError:
+    except Exception:
         conn.close()
         raise HTTPException(status_code=400, detail="Mã học sinh đã tồn tại")
+    cursor.close()
     conn.close()
     return {"message": "Đã thêm học sinh"}
 
 @app.delete("/api/students/{student_id}")
 def delete_student(student_id: int):
     conn = get_db()
-    conn.execute("DELETE FROM students WHERE id = ?", (student_id,))
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM students WHERE id = %s", (student_id,))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Đã xóa học sinh"}
 
 # --- ĐIỂM DANH ---
-@app.delete("/api/attendance/dates/{date_str}")
-def delete_attendance_date(date_str: str):
-    conn = get_db()
-    conn.execute("DELETE FROM attendance WHERE date = ?", (date_str,))
-    conn.commit()
-    conn.close()
-    return {"message": f"Đã xóa ngày điểm danh {date_str}"}
 @app.get("/api/attendance")
 def get_attendance():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM attendance").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM attendance")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(r) for r in rows]
 
 @app.get("/api/attendance/dates")
 def get_attendance_dates():
     conn = get_db()
-    rows = conn.execute("SELECT DISTINCT date FROM attendance ORDER BY date ASC").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT date FROM attendance ORDER BY date ASC")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [r["date"] for r in rows]
 
@@ -189,20 +210,35 @@ class AttendanceUpdate(BaseModel):
 @app.post("/api/attendance")
 def save_attendance(data: AttendanceUpdate):
     conn = get_db()
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
         INSERT INTO attendance (student_id, date, status)
-        VALUES (?, ?, ?)
-        ON CONFLICT(student_id, date) DO UPDATE SET status=excluded.status
+        VALUES (%s, %s, %s)
+        ON CONFLICT(student_id, date) DO UPDATE SET status = EXCLUDED.status
     """, (data.student_id, data.date, data.status))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Đã ghi nhận điểm danh"}
+
+@app.delete("/api/attendance/dates/{date_str}")
+def delete_attendance_date(date_str: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM attendance WHERE date = %s", (date_str,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": f"Đã xóa ngày điểm danh {date_str}"}
 
 # --- VIDEO BÀI GIẢNG ---
 @app.get("/api/videos")
 def get_videos():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM videos ORDER BY order_index ASC, id DESC").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM videos ORDER BY order_index ASC, id DESC")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -215,9 +251,11 @@ class VideoCreate(BaseModel):
 @app.post("/api/videos")
 def create_video(v: VideoCreate):
     conn = get_db()
-    conn.execute("INSERT INTO videos (title, youtube_id, description, order_index) VALUES (?, ?, ?, ?)",
-                 (v.title, v.youtube_id, v.description, v.order_index))
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO videos (title, youtube_id, description, order_index) VALUES (%s, %s, %s, %s)",
+                   (v.title, v.youtube_id, v.description, v.order_index))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Đã thêm video"}
 
@@ -225,7 +263,10 @@ def create_video(v: VideoCreate):
 @app.get("/api/documents")
 def get_documents():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM documents ORDER BY id DESC").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM documents ORDER BY id DESC")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -237,9 +278,11 @@ class DocumentCreate(BaseModel):
 @app.post("/api/documents")
 def create_document(d: DocumentCreate):
     conn = get_db()
-    conn.execute("INSERT INTO documents (title, drive_url, category) VALUES (?, ?, ?)",
-                 (d.title, d.drive_url, d.category))
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO documents (title, drive_url, category) VALUES (%s, %s, %s)",
+                   (d.title, d.drive_url, d.category))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Đã thêm tài liệu"}
 
@@ -247,7 +290,10 @@ def create_document(d: DocumentCreate):
 @app.get("/api/assignments")
 def get_assignments():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM assignments ORDER BY id DESC").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM assignments ORDER BY id DESC")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -259,19 +305,24 @@ class AssignmentCreate(BaseModel):
 @app.post("/api/assignments")
 def create_assignment(a: AssignmentCreate):
     conn = get_db()
-    conn.execute("INSERT INTO assignments (title, content, due_date) VALUES (?, ?, ?)",
-                 (a.title, a.content, a.due_date))
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO assignments (title, content, due_date) VALUES (%s, %s, %s)",
+                   (a.title, a.content, a.due_date))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Đã tạo bài tập"}
 
 @app.get("/api/submissions")
 def get_submissions(assignment_id: Optional[int] = None):
     conn = get_db()
+    cursor = conn.cursor()
     if assignment_id:
-        rows = conn.execute("SELECT * FROM submissions WHERE assignment_id = ? ORDER BY id DESC", (assignment_id,)).fetchall()
+        cursor.execute("SELECT * FROM submissions WHERE assignment_id = %s ORDER BY id DESC", (assignment_id,))
     else:
-        rows = conn.execute("SELECT * FROM submissions ORDER BY id DESC").fetchall()
+        cursor.execute("SELECT * FROM submissions ORDER BY id DESC")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -283,9 +334,11 @@ class SubmissionCreate(BaseModel):
 @app.post("/api/submissions")
 def create_submission(s: SubmissionCreate):
     conn = get_db()
-    conn.execute("INSERT INTO submissions (assignment_id, student_name, answer_text) VALUES (?, ?, ?)",
-                 (s.assignment_id, s.student_name, s.answer_text))
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO submissions (assignment_id, student_name, answer_text) VALUES (%s, %s, %s)",
+                   (s.assignment_id, s.student_name, s.answer_text))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Nộp bài thành công"}
 
@@ -293,7 +346,10 @@ def create_submission(s: SubmissionCreate):
 @app.get("/api/exams")
 def get_exams():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM exams ORDER BY id DESC").fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM exams ORDER BY id DESC")
+    rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -304,7 +360,9 @@ class ExamCreate(BaseModel):
 @app.post("/api/exams")
 def create_exam(e: ExamCreate):
     conn = get_db()
-    conn.execute("INSERT INTO exams (title, question_mathml) VALUES (?, ?)", (e.title, e.question_mathml))
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO exams (title, question_mathml) VALUES (%s, %s)", (e.title, e.question_mathml))
     conn.commit()
+    cursor.close()
     conn.close()
     return {"message": "Đã thêm câu hỏi/đề thi"}
