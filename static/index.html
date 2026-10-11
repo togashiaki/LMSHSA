@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Lớp Học Tinh Gọn</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- MathJax v3 CDN cho render MathML & LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800" x-data="classroomApp()" x-init="initData()">
+
+    <!-- Header & Navigation -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
+            <h1 class="text-xl font-bold">Lớp Học Trực Tuyến</h1>
+            <div class="flex items-center space-x-3">
+                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full" x-text="role === 'teacher' ? 'Quyền: Giáo Viên' : 'Quyền: Học Sinh'"></span>
+                <button @click="role = (role === 'teacher' ? 'student' : 'teacher')" class="bg-white text-indigo-600 px-3 py-1 rounded text-sm font-semibold hover:bg-indigo-50">
+                    Đổi Quyền
+                </button>
+            </div>
+        </div>
+        <nav class="max-w-7xl mx-auto px-4 flex space-x-4 border-t border-indigo-500 text-sm font-medium overflow-x-auto">
+            <button @click="activeTab = 'videos'" :class="activeTab === 'videos' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Video Bài Giảng</button>
+            <button @click="activeTab = 'attendance'" :class="activeTab === 'attendance' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Điểm Danh</button>
+            <button @click="activeTab = 'assignments'" :class="activeTab === 'assignments' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Bài Tập Về Nhà</button>
+            <button @click="activeTab = 'documents'" :class="activeTab === 'documents' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Tài Liệu PDF</button>
+            <button @click="activeTab = 'exams'" :class="activeTab === 'exams' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Đề Thi & MathML</button>
+            <button x-show="role === 'teacher'" @click="activeTab = 'students'" :class="activeTab === 'students' ? 'border-b-2 border-white py-3' : 'py-3 text-indigo-200 hover:text-white'">Danh Sách Lớp</button>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- 1. VIDEO BÀI GIẢNG -->
+        <section x-show="activeTab === 'videos'">
+            <div x-show="role === 'teacher'" class="bg-white p-4 rounded-lg shadow mb-6">
+                <h3 class="font-bold mb-3">Thêm Video Bài Giảng (YouTube Unlisted)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng" class="border p-2 rounded w-full">
+                    <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID (vd: dQw4w9WgXcQ)" class="border p-2 rounded w-full">
+                    <button @click="addVideo()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Thêm Video</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 bg-white p-4 rounded-lg shadow" x-show="currentVideoId">
+                    <div class="aspect-w-16 aspect-h-9 mb-4">
+                        <iframe :src="'https://www.youtube.com/embed/' + currentVideoId" class="w-full h-80 rounded" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <h2 class="text-xl font-bold" x-text="currentVideoTitle"></h2>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h3 class="font-bold mb-3 text-gray-700">Danh Sách Bài Giảng</h3>
+                    <ul class="divide-y">
+                        <template x-for="v in videos" :key="v.id">
+                            <li @click="selectVideo(v)" class="py-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                                <span class="font-medium text-indigo-600" x-text="v.title"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. ĐIỂM DANH -->
+        <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-lg shadow overflow-x-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Bảng Điểm Danh Lớp Học</h2>
+                <input type="date" x-model="selectedDate" class="border p-2 rounded">
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b">
+                        <th class="p-3">Mã HS</th>
+                        <th class="p-3">Họ và Tên</th>
+                        <th class="p-3 text-center">Trạng Thái (Ngày: <span x-text="selectedDate"></span>)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="s in students" :key="s.id">
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-mono" x-text="s.student_code"></td>
+                            <td class="p-3" x-text="s.full_name"></td>
+                            <td class="p-3 text-center">
+                                <select :disabled="role !== 'teacher'" :value="getAttendanceStatus(s.id, selectedDate)" @change="updateAttendance(s.id, selectedDate, $event.target.value)" class="border p-1 rounded">
+                                    <option value="Có mặt">Có mặt</option>
+                                    <option value="Vắng">Vắng</option>
+                                    <option value="Có phép">Có phép</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 3. BÀI TẬP VỀ NHÀ -->
+        <section x-show="activeTab === 'assignments'">
+            <div x-show="role === 'teacher'" class="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 class="font-bold mb-3">Tạo Form Bài Tập Mới</h3>
+                <input type="text" x-model="newAssignment.title" placeholder="Tên bài tập" class="border p-2 rounded w-full mb-3">
+                <textarea x-model="newAssignment.content" placeholder="Nội dung câu hỏi hoặc yêu cầu" class="border p-2 rounded w-full mb-3" rows="3"></textarea>
+                <button @click="addAssignment()" class="bg-indigo-600 text-white px-4 py-2 rounded">Đăng Bài Tập</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <template x-for="a in assignments" :key="a.id">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-lg font-bold text-indigo-600 mb-2" x-text="a.title"></h3>
+                        <p class="text-gray-700 mb-4 whitespace-pre-line" x-text="a.content"></p>
+                        
+                        <!-- Form nộp bài phía học sinh -->
+                        <div x-show="role === 'student'" class="border-t pt-4">
+                            <h4 class="font-semibold text-sm mb-2">Nộp câu trả lời:</h4>
+                            <input type="text" x-model="submissionForms[a.id].student_name" placeholder="Họ và tên học sinh" class="border p-2 rounded w-full mb-2 text-sm">
+                            <textarea x-model="submissionForms[a.id].answer_text" placeholder="Nhập đáp án..." class="border p-2 rounded w-full mb-2 text-sm" rows="2"></textarea>
+                            <button @click="submitHomework(a.id)" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Nộp Bài</button>
+                        </div>
+
+                        <!-- Danh sách học sinh đã nộp (Giáo viên xem) -->
+                        <div x-show="role === 'teacher'" class="border-t pt-4">
+                            <button @click="loadSubmissions(a.id)" class="text-sm text-indigo-600 underline mb-2">Xem danh sách bài nộp</button>
+                            <ul class="text-sm divide-y max-h-40 overflow-y-auto">
+                                <template x-for="sub in currentSubmissions[a.id] || []" :key="sub.id">
+                                    <li class="py-2">
+                                        <span class="font-bold" x-text="sub.student_name"></span>: 
+                                        <span class="text-gray-600" x-text="sub.answer_text"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <!-- 4. TÀI LIỆU GOOGLE DRIVE -->
+        <section x-show="activeTab === 'documents'">
+            <div x-show="role === 'teacher'" class="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 class="font-bold mb-3">Thêm Tệp PDF Từ Google Drive</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input type="text" x-model="newDoc.title" placeholder="Tên tài liệu" class="border p-2 rounded w-full">
+                    <input type="text" x-model="newDoc.drive_url" placeholder="Link xem PDF (vd: https://drive.google.com/file/d/XYZ/preview)" class="border p-2 rounded w-full">
+                    <button @click="addDocument()" class="bg-indigo-600 text-white px-4 py-2 rounded">Lưu Tài Liệu</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <template x-for="doc in documents" :key="doc.id">
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="font-bold text-gray-800 mb-3" x-text="doc.title"></h3>
+                        <div class="h-96 border rounded mb-3">
+                            <iframe :src="doc.drive_url" class="w-full h-full" frameborder="0"></iframe>
+                        </div>
+                        <a :href="doc.drive_url.replace('/preview', '/view')" target="_blank" class="inline-block bg-gray-100 text-indigo-600 text-sm px-3 py-1 rounded border hover:bg-gray-200">
+                            Mở / Tải về qua Google Drive
+                        </a>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <!-- 5. ĐỀ THI & MATHML -->
+        <section x-show="activeTab === 'exams'">
+            <div x-show="role === 'teacher'" class="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 class="font-bold mb-3">Thêm Câu Hỏi MathML / LaTeX</h3>
+                <input type="text" x-model="newExam.title" placeholder="Tiêu đề bài tập / câu hỏi" class="border p-2 rounded w-full mb-3">
+                <textarea x-model="newExam.question_mathml" placeholder="Dán mã MathML (<math>...</math>) hoặc LaTeX ($...$)" class="border p-2 rounded w-full mb-3 font-mono text-sm" rows="4"></textarea>
+                <button @click="addExam()" class="bg-indigo-600 text-white px-4 py-2 rounded">Thêm Mã Toán Học</button>
+            </div>
+
+            <div class="space-y-4">
+                <template x-for="exam in exams" :key="exam.id">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="font-bold text-indigo-600 mb-2" x-text="exam.title"></h3>
+                        <div class="p-4 bg-gray-50 border rounded math-content" x-html="exam.question_mathml"></div>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <!-- 6. QUẢN LÝ DANH SÁCH LỚP -->
+        <section x-show="activeTab === 'students' && role === 'teacher'" class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-bold mb-3">Thêm Học Sinh Mới</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh" class="border p-2 rounded">
+                <input type="text" x-model="newStudent.full_name" placeholder="Họ và tên" class="border p-2 rounded">
+                <button @click="addStudent()" class="bg-indigo-600 text-white px-4 py-2 rounded">Thêm Vào Danh Sách</button>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b">
+                        <th class="p-3">Mã HS</th>
+                        <th class="p-3">Họ và Tên</th>
+                        <th class="p-3">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="s in students" :key="s.id">
+                        <tr class="border-b">
+                            <td class="p-3 font-mono" x-text="s.student_code"></td>
+                            <td class="p-3" x-text="s.full_name"></td>
+                            <td class="p-3">
+                                <button @click="deleteStudent(s.id)" class="text-red-600 hover:underline text-sm">Xóa</button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script>
+        function classroomApp() {
+            return {
+                role: 'teacher',
+                activeTab: 'videos',
+                selectedDate: new Date().toISOString().split('T')[0],
+                students: [],
+                attendance: [],
+                videos: [],
+                documents: [],
+                assignments: [],
+                exams: [],
+                currentVideoId: '',
+                currentVideoTitle: '',
+                submissionForms: {},
+                currentSubmissions: {},
+                newStudent: { student_code: '', full_name: '' },
+                newVideo: { title: '', youtube_id: '' },
+                newDoc: { title: '', drive_url: '' },
+                newAssignment: { title: '', content: '' },
+                newExam: { title: '', question_mathml: '' },
+
+                async initData() {
+                    await this.fetchStudents();
+                    await this.fetchAttendance();
+                    await this.fetchVideos();
+                    await this.fetchDocuments();
+                    await this.fetchAssignments();
+                    await this.fetchExams();
+                    this.renderMath();
+                },
+
+                renderMath() {
+                    this.$nextTick(() => {
+                        if (window.MathJax && window.MathJax.typeset) {
+                            window.MathJax.typeset();
+                        }
+                    });
+                },
+
+                async fetchStudents() {
+                    let res = await fetch('/api/students');
+                    this.students = await res.json();
+                },
+                async addStudent() {
+                    if (!this.newStudent.student_code || !this.newStudent.full_name) return;
+                    await fetch('/api/students', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newStudent)
+                    });
+                    this.newStudent = { student_code: '', full_name: '' };
+                    await this.fetchStudents();
+                },
+                async deleteStudent(id) {
+                    await fetch('/api/students/' + id, { method: 'DELETE' });
+                    await this.fetchStudents();
+                },
+
+                async fetchAttendance() {
+                    let res = await fetch('/api/attendance');
+                    this.attendance = await res.json();
+                },
+                getAttendanceStatus(studentId, date) {
+                    let rec = this.attendance.find(a => a.student_id === studentId && a.date === date);
+                    return rec ? rec.status : 'Có mặt';
+                },
+                async updateAttendance(studentId, date, status) {
+                    await fetch('/api/attendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ student_id: studentId, date: date, status: status })
+                    });
+                    await this.fetchAttendance();
+                },
+
+                async fetchVideos() {
+                    let res = await fetch('/api/videos');
+                    this.videos = await res.json();
+                    if (this.videos.length > 0 && !this.currentVideoId) {
+                        this.selectVideo(this.videos[0]);
+                    }
+                },
+                selectVideo(v) {
+                    this.currentVideoId = v.youtube_id;
+                    this.currentVideoTitle = v.title;
+                },
+                async addVideo() {
+                    if (!this.newVideo.title || !this.newVideo.youtube_id) return;
+                    await fetch('/api/videos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newVideo)
+                    });
+                    this.newVideo = { title: '', youtube_id: '' };
+                    await this.fetchVideos();
+                },
+
+                async fetchDocuments() {
+                    let res = await fetch('/api/documents');
+                    this.documents = await res.json();
+                },
+                async addDocument() {
+                    if (!this.newDoc.title || !this.newDoc.drive_url) return;
+                    await fetch('/api/documents', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newDoc)
+                    });
+                    this.newDoc = { title: '', drive_url: '' };
+                    await this.fetchDocuments();
+                },
+
+                async fetchAssignments() {
+                    let res = await fetch('/api/assignments');
+                    this.assignments = await res.json();
+                    this.assignments.forEach(a => {
+                        this.submissionForms[a.id] = { student_name: '', answer_text: '' };
+                    });
+                },
+                async addAssignment() {
+                    if (!this.newAssignment.title) return;
+                    await fetch('/api/assignments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newAssignment)
+                    });
+                    this.newAssignment = { title: '', content: '' };
+                    await this.fetchAssignments();
+                },
+                async submitHomework(assignmentId) {
+                    let form = this.submissionForms[assignmentId];
+                    if (!form.student_name || !form.answer_text) return;
+                    await fetch('/api/submissions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            assignment_id: assignmentId,
+                            student_name: form.student_name,
+                            answer_text: form.answer_text
+                        })
+                    });
+                    alert('Nộp bài thành công!');
+                    this.submissionForms[assignmentId].answer_text = '';
+                },
+                async loadSubmissions(assignmentId) {
+                    let res = await fetch('/api/submissions?assignment_id=' + assignmentId);
+                    this.currentSubmissions[assignmentId] = await res.json();
+                },
+
+                async fetchExams() {
+                    let res = await fetch('/api/exams');
+                    this.exams = await res.json();
+                    this.renderMath();
+                },
+                async addExam() {
+                    if (!this.newExam.title || !this.newExam.question_mathml) return;
+                    await fetch('/api/exams', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newExam)
+                    });
+                    this.newExam = { title: '', question_mathml: '' };
+                    await this.fetchExams();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
