@@ -16,14 +16,14 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased" x-data="classroomApp()" x-init="initData()">
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ (XUẤT HIỆN KHI CHƯA ĐĂNG NHẬP) -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
     <div x-show="!currentUser" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-100">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl">C</div>
                 <div>
                     <h2 class="text-xl font-bold text-slate-900">ClassStu</h2>
-                    <p class="text-xs text-slate-500">Quản lý lớp học</p>
+                    <p class="text-xs text-slate-500">Quản lý lớp học thông minh</p>
                 </div>
             </div>
 
@@ -264,8 +264,11 @@
                             <h3 class="font-bold text-slate-900 mb-3 text-sm">Danh Sách Bài Giảng</h3>
                             <ul class="divide-y divide-slate-100">
                                 <template x-for="v in videos" :key="v.id">
-                                    <li @click="selectVideo(v)" class="py-3 cursor-pointer hover:bg-slate-50 rounded-lg px-2">
-                                        <span class="font-medium text-xs text-slate-800 hover:text-blue-600" x-text="v.title"></span>
+                                    <li class="py-3 flex items-center justify-between hover:bg-slate-50 rounded-lg px-2">
+                                        <span @click="selectVideo(v)" class="font-medium text-xs text-slate-800 hover:text-blue-600 cursor-pointer flex-1 mr-2" x-text="v.title"></span>
+                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-500 hover:text-rose-700 p-1 rounded transition shrink-0" title="Xóa video này">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
+                                        </button>
                                     </li>
                                 </template>
                             </ul>
@@ -615,10 +618,21 @@
                 },
 
                 async fetchVideos() {
-                    let res = await fetch('/api/videos');
-                    this.videos = await res.json();
-                    if (this.videos.length > 0 && !this.currentVideoId) {
-                        this.selectVideo(this.videos[0]);
+                    try {
+                        let res = await fetch('/api/videos');
+                        if (res.ok) {
+                            this.videos = await res.json();
+                            if (this.videos.length > 0) {
+                                if (!this.currentVideoId || !this.videos.some(v => v.youtube_id === this.currentVideoId)) {
+                                    this.selectVideo(this.videos[0]);
+                                }
+                            } else {
+                                this.currentVideoId = '';
+                                this.currentVideoTitle = '';
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Lỗi khi tải danh sách video:', e);
                     }
                 },
                 selectVideo(v) {
@@ -627,13 +641,34 @@
                 },
                 async addVideo() {
                     if (!this.newVideo.title || !this.newVideo.youtube_id) return;
-                    await fetch('/api/videos', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.newVideo)
-                    });
-                    this.newVideo = { title: '', youtube_id: '' };
-                    await this.fetchVideos();
+                    try {
+                        let res = await fetch('/api/videos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newVideo)
+                        });
+                        if (res.ok) {
+                            this.newVideo = { title: '', youtube_id: '' };
+                            await this.fetchVideos();
+                        } else {
+                            alert('Thêm video thất bại!');
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
+                },
+                async deleteVideo(id) {
+                    if (!confirm('Bạn có chắc chắn muốn xóa video này không?')) return;
+                    try {
+                        let res = await fetch('/api/videos/' + id, { method: 'DELETE' });
+                        if (!res.ok) {
+                            alert('Xóa video thất bại!');
+                            return;
+                        }
+                        await this.fetchVideos();
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
                 },
 
                 async fetchDocuments() {
