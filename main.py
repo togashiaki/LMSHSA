@@ -1,12 +1,12 @@
-import sqlite3
-from datetime import datetime
-from typing import List, Optional
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from typing import List, Optional
+import sqlite3
+import os
 
-app = FastAPI(title="LMS Lightweight System")
+app = FastAPI(title="Hệ thống Quản lý Lớp học")
 
 DB_FILE = "classroom.db"
 
@@ -18,130 +18,90 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS students (
+    cursor.executescript("""
+    CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        code TEXT UNIQUE,
-        name TEXT,
+        student_code TEXT UNIQUE NOT NULL,
+        full_name TEXT NOT NULL,
         dob TEXT,
-        status TEXT DEFAULT 'Đang học'
-    )''')
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS attendance (
+        status TEXT DEFAULT 'Active'
+    );
+    CREATE TABLE IF NOT EXISTS attendance (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        student_id INTEGER,
-        date TEXT,
-        status TEXT,
+        student_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        status TEXT NOT NULL,
         UNIQUE(student_id, date)
-    )''')
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS videos (
+    );
+    CREATE TABLE IF NOT EXISTS videos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        youtube_url TEXT,
-        description TEXT
-    )''')
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS homeworks (
+        title TEXT NOT NULL,
+        youtube_id TEXT NOT NULL,
+        description TEXT,
+        order_index INTEGER DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS documents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        question TEXT,
+        title TEXT NOT NULL,
+        drive_url TEXT NOT NULL,
+        category TEXT DEFAULT 'Chung'
+    );
+    CREATE TABLE IF NOT EXISTS assignments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
         due_date TEXT
-    )''')
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS submissions (
+    );
+    CREATE TABLE IF NOT EXISTS submissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        homework_id INTEGER,
-        student_code TEXT,
-        student_name TEXT,
-        answer TEXT,
-        submitted_at TEXT
-    )''')
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS documents (
+        assignment_id INTEGER NOT NULL,
+        student_name TEXT NOT NULL,
+        answer_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS exams (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        drive_embed_url TEXT,
-        download_url TEXT
-    )''')
-    
-    cursor.execute('''CREATE TABLE IF NOT EXISTS exams (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        question_content TEXT,
-        answer_key TEXT
-    )''')
-    
+        title TEXT NOT NULL,
+        question_mathml TEXT NOT NULL
+    );
+    """)
     conn.commit()
     conn.close()
 
 init_db()
 
-class StudentModel(BaseModel):
-    code: str
-    name: str
-    dob: str
-    status: Optional[str] = "Đang học"
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-class AttendanceModel(BaseModel):
-    student_id: int
-    date: str
-    status: str
-
-class VideoModel(BaseModel):
-    title: str
-    youtube_url: str
-    description: Optional[str] = ""
-
-class HomeworkModel(BaseModel):
-    title: str
-    question: str
-    due_date: str
-
-class SubmissionModel(BaseModel):
-    homework_id: int
-    student_code: str
-    student_name: str
-    answer: str
-
-class DocumentModel(BaseModel):
-    title: str
-    drive_embed_url: str
-    download_url: str
-
-class ExamModel(BaseModel):
-    title: str
-    question_content: str
-    answer_key: str
-
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def read_root():
-    with open("templates/index.html", "r", encoding="utf-8") as f:
-        return f.read()
+    return FileResponse("static/index.html")
 
+# --- QUẢN LÝ HỌC SINH ---
 @app.get("/api/students")
 def get_students():
     conn = get_db()
-    students = conn.execute("SELECT * FROM students ORDER BY code ASC").fetchall()
+    students = conn.execute("SELECT * FROM students ORDER BY student_code ASC").fetchall()
     conn.close()
     return [dict(s) for s in students]
 
+class StudentCreate(BaseModel):
+    student_code: str
+    full_name: str
+    dob: Optional[str] = ""
+    status: Optional[str] = "Active"
+
 @app.post("/api/students")
-def add_student(student: StudentModel):
+def create_student(s: StudentCreate):
     conn = get_db()
     try:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO students (code, name, dob, status) VALUES (?, ?, ?, ?)",
-            (student.code, student.name, student.dob, student.status)
-        )
+        conn.execute("INSERT INTO students (student_code, full_name, dob, status) VALUES (?, ?, ?, ?)",
+                     (s.student_code, s.full_name, s.dob, s.status))
         conn.commit()
-        student_id = cursor.lastrowid
-        conn.close()
-        return {"id": student_id, "message": "Thêm học sinh thành công"}
     except sqlite3.IntegrityError:
         conn.close()
         raise HTTPException(status_code=400, detail="Mã học sinh đã tồn tại")
+    conn.close()
+    return {"message": "Đã thêm học sinh"}
 
 @app.delete("/api/students/{student_id}")
 def delete_student(student_id: int):
@@ -149,126 +109,140 @@ def delete_student(student_id: int):
     conn.execute("DELETE FROM students WHERE id = ?", (student_id,))
     conn.commit()
     conn.close()
-    return {"message": "Xóa học sinh thành công"}
+    return {"message": "Đã xóa học sinh"}
 
+# --- ĐIỂM DANH ---
 @app.get("/api/attendance")
-def get_attendance(date: str):
+def get_attendance():
     conn = get_db()
-    records = conn.execute(
-        "SELECT student_id, status FROM attendance WHERE date = ?", (date,)
-    ).fetchall()
+    rows = conn.execute("SELECT * FROM attendance").fetchall()
     conn.close()
-    return {r["student_id"]: r["status"] for r in records}
+    return [dict(r) for r in rows]
+
+class AttendanceUpdate(BaseModel):
+    student_id: int
+    date: str
+    status: str
 
 @app.post("/api/attendance")
-def save_attendance(data: List[AttendanceModel]):
+def save_attendance(data: AttendanceUpdate):
     conn = get_db()
-    cursor = conn.cursor()
-    for item in data:
-        cursor.execute(
-            '''INSERT INTO attendance (student_id, date, status)
-               VALUES (?, ?, ?)
-               ON CONFLICT(student_id, date) DO UPDATE SET status=excluded.status''',
-            (item.student_id, item.date, item.status)
-        )
+    conn.execute("""
+        INSERT INTO attendance (student_id, date, status)
+        VALUES (?, ?, ?)
+        ON CONFLICT(student_id, date) DO UPDATE SET status=excluded.status
+    """, (data.student_id, data.date, data.status))
     conn.commit()
     conn.close()
-    return {"message": "Lưu điểm danh thành công"}
+    return {"message": "Đã ghi nhận điểm danh"}
 
+# --- VIDEO BÀI GIẢNG ---
 @app.get("/api/videos")
 def get_videos():
     conn = get_db()
-    videos = conn.execute("SELECT * FROM videos ORDER BY id DESC").fetchall()
+    rows = conn.execute("SELECT * FROM videos ORDER BY order_index ASC, id DESC").fetchall()
     conn.close()
-    return [dict(v) for v in videos]
+    return [dict(r) for r in rows]
+
+class VideoCreate(BaseModel):
+    title: str
+    youtube_id: str
+    description: Optional[str] = ""
+    order_index: Optional[int] = 0
 
 @app.post("/api/videos")
-def add_video(video: VideoModel):
+def create_video(v: VideoCreate):
     conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO videos (title, youtube_url, description) VALUES (?, ?, ?)",
-        (video.title, video.youtube_url, video.description)
-    )
+    conn.execute("INSERT INTO videos (title, youtube_id, description, order_index) VALUES (?, ?, ?, ?)",
+                 (v.title, v.youtube_id, v.description, v.order_index))
     conn.commit()
     conn.close()
-    return {"message": "Thêm video thành công"}
+    return {"message": "Đã thêm video"}
 
-@app.get("/api/homeworks")
-def get_homeworks():
+# --- TÀI LIỆU GOOGLE DRIVE ---
+@app.get("/api/documents")
+def get_documents():
     conn = get_db()
-    homeworks = conn.execute("SELECT * FROM homeworks ORDER BY id DESC").fetchall()
+    rows = conn.execute("SELECT * FROM documents ORDER BY id DESC").fetchall()
     conn.close()
-    return [dict(h) for h in homeworks]
+    return [dict(r) for r in rows]
 
-@app.post("/api/homeworks")
-def add_homework(hw: HomeworkModel):
+class DocumentCreate(BaseModel):
+    title: str
+    drive_url: str
+    category: Optional[str] = "Chung"
+
+@app.post("/api/documents")
+def create_document(d: DocumentCreate):
     conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO homeworks (title, question, due_date) VALUES (?, ?, ?)",
-        (hw.title, hw.question, hw.due_date)
-    )
+    conn.execute("INSERT INTO documents (title, drive_url, category) VALUES (?, ?, ?)",
+                 (d.title, d.drive_url, d.category))
     conn.commit()
     conn.close()
-    return {"message": "Tạo BTVN thành công"}
+    return {"message": "Đã thêm tài liệu"}
 
-@app.get("/api/submissions/{homework_id}")
-def get_submissions(homework_id: int):
+# --- BÀI TẬP VỀ NHÀ ---
+@app.get("/api/assignments")
+def get_assignments():
     conn = get_db()
-    subs = conn.execute(
-        "SELECT * FROM submissions WHERE homework_id = ? ORDER BY id DESC", (homework_id,)
-    ).fetchall()
+    rows = conn.execute("SELECT * FROM assignments ORDER BY id DESC").fetchall()
     conn.close()
-    return [dict(s) for s in subs]
+    return [dict(r) for r in rows]
+
+class AssignmentCreate(BaseModel):
+    title: str
+    content: str
+    due_date: Optional[str] = ""
+
+@app.post("/api/assignments")
+def create_assignment(a: AssignmentCreate):
+    conn = get_db()
+    conn.execute("INSERT INTO assignments (title, content, due_date) VALUES (?, ?, ?)",
+                 (a.title, a.content, a.due_date))
+    conn.commit()
+    conn.close()
+    return {"message": "Đã tạo bài tập"}
+
+@app.get("/api/submissions")
+def get_submissions(assignment_id: Optional[int] = None):
+    conn = get_db()
+    if assignment_id:
+        rows = conn.execute("SELECT * FROM submissions WHERE assignment_id = ? ORDER BY id DESC", (assignment_id,)).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM submissions ORDER BY id DESC").fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+class SubmissionCreate(BaseModel):
+    assignment_id: int
+    student_name: str
+    answer_text: str
 
 @app.post("/api/submissions")
-def submit_homework(sub: SubmissionModel):
+def create_submission(s: SubmissionCreate):
     conn = get_db()
-    cursor = conn.cursor()
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute(
-        "INSERT INTO submissions (homework_id, student_code, student_name, answer, submitted_at) VALUES (?, ?, ?, ?, ?)",
-        (sub.homework_id, sub.student_code, sub.student_name, sub.answer, now)
-    )
+    conn.execute("INSERT INTO submissions (assignment_id, student_name, answer_text) VALUES (?, ?, ?)",
+                 (s.assignment_id, s.student_name, s.answer_text))
     conn.commit()
     conn.close()
     return {"message": "Nộp bài thành công"}
 
-@app.get("/api/documents")
-def get_documents():
-    conn = get_db()
-    docs = conn.execute("SELECT * FROM documents ORDER BY id DESC").fetchall()
-    conn.close()
-    return [dict(d) for d in docs]
-
-@app.post("/api/documents")
-def add_document(doc: DocumentModel):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO documents (title, drive_embed_url, download_url) VALUES (?, ?, ?)",
-        (doc.title, doc.drive_embed_url, doc.download_url)
-    )
-    conn.commit()
-    conn.close()
-    return {"message": "Thêm tài liệu thành công"}
-
+# --- ĐỀ KIỂM TRA & MATHML ---
 @app.get("/api/exams")
 def get_exams():
     conn = get_db()
-    exams = conn.execute("SELECT * FROM exams ORDER BY id DESC").fetchall()
+    rows = conn.execute("SELECT * FROM exams ORDER BY id DESC").fetchall()
     conn.close()
-    return [dict(e) for e in exams]
+    return [dict(r) for r in rows]
+
+class ExamCreate(BaseModel):
+    title: str
+    question_mathml: str
 
 @app.post("/api/exams")
-def add_exam(exam: ExamModel):
+def create_exam(e: ExamCreate):
     conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO exams (title, question_content, answer_key) VALUES (?, ?, ?)",
-        (exam.title, exam.question_content, exam.answer_key)
-    )
+    conn.execute("INSERT INTO exams (title, question_mathml) VALUES (?, ?)", (e.title, e.question_mathml))
     conn.commit()
     conn.close()
-    return {"message": "Thêm đề kiểm tra thành công"}
+    return {"message": "Đã thêm câu hỏi/đề thi"}
