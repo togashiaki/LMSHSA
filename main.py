@@ -68,6 +68,7 @@ def init_db():
         content TEXT NOT NULL,
         pdf_url TEXT DEFAULT '',
         due_date TEXT,
+        duration_minutes INTEGER DEFAULT 60,
         mc_count INTEGER DEFAULT 0,
         tf_count INTEGER DEFAULT 0,
         sa_count INTEGER DEFAULT 0,
@@ -96,6 +97,7 @@ def init_db():
         content TEXT DEFAULT '',
         question_mathml TEXT DEFAULT '',
         due_date TEXT DEFAULT '',
+        duration_minutes INTEGER DEFAULT 60,
         mc_count INTEGER DEFAULT 0,
         tf_count INTEGER DEFAULT 0,
         sa_count INTEGER DEFAULT 0,
@@ -121,12 +123,14 @@ def init_db():
     
     cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS visit_count INTEGER DEFAULT 1;")
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS pdf_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS duration_minutes INTEGER DEFAULT 60;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS raw_score NUMERIC(5, 2) DEFAULT 0;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS max_score NUMERIC(5, 2) DEFAULT 0;")
     
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS pdf_url TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS content TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS due_date TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS duration_minutes INTEGER DEFAULT 60;")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS mc_count INTEGER DEFAULT 0;")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_count INTEGER DEFAULT 0;")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS sa_count INTEGER DEFAULT 0;")
@@ -517,6 +521,7 @@ def get_assignments():
     res = []
     for r in rows:
         item = dict(r)
+        item["duration_minutes"] = int(item["duration_minutes"]) if item.get("duration_minutes") is not None else 60
         item["mc_score_per_q"] = float(item["mc_score_per_q"]) if item.get("mc_score_per_q") is not None else 0.25
         item["tf_score_1"] = float(item["tf_score_1"]) if item.get("tf_score_1") is not None else 0.10
         item["tf_score_2"] = float(item["tf_score_2"]) if item.get("tf_score_2") is not None else 0.25
@@ -531,6 +536,7 @@ class AssignmentCreate(BaseModel):
     content: str
     pdf_url: Optional[str] = ""
     due_date: Optional[str] = ""
+    duration_minutes: Optional[int] = 60
     mc_count: Optional[int] = 0
     tf_count: Optional[int] = 0
     sa_count: Optional[int] = 0
@@ -552,11 +558,11 @@ def create_assignment(a: AssignmentCreate):
     cleaned_key = sanitize_and_clean_answer_key(a.answer_key or "{}", mc_c, tf_c, sa_c)
 
     cursor.execute("""
-        INSERT INTO assignments (title, content, pdf_url, due_date, mc_count, tf_count, sa_count, answer_key,
+        INSERT INTO assignments (title, content, pdf_url, due_date, duration_minutes, mc_count, tf_count, sa_count, answer_key,
                                  mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        a.title, a.content, a.pdf_url or "", a.due_date, mc_c, tf_c, sa_c, cleaned_key,
+        a.title, a.content, a.pdf_url or "", a.due_date or "", a.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
         a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
         a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50
     ))
@@ -576,11 +582,11 @@ def update_assignment(assignment_id: int, a: AssignmentCreate):
 
     cursor.execute("""
         UPDATE assignments
-        SET title = %s, content = %s, pdf_url = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
+        SET title = %s, content = %s, pdf_url = %s, due_date = %s, duration_minutes = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
             mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
         WHERE id = %s
     """, (
-        a.title, a.content, a.pdf_url or "", a.due_date, mc_c, tf_c, sa_c, cleaned_key,
+        a.title, a.content, a.pdf_url or "", a.due_date or "", a.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
         a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
         a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50,
         assignment_id
@@ -692,6 +698,7 @@ def get_exams():
     res = []
     for r in rows:
         item = dict(r)
+        item["duration_minutes"] = int(item["duration_minutes"]) if item.get("duration_minutes") is not None else 60
         item["mc_score_per_q"] = float(item["mc_score_per_q"]) if item.get("mc_score_per_q") is not None else 0.25
         item["tf_score_1"] = float(item["tf_score_1"]) if item.get("tf_score_1") is not None else 0.10
         item["tf_score_2"] = float(item["tf_score_2"]) if item.get("tf_score_2") is not None else 0.25
@@ -707,6 +714,7 @@ class ExamCreate(BaseModel):
     content: Optional[str] = ""
     question_mathml: Optional[str] = ""
     due_date: Optional[str] = ""
+    duration_minutes: Optional[int] = 60
     mc_count: Optional[int] = 0
     tf_count: Optional[int] = 0
     sa_count: Optional[int] = 0
@@ -728,11 +736,11 @@ def create_exam(e: ExamCreate):
     cleaned_key = sanitize_and_clean_answer_key(e.answer_key or "{}", mc_c, tf_c, sa_c)
 
     cursor.execute("""
-        INSERT INTO exams (title, pdf_url, content, question_mathml, due_date, mc_count, tf_count, sa_count, answer_key,
+        INSERT INTO exams (title, pdf_url, content, question_mathml, due_date, duration_minutes, mc_count, tf_count, sa_count, answer_key,
                            mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", mc_c, tf_c, sa_c, cleaned_key,
+        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", e.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
         e.mc_score_per_q or 0.25, e.tf_score_1 or 0.10, e.tf_score_2 or 0.25,
         e.tf_score_3 or 0.50, e.tf_score_4 or 1.00, e.sa_score_per_q or 0.50
     ))
@@ -752,12 +760,12 @@ def update_exam(exam_id: int, e: ExamCreate):
 
     cursor.execute("""
         UPDATE exams
-        SET title = %s, pdf_url = %s, content = %s, question_mathml = %s, due_date = %s,
+        SET title = %s, pdf_url = %s, content = %s, question_mathml = %s, due_date = %s, duration_minutes = %s,
             mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
             mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
         WHERE id = %s
     """, (
-        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", mc_c, tf_c, sa_c, cleaned_key,
+        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", e.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
         e.mc_score_per_q or 0.25, e.tf_score_1 or 0.10, e.tf_score_2 or 0.25,
         e.tf_score_3 or 0.50, e.tf_score_4 or 1.00, e.sa_score_per_q or 0.50,
         exam_id
