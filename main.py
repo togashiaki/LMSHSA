@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -9,7 +9,7 @@ import os
 import json
 from datetime import datetime
 
-app = FastAPI(title="Hệ thống Quản lý Lớp học")
+app = FastAPI(title="Hệ thống Quản lý Lớp học - LMS")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -68,7 +68,6 @@ def init_db():
         content TEXT NOT NULL,
         pdf_url TEXT DEFAULT '',
         due_date TEXT,
-        duration_minutes INTEGER DEFAULT 60,
         mc_count INTEGER DEFAULT 0,
         tf_count INTEGER DEFAULT 0,
         sa_count INTEGER DEFAULT 0,
@@ -97,7 +96,6 @@ def init_db():
         content TEXT DEFAULT '',
         question_mathml TEXT DEFAULT '',
         due_date TEXT DEFAULT '',
-        duration_minutes INTEGER DEFAULT 60,
         mc_count INTEGER DEFAULT 0,
         tf_count INTEGER DEFAULT 0,
         sa_count INTEGER DEFAULT 0,
@@ -123,14 +121,12 @@ def init_db():
     
     cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS visit_count INTEGER DEFAULT 1;")
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS pdf_url TEXT DEFAULT '';")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS duration_minutes INTEGER DEFAULT 60;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS raw_score NUMERIC(5, 2) DEFAULT 0;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS max_score NUMERIC(5, 2) DEFAULT 0;")
     
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS pdf_url TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS content TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS due_date TEXT DEFAULT '';")
-    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS duration_minutes INTEGER DEFAULT 60;")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS mc_count INTEGER DEFAULT 0;")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_count INTEGER DEFAULT 0;")
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS sa_count INTEGER DEFAULT 0;")
@@ -264,6 +260,77 @@ def calculate_submission_score_details(
 
     return raw_score, max_score, score_10
 
+def build_detailed_breakdown(
+    answer_key_raw: str,
+    student_answers_raw: str,
+    mc_count: int,
+    tf_count: int,
+    sa_count: int
+) -> Dict[str, Any]:
+    try:
+        key = json.loads(answer_key_raw or "{}")
+    except Exception:
+        key = {}
+    try:
+        ans = json.loads(student_answers_raw or "{}")
+    except Exception:
+        ans = {}
+
+    mc_detail = []
+    mc_key = key.get("mc", {})
+    mc_ans = ans.get("mc", {})
+    for i in range(1, mc_count + 1):
+        q_str = str(i)
+        c_ans = mc_key.get(q_str, "")
+        s_ans = mc_ans.get(q_str, "")
+        is_corr = bool(c_ans and str(s_ans).strip().upper() == str(c_ans).strip().upper())
+        mc_detail.append({
+            "question": f"Câu {i}",
+            "student_answer": s_ans,
+            "correct_answer": c_ans,
+            "is_correct": is_corr
+        })
+
+    tf_detail = []
+    tf_key = key.get("tf", {})
+    tf_ans = ans.get("tf", {})
+    for i in range(1, tf_count + 1):
+        sub_list = []
+        for sub in ['a', 'b', 'c', 'd']:
+            sub_q = f"{i}{sub}"
+            c_ans = tf_key.get(sub_q, "")
+            s_ans = tf_ans.get(sub_q, "")
+            is_corr = bool(c_ans and str(s_ans).strip() == str(c_ans).strip())
+            sub_list.append({
+                "sub_question": f"Ý {sub}",
+                "student_answer": s_ans,
+                "correct_answer": c_ans,
+                "is_correct": is_corr
+            })
+        tf_detail.append({
+            "question": f"Câu {i}",
+            "subs": sub_list
+        })
+
+    sa_detail = []
+    sa_key = key.get("sa", {})
+    sa_ans = ans.get("sa", {})
+    for i in range(1, sa_count + 1):
+        q_str = str(i)
+        c_ans = sa_key.get(q_str, "")
+        s_ans = sa_ans.get(q_str, "")
+        k_str = str(c_ans).strip().lower().replace(",", ".")
+        s_str = str(s_ans).strip().lower().replace(",", ".")
+        is_corr = bool(c_ans and k_str == s_str and k_str != "")
+        sa_detail.append({
+            "question": f"Câu {i}",
+            "student_answer": s_ans,
+            "correct_answer": c_ans,
+            "is_correct": is_corr
+        })
+
+    return {"mc": mc_detail, "tf": tf_detail, "sa": sa_detail}
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
@@ -280,6 +347,15 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+class ChangePassword(BaseModel):
+    user_id: int
+    old_password: str
+    new_password: str
+
+class UserUpdate(BaseModel):
+    full_name: str
+    role: Optional[str] = "student"
 
 @app.post("/api/register")
 def register(u: UserRegister):
@@ -325,6 +401,33 @@ def get_users():
     conn.close()
     return [dict(r) for r in rows]
 
+@app.post("/api/users/change-password")
+def change_password(data: ChangePassword):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, password FROM users WHERE id = %s", (data.user_id,))
+    u = cursor.fetchone()
+    if not u or u["password"] != data.old_password:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=400, detail="Mật khẩu cũ không chính xác!")
+    
+    cursor.execute("UPDATE users SET password = %s WHERE id = %s", (data.new_password, data.user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đổi mật khẩu thành công!"}
+
+@app.put("/api/users/{user_id}")
+def update_user(user_id: int, u: UserUpdate):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET full_name = %s, role = %s WHERE id = %s", (u.full_name, u.role, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật thông tin người dùng"}
+
 # --- QUẢN LÝ HỌC SINH ---
 @app.get("/api/students")
 def get_students():
@@ -356,6 +459,20 @@ def create_student(s: StudentCreate):
     cursor.close()
     conn.close()
     return {"message": "Đã thêm học sinh"}
+
+@app.put("/api/students/{student_id}")
+def update_student(student_id: int, s: StudentCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE students
+        SET student_code = %s, full_name = %s, dob = %s, status = %s
+        WHERE id = %s
+    """, (s.student_code, s.full_name, s.dob, s.status, student_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật thông tin học sinh"}
 
 @app.delete("/api/students/{student_id}")
 def delete_student(student_id: int):
@@ -407,6 +524,21 @@ def save_attendance(data: AttendanceUpdate):
     conn.close()
     return {"message": "Đã ghi nhận điểm danh"}
 
+@app.post("/api/attendance/bulk")
+def save_bulk_attendance(items: List[AttendanceUpdate]):
+    conn = get_db()
+    cursor = conn.cursor()
+    for item in items:
+        cursor.execute("""
+            INSERT INTO attendance (student_id, date, status)
+            VALUES (%s, %s, %s)
+            ON CONFLICT(student_id, date) DO UPDATE SET status = EXCLUDED.status
+        """, (item.student_id, item.date, item.status))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": f"Đã ghi nhận điểm danh hàng loạt cho {len(items)} lượt"}
+
 @app.delete("/api/attendance/dates/{date_str}")
 def delete_attendance_date(date_str: str):
     conn = get_db()
@@ -444,6 +576,20 @@ def create_video(v: VideoCreate):
     cursor.close()
     conn.close()
     return {"message": "Đã thêm video"}
+
+@app.put("/api/videos/{video_id}")
+def update_video(video_id: int, v: VideoCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE videos
+        SET title = %s, youtube_id = %s, description = %s, order_index = %s
+        WHERE id = %s
+    """, (v.title, v.youtube_id, v.description, v.order_index, video_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật video"}
 
 @app.delete("/api/videos/{video_id}")
 def delete_video(video_id: int):
@@ -521,7 +667,6 @@ def get_assignments():
     res = []
     for r in rows:
         item = dict(r)
-        item["duration_minutes"] = int(item["duration_minutes"]) if item.get("duration_minutes") is not None else 60
         item["mc_score_per_q"] = float(item["mc_score_per_q"]) if item.get("mc_score_per_q") is not None else 0.25
         item["tf_score_1"] = float(item["tf_score_1"]) if item.get("tf_score_1") is not None else 0.10
         item["tf_score_2"] = float(item["tf_score_2"]) if item.get("tf_score_2") is not None else 0.25
@@ -536,7 +681,6 @@ class AssignmentCreate(BaseModel):
     content: str
     pdf_url: Optional[str] = ""
     due_date: Optional[str] = ""
-    duration_minutes: Optional[int] = 60
     mc_count: Optional[int] = 0
     tf_count: Optional[int] = 0
     sa_count: Optional[int] = 0
@@ -558,11 +702,11 @@ def create_assignment(a: AssignmentCreate):
     cleaned_key = sanitize_and_clean_answer_key(a.answer_key or "{}", mc_c, tf_c, sa_c)
 
     cursor.execute("""
-        INSERT INTO assignments (title, content, pdf_url, due_date, duration_minutes, mc_count, tf_count, sa_count, answer_key,
+        INSERT INTO assignments (title, content, pdf_url, due_date, mc_count, tf_count, sa_count, answer_key,
                                  mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        a.title, a.content, a.pdf_url or "", a.due_date or "", a.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
+        a.title, a.content, a.pdf_url or "", a.due_date, mc_c, tf_c, sa_c, cleaned_key,
         a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
         a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50
     ))
@@ -582,11 +726,11 @@ def update_assignment(assignment_id: int, a: AssignmentCreate):
 
     cursor.execute("""
         UPDATE assignments
-        SET title = %s, content = %s, pdf_url = %s, due_date = %s, duration_minutes = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
+        SET title = %s, content = %s, pdf_url = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
             mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
         WHERE id = %s
     """, (
-        a.title, a.content, a.pdf_url or "", a.due_date or "", a.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
+        a.title, a.content, a.pdf_url or "", a.due_date, mc_c, tf_c, sa_c, cleaned_key,
         a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
         a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50,
         assignment_id
@@ -645,6 +789,43 @@ def get_submissions(assignment_id: Optional[int] = None):
         res.append(item)
     return res
 
+@app.get("/api/submissions/{submission_id}/detail")
+def get_submission_detail(submission_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT s.*, a.answer_key, a.mc_count, a.tf_count, a.sa_count, a.title as assignment_title
+        FROM submissions s
+        JOIN assignments a ON s.assignment_id = a.id
+        WHERE s.id = %s
+    """, (submission_id,))
+    sub = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Bài nộp không tồn tại!")
+    
+    breakdown = build_detailed_breakdown(
+        sub["answer_key"],
+        sub["answer_text"],
+        sub["mc_count"] or 0,
+        sub["tf_count"] or 0,
+        sub["sa_count"] or 0
+    )
+    result = dict(sub)
+    result["breakdown"] = breakdown
+    return result
+
+@app.delete("/api/submissions/{submission_id}")
+def delete_submission(submission_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM submissions WHERE id = %s", (submission_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa bài nộp"}
+
 class SubmissionCreate(BaseModel):
     assignment_id: int
     student_name: str
@@ -698,7 +879,6 @@ def get_exams():
     res = []
     for r in rows:
         item = dict(r)
-        item["duration_minutes"] = int(item["duration_minutes"]) if item.get("duration_minutes") is not None else 60
         item["mc_score_per_q"] = float(item["mc_score_per_q"]) if item.get("mc_score_per_q") is not None else 0.25
         item["tf_score_1"] = float(item["tf_score_1"]) if item.get("tf_score_1") is not None else 0.10
         item["tf_score_2"] = float(item["tf_score_2"]) if item.get("tf_score_2") is not None else 0.25
@@ -714,7 +894,6 @@ class ExamCreate(BaseModel):
     content: Optional[str] = ""
     question_mathml: Optional[str] = ""
     due_date: Optional[str] = ""
-    duration_minutes: Optional[int] = 60
     mc_count: Optional[int] = 0
     tf_count: Optional[int] = 0
     sa_count: Optional[int] = 0
@@ -736,11 +915,11 @@ def create_exam(e: ExamCreate):
     cleaned_key = sanitize_and_clean_answer_key(e.answer_key or "{}", mc_c, tf_c, sa_c)
 
     cursor.execute("""
-        INSERT INTO exams (title, pdf_url, content, question_mathml, due_date, duration_minutes, mc_count, tf_count, sa_count, answer_key,
+        INSERT INTO exams (title, pdf_url, content, question_mathml, due_date, mc_count, tf_count, sa_count, answer_key,
                            mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", e.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
+        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", mc_c, tf_c, sa_c, cleaned_key,
         e.mc_score_per_q or 0.25, e.tf_score_1 or 0.10, e.tf_score_2 or 0.25,
         e.tf_score_3 or 0.50, e.tf_score_4 or 1.00, e.sa_score_per_q or 0.50
     ))
@@ -760,12 +939,12 @@ def update_exam(exam_id: int, e: ExamCreate):
 
     cursor.execute("""
         UPDATE exams
-        SET title = %s, pdf_url = %s, content = %s, question_mathml = %s, due_date = %s, duration_minutes = %s,
+        SET title = %s, pdf_url = %s, content = %s, question_mathml = %s, due_date = %s,
             mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
             mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
         WHERE id = %s
     """, (
-        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", e.duration_minutes or 60, mc_c, tf_c, sa_c, cleaned_key,
+        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", mc_c, tf_c, sa_c, cleaned_key,
         e.mc_score_per_q or 0.25, e.tf_score_1 or 0.10, e.tf_score_2 or 0.25,
         e.tf_score_3 or 0.50, e.tf_score_4 or 1.00, e.sa_score_per_q or 0.50,
         exam_id
@@ -824,6 +1003,43 @@ def get_exam_submissions(exam_id: Optional[int] = None):
         res.append(item)
     return res
 
+@app.get("/api/exam_submissions/{submission_id}/detail")
+def get_exam_submission_detail(submission_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT s.*, e.answer_key, e.mc_count, e.tf_count, e.sa_count, e.title as exam_title
+        FROM exam_submissions s
+        JOIN exams e ON s.exam_id = e.id
+        WHERE s.id = %s
+    """, (submission_id,))
+    sub = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Bài nộp không tồn tại!")
+    
+    breakdown = build_detailed_breakdown(
+        sub["answer_key"],
+        sub["answer_text"],
+        sub["mc_count"] or 0,
+        sub["tf_count"] or 0,
+        sub["sa_count"] or 0
+    )
+    result = dict(sub)
+    result["breakdown"] = breakdown
+    return result
+
+@app.delete("/api/exam_submissions/{submission_id}")
+def delete_exam_submission(submission_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM exam_submissions WHERE id = %s", (submission_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa bài nộp đề kiểm tra"}
+
 class ExamSubmissionCreate(BaseModel):
     exam_id: int
     student_name: str
@@ -863,3 +1079,56 @@ def create_exam_submission(s: ExamSubmissionCreate):
     cursor.close()
     conn.close()
     return {"message": "Nộp bài kiểm tra thành công!", "raw_score": raw_score, "max_score": max_score, "score": score_10}
+
+# --- THỐNG KÊ TỔNG QUAN HỆ THỐNG ---
+@app.get("/api/dashboard/stats")
+def get_dashboard_stats():
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) as cnt FROM students")
+    total_students = cursor.fetchone()["cnt"]
+    
+    cursor.execute("SELECT COUNT(*) as cnt FROM videos")
+    total_videos = cursor.fetchone()["cnt"]
+    
+    cursor.execute("SELECT COUNT(*) as cnt FROM documents")
+    total_documents = cursor.fetchone()["cnt"]
+    
+    cursor.execute("SELECT COUNT(*) as cnt FROM assignments")
+    total_assignments = cursor.fetchone()["cnt"]
+    
+    cursor.execute("SELECT COUNT(*) as cnt FROM exams")
+    total_exams = cursor.fetchone()["cnt"]
+    
+    cursor.execute("SELECT COALESCE(AVG(score), 0) as avg_score, COUNT(*) as total_sub FROM submissions")
+    sub_stat = cursor.fetchone()
+    avg_hw_score = round(float(sub_stat["avg_score"]), 2)
+    total_hw_subs = sub_stat["total_sub"]
+    
+    cursor.execute("SELECT COALESCE(AVG(score), 0) as avg_score, COUNT(*) as total_sub FROM exam_submissions")
+    ex_stat = cursor.fetchone()
+    avg_ex_score = round(float(ex_stat["avg_score"]), 2)
+    total_ex_subs = ex_stat["total_sub"]
+    
+    cursor.execute("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'Có mặt' THEN 1 ELSE 0 END) as present FROM attendance")
+    att_stat = cursor.fetchone()
+    tot_att = att_stat["total"] or 0
+    pres_att = att_stat["present"] or 0
+    attendance_rate = round((pres_att / tot_att) * 100) if tot_att > 0 else 100
+    
+    cursor.close()
+    conn.close()
+    
+    return {
+        "total_students": total_students,
+        "total_videos": total_videos,
+        "total_documents": total_documents,
+        "total_assignments": total_assignments,
+        "total_exams": total_exams,
+        "avg_hw_score": avg_hw_score,
+        "total_hw_submissions": total_hw_subs,
+        "avg_exam_score": avg_ex_score,
+        "total_exam_submissions": total_ex_subs,
+        "attendance_rate": attendance_rate
+    }
