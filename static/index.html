@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Lớp Học</title>
+    <title>Phần Mềm Quản Lý Học Tập</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -14,60 +14,72 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased" x-data="classroomApp()" x-init="initData()">
+<body class="bg-[#FAF8F5] text-[#2D2926] font-sans antialiased min-h-screen" x-data="classroomApp()" x-init="initData()">
+
+    <!-- MÀN HÌNH CHỜ TẢI DỮ LIỆU (LOADING OVERLAY) -->
+    <div x-show="isLoadingContent" x-transition:enter="transition opacity ease-out duration-200" x-transition:leave="transition opacity ease-in duration-200" class="fixed inset-0 z-50 bg-[#2D2926]/40 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+        <div class="bg-[#FAF8F5] p-8 rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col items-center space-y-4 max-w-sm text-center">
+            <div class="w-12 h-12 border-4 border-[#F2E8E1] border-t-[#B8502B] rounded-full animate-spin"></div>
+            <div>
+                <div class="font-bold text-[#2D2926] text-sm">Hệ thống đang lấy dữ liệu</div>
+                <div class="text-xs text-[#78716C] mt-1">Vui lòng chờ trong giây lát...</div>
+            </div>
+        </div>
+    </div>
 
     <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
-    <div x-show="!currentUser" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-100">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl">C</div>
+    <div x-show="!currentUser" class="fixed inset-0 z-40 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-[#E6E1D8]">
+            <div class="flex flex-col items-center text-center space-y-2 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-[#B8502B] flex items-center justify-center text-white shadow-md">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">ClassStu</h2>
-                    <p class="text-xs text-slate-500">Quản lý lớp học thông minh</p>
+                    <h2 class="text-xs font-bold tracking-wider text-[#78716C] uppercase">Phần mềm quản lý học tập</h2>
                 </div>
             </div>
 
-            <div class="flex border-b border-slate-200 mb-6">
-                <button @click="authTab = 'login'" :class="authTab === 'login' ? 'border-blue-600 text-blue-600 font-bold' : 'text-slate-400'" class="flex-1 py-2 text-sm border-b-2 text-center">Đăng nhập</button>
-                <button @click="authTab = 'register'" :class="authTab === 'register' ? 'border-blue-600 text-blue-600 font-bold' : 'text-slate-400'" class="flex-1 py-2 text-sm border-b-2 text-center">Tạo tài khoản</button>
+            <div class="flex border-b border-[#E6E1D8] mb-6">
+                <button @click="authTab = 'login'" :class="authTab === 'login' ? 'border-[#B8502B] text-[#B8502B] font-bold' : 'text-[#78716C]'" class="flex-1 py-2 text-sm border-b-2 text-center transition">Đăng nhập</button>
+                <button @click="authTab = 'register'" :class="authTab === 'register' ? 'border-[#B8502B] text-[#B8502B] font-bold' : 'text-[#78716C]'" class="flex-1 py-2 text-sm border-b-2 text-center transition">Tạo tài khoản</button>
             </div>
 
-            <div x-show="authError" class="p-3 bg-rose-50 text-rose-600 rounded-xl text-xs font-medium mb-4" x-text="authError"></div>
+            <div x-show="authError" class="p-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-medium mb-4 border border-rose-200" x-text="authError"></div>
 
             <div x-show="authTab === 'login'" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tên đăng nhập</label>
-                    <input type="text" x-model="loginForm.username" placeholder="Nhập username" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Tên đăng nhập</label>
+                    <input type="text" x-model="loginForm.username" placeholder="Nhập username" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu</label>
-                    <input type="password" x-model="loginForm.password" placeholder="Nhập mật khẩu" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Mật khẩu</label>
+                    <input type="password" x-model="loginForm.password" placeholder="Nhập mật khẩu" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                 </div>
-                <button @click="login()" class="w-full bg-blue-600 text-white font-semibold text-xs py-3 rounded-xl hover:bg-blue-700 transition">Đăng nhập</button>
-                <p class="text-[11px] text-slate-400 text-center mt-2">Tài khoản GV mặc định: admin / 123456</p>
+                <button @click="login()" class="w-full bg-[#B8502B] text-white font-semibold text-xs py-3 rounded-xl hover:bg-[#9E4221] transition shadow-sm">Đăng nhập</button>
+                <p class="text-[11px] text-[#A8A29E] text-center mt-2">Tài khoản GV mặc định: admin / 123456</p>
             </div>
 
             <div x-show="authTab === 'register'" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Họ và tên</label>
-                    <input type="text" x-model="regForm.full_name" placeholder="Ví dụ: Nguyễn Văn A" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Họ và tên</label>
+                    <input type="text" x-model="regForm.full_name" placeholder="Ví dụ: Nguyễn Văn A" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tên đăng nhập</label>
-                    <input type="text" x-model="regForm.username" placeholder="Tên tài khoản mới" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Tên đăng nhập</label>
+                    <input type="text" x-model="regForm.username" placeholder="Tên tài khoản mới" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu</label>
-                    <input type="password" x-model="regForm.password" placeholder="Tạo mật khẩu" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Mật khẩu</label>
+                    <input type="password" x-model="regForm.password" placeholder="Tạo mật khẩu" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Vai trò</label>
-                    <select x-model="regForm.role" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Vai trò</label>
+                    <select x-model="regForm.role" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                         <option value="student">Học sinh</option>
                         <option value="teacher">Giáo viên</option>
                     </select>
                 </div>
-                <button @click="register()" class="w-full bg-blue-600 text-white font-semibold text-xs py-3 rounded-xl hover:bg-blue-700 transition">Đăng ký tài khoản</button>
+                <button @click="register()" class="w-full bg-[#B8502B] text-white font-semibold text-xs py-3 rounded-xl hover:bg-[#9E4221] transition shadow-sm">Đăng ký tài khoản</button>
             </div>
         </div>
     </div>
@@ -75,30 +87,37 @@
     <!-- MÀN HÌNH CHÍNH -->
     <div x-show="currentUser" class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 select-none">
-            <div class="p-4">
-                <div class="flex items-center space-x-3 px-2 py-3 mb-4">
-                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">C</div>
-                    <div>
-                        <div class="font-bold text-slate-900 leading-tight">ClassStu</div>
-                        <div class="text-xs text-slate-400">Quản lý lớp học</div>
+        <!-- SIDEBAR BÊN TRÁI -->
+        <aside x-show="sidebarOpen" 
+               x-transition:enter="transition-all ease-out duration-300"
+               x-transition:enter-start="-ml-64 opacity-0"
+               x-transition:enter-end="ml-0 opacity-100"
+               x-transition:leave="transition-all ease-in duration-300"
+               x-transition:leave-start="ml-0 opacity-100"
+               x-transition:leave-end="-ml-64 opacity-0"
+               class="w-64 bg-white border-r border-[#E6E1D8] flex flex-col justify-between shrink-0 select-none z-20">
+            <div class="p-5">
+                <!-- LOGO BÊN TRÁI (CHỈ ICON VÀ TÊN DƯỚI) -->
+                <div class="flex flex-col items-center text-center pb-4 mb-4 border-b border-[#E6E1D8] space-y-2">
+                    <div class="w-12 h-12 rounded-2xl bg-[#B8502B] flex items-center justify-center text-white shadow-md">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
+                    <div class="text-[11px] font-bold text-[#78716C] tracking-wide uppercase leading-tight">Phần mềm quản lý học tập</div>
                 </div>
 
                 <nav class="space-y-6">
                     <div>
-                        <div class="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">Chính</div>
+                        <div class="px-3 text-[10px] font-bold text-[#A8A29E] tracking-wider uppercase mb-2">Chính</div>
                         <div class="space-y-1">
-                            <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                                 <span>Tổng quan</span>
                             </button>
-                            <button @click="activeTab = 'attendance'" :class="activeTab === 'attendance' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button @click="activeTab = 'attendance'" :class="activeTab === 'attendance' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                                 <span>Điểm danh</span>
                             </button>
-                            <button x-show="role === 'teacher'" @click="activeTab = 'students'" :class="activeTab === 'students' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button x-show="role === 'teacher'" @click="activeTab = 'students'" :class="activeTab === 'students' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                                 <span>Học sinh</span>
                             </button>
@@ -106,21 +125,21 @@
                     </div>
 
                     <div>
-                        <div class="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">Giảng dạy</div>
+                        <div class="px-3 text-[10px] font-bold text-[#A8A29E] tracking-wider uppercase mb-2">Giảng dạy</div>
                         <div class="space-y-1">
-                            <button @click="activeTab = 'videos'" :class="activeTab === 'videos' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button @click="activeTab = 'videos'" :class="activeTab === 'videos' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 <span>Bài giảng Video</span>
                             </button>
-                            <button @click="activeTab = 'assignments'" :class="activeTab === 'assignments' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button @click="activeTab = 'assignments'" :class="activeTab === 'assignments' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 <span>Bài tập về nhà</span>
                             </button>
-                            <button @click="activeTab = 'documents'" :class="activeTab === 'documents' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button @click="activeTab = 'documents'" :class="activeTab === 'documents' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                 <span>Tài liệu PDF</span>
                             </button>
-                            <button @click="activeTab = 'exams'" :class="activeTab === 'exams' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-600 hover:bg-slate-50'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition">
+                            <button @click="activeTab = 'exams'" :class="activeTab === 'exams' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span>Đề thi & MathML</span>
                             </button>
@@ -129,16 +148,16 @@
                 </nav>
             </div>
 
-            <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div class="p-4 border-t border-[#E6E1D8] bg-[#FAF8F5]/80">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3 min-w-0">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0" x-text="role === 'teacher' ? 'GV' : 'HS'"></div>
+                        <div class="w-8 h-8 rounded-full bg-[#B8502B] text-white font-bold flex items-center justify-center text-xs shrink-0" x-text="role === 'teacher' ? 'GV' : 'HS'"></div>
                         <div class="min-w-0">
-                            <div class="text-xs font-semibold text-slate-800 truncate" x-text="currentUser ? currentUser.full_name : ''"></div>
-                            <div class="text-[10px] text-slate-500 truncate" x-text="role === 'teacher' ? 'Giáo viên' : 'Học sinh'"></div>
+                            <div class="text-xs font-semibold text-[#2D2926] truncate" x-text="currentUser ? currentUser.full_name : ''"></div>
+                            <div class="text-[10px] text-[#78716C] truncate" x-text="role === 'teacher' ? 'Giáo viên' : 'Học sinh'"></div>
                         </div>
                     </div>
-                    <button @click="logout()" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 border border-slate-200 transition shrink-0" title="Đăng xuất">
+                    <button @click="logout()" class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-[#E6E1D8] transition shrink-0" title="Đăng xuất">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     </button>
                 </div>
@@ -146,76 +165,82 @@
         </aside>
 
         <!-- MAIN WORKSPACE -->
-        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-                <h1 class="text-lg font-bold text-slate-900" x-text="getTabTitle()"></h1>
+        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto transition-all duration-300">
+            <!-- HEADER VỚI NÚT ĐÓNG/MỞ SIDEBAR -->
+            <header class="h-16 bg-white/90 backdrop-blur border-b border-[#E6E1D8] flex items-center justify-between px-6 sticky top-0 z-10">
+                <div class="flex items-center space-x-4">
+                    <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-[#57534E] hover:text-[#2D2926] hover:bg-[#FAF8F5] rounded-xl border border-[#E6E1D8] transition cursor-pointer" title="Đóng/Mở Sidebar">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <h1 class="text-base font-bold text-[#2D2926]" x-text="getTabTitle()"></h1>
+                </div>
                 <div class="flex items-center space-x-3">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" :class="role === 'teacher' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
-                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="role === 'teacher' ? 'bg-blue-600' : 'bg-green-600'"></span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border" :class="role === 'teacher' ? 'bg-[#F7ECE7] text-[#B8502B] border-[#E6CFC3]' : 'bg-emerald-50 text-emerald-800 border-emerald-200'">
+                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="role === 'teacher' ? 'bg-[#B8502B]' : 'bg-emerald-600'"></span>
                         <span x-text="role === 'teacher' ? 'Chế độ Giáo viên' : 'Chế độ Học sinh'"></span>
                     </span>
                 </div>
             </header>
 
-            <main class="p-8 space-y-6 max-w-7xl w-full mx-auto">
+            <main class="p-8 space-y-6 max-w-5xl w-full mx-auto transition-all duration-300">
                 <!-- 0. TỔNG QUAN -->
                 <section x-show="activeTab === 'dashboard'" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="text-xs text-slate-500 font-medium">Tổng số học sinh</div>
-                            <div class="text-2xl font-bold text-slate-900 mt-1" x-text="students.length"></div>
+                        <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <div class="text-xs text-[#78716C] font-medium">Tổng số học sinh</div>
+                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="students.length"></div>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="text-xs text-slate-500 font-medium">Video bài giảng</div>
-                            <div class="text-2xl font-bold text-slate-900 mt-1" x-text="videos.length"></div>
+                        <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <div class="text-xs text-[#78716C] font-medium">Video bài giảng</div>
+                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="videos.length"></div>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="text-xs text-slate-500 font-medium">Bài tập đã giao</div>
-                            <div class="text-2xl font-bold text-slate-900 mt-1" x-text="assignments.length"></div>
+                        <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <div class="text-xs text-[#78716C] font-medium">Bài tập đã giao</div>
+                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="assignments.length"></div>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="text-xs text-slate-500 font-medium">Tài liệu & Đề thi</div>
-                            <div class="text-2xl font-bold text-slate-900 mt-1" x-text="documents.length + exams.length"></div>
+                        <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <div class="text-xs text-[#78716C] font-medium">Tài liệu & Đề thi</div>
+                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="documents.length + exams.length"></div>
                         </div>
                     </div>
                 </section>
 
                 <!-- 1. BẢNG ĐIỂM DANH -->
-                <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                         <div>
-                            <h2 class="text-base font-bold text-slate-900">Bảng Điểm Danh Tổng Thể</h2>
-                            <p class="text-xs text-slate-500 mt-0.5">Theo dõi lịch sử chuyên cần của lớp học</p>
+                            <h2 class="text-base font-bold text-[#2D2926]">Bảng Điểm Danh Tổng Thể</h2>
+                            <p class="text-xs text-[#78716C] mt-0.5">Theo dõi lịch sử chuyên cần của lớp học</p>
                         </div>
-                        <div x-show="role === 'teacher'" class="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                            <input type="date" x-model="newAttendanceDate" class="border border-slate-200 p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button @click="addAttendanceDate()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">+ Thêm ngày học</button>
+                        <div x-show="role === 'teacher'" class="flex items-center space-x-2 bg-[#FAF8F5] p-1.5 rounded-xl border border-[#E6E1D8]">
+                            <input type="date" x-model="newAttendanceDate" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B]">
+                            <button @click="addAttendanceDate()" class="bg-[#B8502B] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#9E4221] transition">+ Thêm ngày học</button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                         <table class="w-full text-left border-collapse min-w-max">
                             <thead>
-                                <tr class="bg-blue-600 text-white text-xs">
-                                    <th class="p-3 border-r border-blue-500 w-12 text-center font-bold">STT</th>
-                                    <th class="p-3 border-r border-blue-500 min-w-[200px] font-bold">Họ và tên HS</th>
+                                <tr class="bg-[#2D2926] text-white text-xs">
+                                    <th class="p-3 border-r border-[#44403C] w-12 text-center font-bold">STT</th>
+                                    <th class="p-3 border-r border-[#44403C] min-w-[200px] font-bold">Họ và tên HS</th>
                                     <template x-for="d in attendanceDates" :key="d">
-                                        <th class="p-3 text-center border-r border-blue-500 min-w-[140px]">
+                                        <th class="p-3 text-center border-r border-[#44403C] min-w-[140px]">
                                             <div class="flex items-center justify-center space-x-1">
                                                 <span x-text="formatDateDisplay(d)" class="font-bold text-xs"></span>
-                                                <button x-show="role === 'teacher'" @click="deleteAttendanceDate(d)" class="text-blue-200 hover:text-rose-200 p-0.5 rounded transition" title="Xóa ngày học này">
+                                                <button x-show="role === 'teacher'" @click="deleteAttendanceDate(d)" class="text-stone-400 hover:text-rose-300 p-0.5 rounded transition" title="Xóa ngày học này">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
-                                            <div class="text-[10px] font-normal text-blue-100">Điểm danh</div>
+                                            <div class="text-[10px] font-normal text-stone-300">Điểm danh</div>
                                         </th>
                                     </template>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs divide-y divide-slate-200">
+                            <tbody class="text-xs divide-y divide-[#E6E1D8]">
                                 <template x-for="(s, index) in students" :key="s.id">
-                                    <tr class="hover:bg-slate-50/80">
-                                        <td class="p-3 text-center border-r font-mono text-slate-400" x-text="index + 1"></td>
-                                        <td class="p-3 font-semibold border-r text-slate-800" x-text="s.full_name"></td>
+                                    <tr class="hover:bg-[#FAF8F5]">
+                                        <td class="p-3 text-center border-r font-mono text-[#A8A29E]" x-text="index + 1"></td>
+                                        <td class="p-3 font-semibold border-r text-[#2D2926]" x-text="s.full_name"></td>
                                         <template x-for="d in attendanceDates" :key="d">
                                             <td class="p-2 text-center border-r">
                                                 <template x-if="role === 'teacher'">
@@ -240,28 +265,28 @@
 
                 <!-- 2. BÀI GIẢNG VIDEO -->
                 <section x-show="activeTab === 'videos'" class="space-y-6">
-                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Video Bài Giảng</h3>
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                        <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Video Bài Giảng</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng" class="border border-slate-200 p-2 rounded-xl text-xs">
-                            <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID" class="border border-slate-200 p-2 rounded-xl text-xs">
-                            <button @click="addVideo()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Thêm Video</button>
+                            <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            <button @click="addVideo()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Thêm Video</button>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm" x-show="currentVideoId">
-                            <div class="aspect-video mb-4 rounded-xl overflow-hidden bg-slate-900">
+                        <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm" x-show="currentVideoId">
+                            <div class="aspect-video mb-4 rounded-xl overflow-hidden bg-black">
                                 <iframe :src="'https://www.youtube.com/embed/' + currentVideoId" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
                             </div>
-                            <h2 class="text-base font-bold text-slate-900" x-text="currentVideoTitle"></h2>
+                            <h2 class="text-base font-bold text-[#2D2926]" x-text="currentVideoTitle"></h2>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <h3 class="font-bold text-slate-900 mb-3 text-sm">Danh Sách Bài Giảng</h3>
-                            <ul class="divide-y divide-slate-100">
+                        <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Danh Sách Bài Giảng</h3>
+                            <ul class="divide-y divide-[#E6E1D8]">
                                 <template x-for="v in videos" :key="v.id">
-                                    <li class="py-3 flex items-center justify-between hover:bg-slate-50 rounded-lg px-2">
-                                        <span @click="selectVideo(v)" class="font-medium text-xs text-slate-800 hover:text-blue-600 cursor-pointer flex-1 mr-2" x-text="v.title"></span>
-                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-500 hover:text-rose-700 p-1 rounded transition shrink-0" title="Xóa video">
+                                    <li class="py-3 flex items-center justify-between hover:bg-[#FAF8F5] rounded-lg px-2">
+                                        <span @click="selectVideo(v)" class="font-medium text-xs text-[#2D2926] hover:text-[#B8502B] cursor-pointer flex-1 mr-2" x-text="v.title"></span>
+                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-600 hover:text-rose-800 p-1 rounded transition shrink-0" title="Xóa video">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </li>
@@ -275,10 +300,10 @@
                 <section x-show="activeTab === 'assignments'" class="space-y-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="text-base font-bold text-slate-900">Quản Lý Bài Tập Về Nhà</h2>
-                            <p class="text-xs text-slate-500">Hệ thống giao bài, làm phiếu trắc nghiệm trực tuyến & chấm điểm tự động</p>
+                            <h2 class="text-base font-bold text-[#2D2926]">Quản Lý Bài Tập Về Nhà</h2>
+                            <p class="text-xs text-[#78716C]">Hệ thống giao bài, làm phiếu trắc nghiệm trực tuyến & chấm điểm tự động</p>
                         </div>
-                        <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition flex items-center space-x-2">
+                        <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition flex items-center space-x-2">
                             <span>+ Tạo Bài Tập Mới</span>
                         </button>
                     </div>
@@ -286,17 +311,17 @@
                     <!-- DANH SÁCH BÀI TẬP -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <template x-for="a in assignments" :key="a.id">
-                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm flex flex-col justify-between">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
-                                        <span :class="isAssignmentExpired(a.due_date) ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'" class="px-2.5 py-1 rounded-full text-[11px] font-medium border">
+                                        <span :class="isAssignmentExpired(a.due_date) ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'" class="px-2.5 py-1 rounded-full text-[11px] font-medium border">
                                             <span x-text="isAssignmentExpired(a.due_date) ? 'Đã hết hạn' : 'Đang diễn ra'"></span>
                                         </span>
-                                        <span class="text-xs text-slate-400 font-mono" x-text="a.due_date ? 'Hạn: ' + formatDateTimeDisplay(a.due_date) : 'Không có hạn'"></span>
+                                        <span class="text-xs text-[#78716C] font-mono" x-text="a.due_date ? 'Hạn: ' + formatDateTimeDisplay(a.due_date) : 'Không có hạn'"></span>
                                     </div>
-                                    <h3 class="text-base font-bold text-slate-900 mb-2" x-text="a.title"></h3>
-                                    <p class="text-xs text-slate-600 mb-4 whitespace-pre-line" x-text="a.content"></p>
-                                    <div class="flex flex-wrap gap-2 text-[11px] text-slate-500 font-medium bg-slate-50 p-2.5 rounded-xl mb-4 border border-slate-100">
+                                    <h3 class="text-base font-bold text-[#2D2926] mb-2" x-text="a.title"></h3>
+                                    <p class="text-xs text-[#57534E] mb-4 whitespace-pre-line" x-text="a.content"></p>
+                                    <div class="flex flex-wrap gap-2 text-[11px] text-[#78716C] font-medium bg-[#FAF8F5] p-2.5 rounded-xl mb-4 border border-[#E6E1D8]">
                                         <span x-text="a.mc_count + ' câu TN (' + a.mc_score_per_q + 'đ/câu)'"></span>
                                         <span>•</span>
                                         <span x-text="a.tf_count + ' câu Đ/S'"></span>
@@ -305,20 +330,20 @@
                                     </div>
                                 </div>
 
-                                <div class="border-t border-slate-100 pt-4 flex items-center justify-between gap-2">
+                                <div class="border-t border-[#E6E1D8] pt-4 flex items-center justify-between gap-2">
                                     <div class="flex space-x-2">
-                                        <button @click="openStudentForm(a)" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">
+                                        <button @click="openStudentForm(a)" class="bg-[#B8502B] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#9E4221] transition">
                                             <span x-text="role === 'teacher' ? 'Xem Form Bài Làm' : 'Làm Bài / Nộp Phiếu'"></span>
                                         </button>
-                                        <button @click="viewAssignmentSubmissions(a)" class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-slate-200 transition">
+                                        <button @click="viewAssignmentSubmissions(a)" class="bg-[#FAF8F5] text-[#2D2926] border border-[#E6E1D8] px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#F2ECE1] transition">
                                             <span x-text="role === 'teacher' ? 'Bảng Điểm Lớp' : 'Xem Kết Quả'"></span>
                                         </button>
                                     </div>
                                     <div x-show="role === 'teacher'" class="flex space-x-1">
-                                        <button @click="openEditAssignmentModal(a)" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Sửa bài tập & đáp án">
+                                        <button @click="openEditAssignmentModal(a)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg transition" title="Sửa bài tập & đáp án">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
-                                        <button @click="deleteAssignment(a.id)" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa bài tập này">
+                                        <button @click="deleteAssignment(a.id)" class="p-1.5 text-[#78716C] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa bài tập này">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
@@ -328,77 +353,77 @@
                     </div>
 
                     <!-- MODAL TẠO / CHỈNH SỬA BTVN & THANG ĐIỂM -->
-                    <div x-show="assignmentModalOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-                        <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
-                            <div class="flex items-center justify-between border-b pb-3 mb-4">
-                                <h3 class="text-base font-bold text-slate-900" x-text="isEditingAssignment ? 'Chỉnh Sửa Bài Tập & Cấu Hình Điểm' : 'Tạo Bài Tập Về Nhà Mới'"></h3>
-                                <button @click="assignmentModalOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                    <div x-show="assignmentModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
+                            <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
+                                <h3 class="text-base font-bold text-[#2D2926]" x-text="isEditingAssignment ? 'Chỉnh Sửa Bài Tập & Cấu Hình Điểm' : 'Tạo Bài Tập Về Nhà Mới'"></h3>
+                                <button @click="assignmentModalOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
                             </div>
 
                             <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tiêu đề bài tập *</label>
-                                    <input type="text" x-model="assignmentForm.title" placeholder="Ví dụ: Bài tập Ôn tập Hàm Số Lớp 12" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Tiêu đề bài tập *</label>
+                                    <input type="text" x-model="assignmentForm.title" placeholder="Ví dụ: Bài tập Ôn tập Hàm Số Lớp 12" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nội dung / Hướng dẫn đề bài</label>
-                                    <textarea x-model="assignmentForm.content" placeholder="Mô tả hoặc dán link đề bài PDF..." class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="3"></textarea>
+                                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Nội dung / Hướng dẫn đề bài</label>
+                                    <textarea x-model="assignmentForm.content" placeholder="Mô tả hoặc dán link đề bài PDF..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]" rows="3"></textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Hạn nộp bài (Deadline)</label>
-                                    <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Hạn nộp bài (Deadline)</label>
+                                    <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                                 </div>
 
                                 <!-- CẤU HÌNH SỐ LƯỢNG CÂU HỎI -->
-                                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
-                                    <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider">Cấu hình số lượng câu hỏi</h4>
+                                <div class="bg-[#F7ECE7]/60 p-4 rounded-xl border border-[#E6CFC3] space-y-3">
+                                    <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Cấu hình số lượng câu hỏi</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
-                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Trắc nghiệm (A,B,C,D)</label>
-                                            <input type="number" min="0" x-model.number="assignmentForm.mc_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white font-bold text-blue-600">
+                                            <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Số câu Trắc nghiệm (A,B,C,D)</label>
+                                            <input type="number" min="0" x-model.number="assignmentForm.mc_count" @input="updateAnswerKeyFields()" class="w-full border border-[#E6E1D8] p-2 rounded-lg text-xs bg-white font-bold text-[#B8502B]">
                                         </div>
                                         <div>
-                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Đúng/Sai (Mỗi câu 4 ý)</label>
-                                            <input type="number" min="0" x-model.number="assignmentForm.tf_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white font-bold text-blue-600">
+                                            <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Số câu Đúng/Sai (Mỗi câu 4 ý)</label>
+                                            <input type="number" min="0" x-model.number="assignmentForm.tf_count" @input="updateAnswerKeyFields()" class="w-full border border-[#E6E1D8] p-2 rounded-lg text-xs bg-white font-bold text-[#B8502B]">
                                         </div>
                                         <div>
-                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Trả lời ngắn</label>
-                                            <input type="number" min="0" x-model.number="assignmentForm.sa_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white font-bold text-blue-600">
+                                            <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Số câu Trả lời ngắn</label>
+                                            <input type="number" min="0" x-model.number="assignmentForm.sa_count" @input="updateAnswerKeyFields()" class="w-full border border-[#E6E1D8] p-2 rounded-lg text-xs bg-white font-bold text-[#B8502B]">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- CẤU HÌNH THANG ĐIỂM (GDPT 2018) -->
-                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Cấu hình thang điểm (Chuẩn GDPT 2018)</h4>
+                                <!-- CẤU HÌNH THANG ĐIỂM -->
+                                <div class="bg-[#FAF8F5] p-4 rounded-xl border border-[#E6E1D8] space-y-3">
+                                    <h4 class="text-xs font-bold text-[#2D2926] uppercase tracking-wider">Cấu hình thang điểm (Chuẩn GDPT 2018)</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                                         <div>
-                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Điểm 1 câu Trắc nghiệm đúng</label>
-                                            <input type="number" step="0.05" x-model.number="assignmentForm.mc_score_per_q" class="w-full border border-slate-200 p-2 rounded-lg bg-white">
+                                            <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Điểm 1 câu Trắc nghiệm đúng</label>
+                                            <input type="number" step="0.05" x-model.number="assignmentForm.mc_score_per_q" class="w-full border border-[#E6E1D8] p-2 rounded-lg bg-white">
                                         </div>
                                         <div>
-                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Điểm 1 câu Trả lời ngắn đúng</label>
-                                            <input type="number" step="0.05" x-model.number="assignmentForm.sa_score_per_q" class="w-full border border-slate-200 p-2 rounded-lg bg-white">
+                                            <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Điểm 1 câu Trả lời ngắn đúng</label>
+                                            <input type="number" step="0.05" x-model.number="assignmentForm.sa_score_per_q" class="w-full border border-[#E6E1D8] p-2 rounded-lg bg-white">
                                         </div>
                                     </div>
-                                    <div class="pt-2 border-t border-slate-200">
-                                        <div class="text-[11px] font-bold text-slate-700 mb-1.5">Thang điểm câu Đúng/Sai (Điểm cộng trong cùng 1 câu):</div>
+                                    <div class="pt-2 border-t border-[#E6E1D8]">
+                                        <div class="text-[11px] font-bold text-[#2D2926] mb-1.5">Thang điểm câu Đúng/Sai (Điểm cộng trong cùng 1 câu):</div>
                                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                                             <div>
-                                                <span class="text-[10px] text-slate-500">Đúng 1 ý</span>
-                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_1" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                                <span class="text-[10px] text-[#78716C]">Đúng 1 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_1" class="w-full border border-[#E6E1D8] p-1.5 rounded-lg bg-white">
                                             </div>
                                             <div>
-                                                <span class="text-[10px] text-slate-500">Đúng 2 ý</span>
-                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_2" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                                <span class="text-[10px] text-[#78716C]">Đúng 2 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_2" class="w-full border border-[#E6E1D8] p-1.5 rounded-lg bg-white">
                                             </div>
                                             <div>
-                                                <span class="text-[10px] text-slate-500">Đúng 3 ý</span>
-                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_3" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                                <span class="text-[10px] text-[#78716C]">Đúng 3 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_3" class="w-full border border-[#E6E1D8] p-1.5 rounded-lg bg-white">
                                             </div>
                                             <div>
-                                                <span class="text-[10px] text-slate-500">Đúng 4 ý</span>
-                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_4" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                                <span class="text-[10px] text-[#78716C]">Đúng 4 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_4" class="w-full border border-[#E6E1D8] p-1.5 rounded-lg bg-white">
                                             </div>
                                         </div>
                                     </div>
@@ -406,17 +431,17 @@
 
                                 <!-- THIẾT LẬP BẢNG ĐÁP ÁN CHUẨN -->
                                 <div class="space-y-4">
-                                    <h4 class="text-xs font-bold text-slate-900 border-b pb-1">Bảng Đáp Án Chuẩn</h4>
+                                    <h4 class="text-xs font-bold text-[#2D2926] border-b border-[#E6E1D8] pb-1">Bảng Đáp Án Chuẩn</h4>
 
                                     <!-- Đáp án Trắc nghiệm -->
                                     <template x-if="assignmentForm.mc_count > 0">
                                         <div>
-                                            <div class="text-xs font-bold text-blue-700 mb-2">Phần Trắc nghiệm (Chọn đáp án đúng)</div>
+                                            <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Trắc nghiệm (Chọn đáp án đúng)</div>
                                             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                                 <template x-for="i in assignmentForm.mc_count" :key="i">
-                                                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-                                                        <span class="font-bold text-slate-700" x-text="'Câu ' + i + ':'"></span>
-                                                        <select x-model="assignmentForm.answer_key.mc[i]" class="p-1 border rounded bg-white font-bold text-blue-600">
+                                                    <div class="flex items-center justify-between p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
+                                                        <span class="font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></span>
+                                                        <select x-model="assignmentForm.answer_key.mc[i]" class="p-1 border rounded bg-white font-bold text-[#B8502B]">
                                                             <option value="">--</option>
                                                             <option value="A">A</option>
                                                             <option value="B">B</option>
@@ -432,12 +457,12 @@
                                     <!-- Đáp án Đúng / Sai -->
                                     <template x-if="assignmentForm.tf_count > 0">
                                         <div>
-                                            <div class="text-xs font-bold text-blue-700 mb-2">Phần Đúng / Sai</div>
+                                            <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Đúng / Sai</div>
                                             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                                 <template x-for="q in getTfSubQuestions(assignmentForm.tf_count)" :key="q">
-                                                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-                                                        <span class="font-bold text-slate-700" x-text="'Câu ' + q + ':'"></span>
-                                                        <select x-model="assignmentForm.answer_key.tf[q]" class="p-1 border rounded bg-white font-bold text-blue-600">
+                                                    <div class="flex items-center justify-between p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
+                                                        <span class="font-bold text-[#2D2926]" x-text="'Câu ' + q + ':'"></span>
+                                                        <select x-model="assignmentForm.answer_key.tf[q]" class="p-1 border rounded bg-white font-bold text-[#B8502B]">
                                                             <option value="">--</option>
                                                             <option value="Đúng">Đúng</option>
                                                             <option value="Sai">Sai</option>
@@ -451,12 +476,12 @@
                                     <!-- Đáp án Trả lời ngắn -->
                                     <template x-if="assignmentForm.sa_count > 0">
                                         <div>
-                                            <div class="text-xs font-bold text-blue-700 mb-2">Phần Trả lời ngắn (Nhập đáp án chuẩn)</div>
+                                            <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Trả lời ngắn (Nhập đáp án chuẩn)</div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 <template x-for="i in assignmentForm.sa_count" :key="i">
-                                                    <div class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-                                                        <span class="font-bold text-slate-700 min-w-[60px]" x-text="'Câu ' + i + ':'"></span>
-                                                        <input type="text" x-model="assignmentForm.answer_key.sa[i]" placeholder="Nhập đáp án" class="w-full p-1 border rounded bg-white text-xs">
+                                                    <div class="flex items-center space-x-2 p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
+                                                        <span class="font-bold text-[#2D2926] min-w-[60px]" x-text="'Câu ' + i + ':'"></span>
+                                                        <input type="text" x-model="assignmentForm.answer_key.sa[i]" placeholder="Nhập đáp án" class="w-full p-1 border border-[#E6E1D8] rounded bg-white text-xs">
                                                     </div>
                                                 </template>
                                             </div>
@@ -465,22 +490,22 @@
                                 </div>
                             </div>
 
-                            <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
-                                <button @click="assignmentModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Hủy</button>
-                                <button @click="saveAssignment()" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Lưu Bài Tập</button>
+                            <div class="flex justify-end space-x-2 border-t border-[#E6E1D8] pt-4 mt-4">
+                                <button @click="assignmentModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#78716C] hover:bg-[#FAF8F5]">Hủy</button>
+                                <button @click="saveAssignment()" class="bg-[#B8502B] text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Lưu Bài Tập</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- MODAL FORM LÀM BÀI PHIẾU TRẢ LỜI CỦA HỌC SINH -->
-                    <div x-show="studentFormOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-                        <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
-                            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div x-show="studentFormOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
+                            <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
                                 <div>
-                                    <h3 class="text-base font-bold text-slate-900" x-text="activeStudentAssignment ? activeStudentAssignment.title : ''"></h3>
-                                    <p class="text-xs text-slate-500">Phiếu làm bài trực tuyến</p>
+                                    <h3 class="text-base font-bold text-[#2D2926]" x-text="activeStudentAssignment ? activeStudentAssignment.title : ''"></h3>
+                                    <p class="text-xs text-[#78716C]">Phiếu làm bài trực tuyến</p>
                                 </div>
-                                <button @click="studentFormOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                                <button @click="studentFormOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
                             </div>
 
                             <template x-if="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date)">
@@ -491,19 +516,19 @@
                             </template>
 
                             <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
-                                <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Họ tên học sinh *</label>
-                                    <input type="text" x-model="studentFormAnswer.student_name" placeholder="Nhập đầy đủ họ và tên" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
+                                <div class="bg-[#F7ECE7]/60 p-4 rounded-xl border border-[#E6CFC3]">
+                                    <label class="block text-xs font-bold text-[#2D2926] mb-1">Họ tên học sinh *</label>
+                                    <input type="text" x-model="studentFormAnswer.student_name" placeholder="Nhập đầy đủ họ và tên" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B] font-semibold">
                                 </div>
 
                                 <!-- PHẦN TRẮC NGHIỆM -->
                                 <template x-if="activeStudentAssignment && activeStudentAssignment.mc_count > 0">
-                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                                        <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Phần Trắc Nghiệm *</h4>
-                                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                    <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
+                                        <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Phần Trắc Nghiệm *</h4>
+                                        <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                                             <table class="w-full text-center border-collapse text-xs">
                                                 <thead>
-                                                    <tr class="bg-slate-100 border-b font-bold text-slate-700">
+                                                    <tr class="bg-[#FAF8F5] border-b border-[#E6E1D8] font-bold text-[#2D2926]">
                                                         <th class="p-3 text-left w-24">Câu hỏi</th>
                                                         <th class="p-3 w-16">A</th>
                                                         <th class="p-3 w-16">B</th>
@@ -512,15 +537,15 @@
                                                         <th class="p-3 w-28">Em không biết</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody class="divide-y divide-slate-100">
+                                                <tbody class="divide-y divide-[#E6E1D8]">
                                                     <template x-for="i in activeStudentAssignment.mc_count" :key="i">
-                                                        <tr class="hover:bg-slate-50/80">
-                                                            <td class="p-3 text-left font-bold text-slate-800" x-text="'Câu ' + i"></td>
-                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="A" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
-                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="B" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
-                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="C" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
-                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="D" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
-                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-slate-400"></td>
+                                                        <tr class="hover:bg-[#FAF8F5]">
+                                                            <td class="p-3 text-left font-bold text-[#2D2926]" x-text="'Câu ' + i"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="A" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-[#B8502B]"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="B" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-[#B8502B]"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="C" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-[#B8502B]"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="D" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-[#B8502B]"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-[#A8A29E]"></td>
                                                         </tr>
                                                     </template>
                                                 </tbody>
@@ -531,23 +556,23 @@
 
                                 <!-- PHẦN ĐÚNG / SAI -->
                                 <template x-if="activeStudentAssignment && activeStudentAssignment.tf_count > 0">
-                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                                        <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Phần Đúng / Sai *</h4>
-                                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                    <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
+                                        <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Phần Đúng / Sai *</h4>
+                                        <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                                             <table class="w-full text-center border-collapse text-xs">
                                                 <thead>
-                                                    <tr class="bg-slate-100 border-b font-bold text-slate-700">
+                                                    <tr class="bg-[#FAF8F5] border-b border-[#E6E1D8] font-bold text-[#2D2926]">
                                                         <th class="p-3 text-left">Câu hỏi</th>
                                                         <th class="p-3 w-32">Đúng</th>
                                                         <th class="p-3 w-32">Sai</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody class="divide-y divide-slate-100">
+                                                <tbody class="divide-y divide-[#E6E1D8]">
                                                     <template x-for="q in getTfSubQuestions(activeStudentAssignment.tf_count)" :key="q">
-                                                        <tr class="hover:bg-slate-50/80">
-                                                            <td class="p-3 text-left font-bold text-slate-800" x-text="'Câu ' + q"></td>
-                                                            <td class="p-3"><input type="radio" :name="'tf_' + q" value="Đúng" x-model="studentFormAnswer.tf[q]" class="w-4 h-4 text-blue-600"></td>
-                                                            <td class="p-3"><input type="radio" :name="'tf_' + q" value="Sai" x-model="studentFormAnswer.tf[q]" class="w-4 h-4 text-blue-600"></td>
+                                                        <tr class="hover:bg-[#FAF8F5]">
+                                                            <td class="p-3 text-left font-bold text-[#2D2926]" x-text="'Câu ' + q"></td>
+                                                            <td class="p-3"><input type="radio" :name="'tf_' + q" value="Đúng" x-model="studentFormAnswer.tf[q]" class="w-4 h-4 text-[#B8502B]"></td>
+                                                            <td class="p-3"><input type="radio" :name="'tf_' + q" value="Sai" x-model="studentFormAnswer.tf[q]" class="w-4 h-4 text-[#B8502B]"></td>
                                                         </tr>
                                                     </template>
                                                 </tbody>
@@ -558,13 +583,13 @@
 
                                 <!-- PHẦN TRẢ LỜI NGẮN -->
                                 <template x-if="activeStudentAssignment && activeStudentAssignment.sa_count > 0">
-                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                                        <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Phần Trả Lời Ngắn *</h4>
+                                    <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
+                                        <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Phần Trả Lời Ngắn *</h4>
                                         <div class="space-y-3">
                                             <template x-for="i in activeStudentAssignment.sa_count" :key="i">
-                                                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                                                    <label class="block text-xs font-bold text-slate-800 mb-1" x-text="'Câu ' + i + ' *'"></label>
-                                                    <input type="text" x-model="studentFormAnswer.sa[i]" placeholder="Short answer text..." class="w-full border border-slate-200 p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <div class="p-4 bg-[#FAF8F5] rounded-xl border border-[#E6E1D8]">
+                                                    <label class="block text-xs font-bold text-[#2D2926] mb-1" x-text="'Câu ' + i + ' *'"></label>
+                                                    <input type="text" x-model="studentFormAnswer.sa[i]" placeholder="Nhập câu trả lời..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B]">
                                                 </div>
                                             </template>
                                         </div>
@@ -572,9 +597,9 @@
                                 </template>
                             </div>
 
-                            <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
-                                <button @click="studentFormOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Đóng</button>
-                                <button @click="submitStudentAssignment()" :disabled="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date)" :class="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date) ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-700'" class="px-6 py-2 rounded-xl text-xs font-semibold transition">
+                            <div class="flex justify-end space-x-2 border-t border-[#E6E1D8] pt-4 mt-4">
+                                <button @click="studentFormOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#78716C] hover:bg-[#FAF8F5]">Đóng</button>
+                                <button @click="submitStudentAssignment()" :disabled="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date)" :class="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date) ? 'bg-[#E6E1D8] text-[#A8A29E] cursor-not-allowed' : 'bg-emerald-700 text-white hover:bg-emerald-800'" class="px-6 py-2 rounded-xl text-xs font-semibold transition">
                                     <span>Nộp Bài Ngay</span>
                                 </button>
                             </div>
@@ -582,35 +607,35 @@
                     </div>
 
                     <!-- MODAL BẢNG ĐIỂM VÀ CHI TIẾT KẾT QUẢ BÀI NỘP -->
-                    <div x-show="viewSubmissionsOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-                        <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
-                            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div x-show="viewSubmissionsOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
+                            <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
                                 <div>
-                                    <h3 class="text-base font-bold text-slate-900" x-text="activeViewAssignment ? 'Bảng Điểm: ' + activeViewAssignment.title : 'Kết Quả Bài Nộp'"></h3>
-                                    <p class="text-xs text-slate-500">Danh sách bài làm và chi tiết chấm điểm</p>
+                                    <h3 class="text-base font-bold text-[#2D2926]" x-text="activeViewAssignment ? 'Bảng Điểm: ' + activeViewAssignment.title : 'Kết Quả Bài Nộp'"></h3>
+                                    <p class="text-xs text-[#78716C]">Danh sách bài làm và chi tiết chấm điểm</p>
                                 </div>
-                                <button @click="viewSubmissionsOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                                <button @click="viewSubmissionsOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
                             </div>
 
                             <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
-                                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                                     <table class="w-full text-left border-collapse text-xs">
                                         <thead>
-                                            <tr class="bg-slate-100 border-b font-bold text-slate-700">
+                                            <tr class="bg-[#FAF8F5] border-b border-[#E6E1D8] font-bold text-[#2D2926]">
                                                 <th class="p-3">Họ tên HS</th>
                                                 <th class="p-3">Thời gian nộp</th>
                                                 <th class="p-3 text-center">Điểm số</th>
                                                 <th class="p-3 text-right">Chi tiết</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-slate-100">
+                                        <tbody class="divide-y divide-[#E6E1D8]">
                                             <template x-for="sub in currentSubmissions" :key="sub.id">
-                                                <tr class="hover:bg-slate-50">
-                                                    <td class="p-3 font-semibold text-slate-800" x-text="sub.student_name"></td>
-                                                    <td class="p-3 text-slate-500 font-mono text-[11px]" x-text="sub.created_at ? formatDateTimeDisplay(sub.created_at) : ''"></td>
-                                                    <td class="p-3 text-center font-bold text-sm" :class="sub.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="sub.score + ' Điểm'"></td>
+                                                <tr class="hover:bg-[#FAF8F5]">
+                                                    <td class="p-3 font-semibold text-[#2D2926]" x-text="sub.student_name"></td>
+                                                    <td class="p-3 text-[#78716C] font-mono text-[11px]" x-text="sub.created_at ? formatDateTimeDisplay(sub.created_at) : ''"></td>
+                                                    <td class="p-3 text-center font-bold text-sm" :class="sub.score >= 5 ? 'text-emerald-700' : 'text-rose-700'" x-text="sub.score + ' Điểm'"></td>
                                                     <td class="p-3 text-right">
-                                                        <button @click="inspectSubmission(sub)" class="text-blue-600 hover:underline font-semibold">Xem bài làm</button>
+                                                        <button @click="inspectSubmission(sub)" class="text-[#B8502B] hover:underline font-semibold">Xem bài làm</button>
                                                     </td>
                                                 </tr>
                                             </template>
@@ -620,21 +645,21 @@
 
                                 <!-- KHUNG XEM CHI TIẾT BÀI LÀM -->
                                 <template x-if="selectedSubmission">
-                                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                                        <div class="flex items-center justify-between border-b pb-3">
+                                    <div class="bg-[#FAF8F5] p-5 rounded-2xl border border-[#E6E1D8] space-y-4">
+                                        <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3">
                                             <div>
-                                                <div class="text-xs text-slate-500">Bài làm của: <span class="font-bold text-slate-900" x-text="selectedSubmission.student_name"></span></div>
+                                                <div class="text-xs text-[#78716C]">Bài làm của: <span class="font-bold text-[#2D2926]" x-text="selectedSubmission.student_name"></span></div>
                                             </div>
-                                            <div class="text-lg font-bold" :class="selectedSubmission.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="'Điểm: ' + selectedSubmission.score"></div>
+                                            <div class="text-lg font-bold" :class="selectedSubmission.score >= 5 ? 'text-emerald-700' : 'text-rose-700'" x-text="'Điểm: ' + selectedSubmission.score"></div>
                                         </div>
 
                                         <!-- CHI TIẾT CÂU TRẮC NGHIỆM -->
                                         <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.mc).length > 0">
                                             <div>
-                                                <div class="text-xs font-bold text-slate-800 mb-2">Phần Trắc Nghiệm:</div>
+                                                <div class="text-xs font-bold text-[#2D2926] mb-2">Phần Trắc Nghiệm:</div>
                                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                                     <template x-for="(val, q) in selectedSubmissionDetails.mc" :key="q">
-                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'" class="p-2.5 rounded-xl border text-xs">
+                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-900'" class="p-2.5 rounded-xl border text-xs">
                                                             <div class="font-bold" x-text="'Câu ' + q + ': ' + (val.student || 'Bỏ trống')"></div>
                                                             <div x-show="!val.is_correct" class="text-[10px] mt-0.5" x-text="'Đáp án đúng: ' + val.correct"></div>
                                                         </div>
@@ -646,10 +671,10 @@
                                         <!-- CHI TIẾT CÂU ĐÚNG / SAI -->
                                         <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.tf).length > 0">
                                             <div>
-                                                <div class="text-xs font-bold text-slate-800 mb-2">Phần Đúng / Sai:</div>
+                                                <div class="text-xs font-bold text-[#2D2926] mb-2">Phần Đúng / Sai:</div>
                                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                                     <template x-for="(val, q) in selectedSubmissionDetails.tf" :key="q">
-                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'" class="p-2.5 rounded-xl border text-xs">
+                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-900'" class="p-2.5 rounded-xl border text-xs">
                                                             <div class="font-bold" x-text="'Câu ' + q + ': ' + (val.student || 'Bỏ trống')"></div>
                                                             <div x-show="!val.is_correct" class="text-[10px] mt-0.5" x-text="'Đáp án đúng: ' + val.correct"></div>
                                                         </div>
@@ -661,10 +686,10 @@
                                         <!-- CHI TIẾT CÂU TRẢ LỜI NGẮN -->
                                         <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.sa).length > 0">
                                             <div>
-                                                <div class="text-xs font-bold text-slate-800 mb-2">Phần Trả Lời Ngắn:</div>
+                                                <div class="text-xs font-bold text-[#2D2926] mb-2">Phần Trả Lời Ngắn:</div>
                                                 <div class="space-y-2">
                                                     <template x-for="(val, q) in selectedSubmissionDetails.sa" :key="q">
-                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'" class="p-2.5 rounded-xl border text-xs">
+                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-900'" class="p-2.5 rounded-xl border text-xs">
                                                             <div class="font-bold" x-text="'Câu ' + q + ' - Bài làm: ' + (val.student || 'Bỏ trống')"></div>
                                                             <div x-show="!val.is_correct" class="text-[11px] font-semibold mt-0.5" x-text="'Đáp án đúng: ' + val.correct"></div>
                                                         </div>
@@ -676,8 +701,8 @@
                                 </template>
                             </div>
 
-                            <div class="flex justify-end border-t pt-4 mt-4">
-                                <button @click="viewSubmissionsOpen = false" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-300">Đóng</button>
+                            <div class="flex justify-end border-t border-[#E6E1D8] pt-4 mt-4">
+                                <button @click="viewSubmissionsOpen = false" class="bg-[#FAF8F5] text-[#2D2926] border border-[#E6E1D8] px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#F2ECE1]">Đóng</button>
                             </div>
                         </div>
                     </div>
@@ -685,22 +710,22 @@
 
                 <!-- 4. TÀI LIỆU PDF -->
                 <section x-show="activeTab === 'documents'" class="space-y-6">
-                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Tệp PDF Từ Google Drive</h3>
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                        <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Tệp PDF Từ Google Drive</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <input type="text" x-model="newDoc.title" placeholder="Tên tài liệu" class="border border-slate-200 p-2 rounded-xl text-xs">
-                            <input type="text" x-model="newDoc.drive_url" placeholder="Link xem PDF" class="border border-slate-200 p-2 rounded-xl text-xs">
-                            <button @click="addDocument()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Lưu Tài Liệu</button>
+                            <input type="text" x-model="newDoc.title" placeholder="Tên tài liệu" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            <input type="text" x-model="newDoc.drive_url" placeholder="Link xem PDF" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            <button @click="addDocument()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Lưu Tài Liệu</button>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <template x-for="doc in documents" :key="doc.id">
-                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                <h3 class="font-bold text-slate-900 mb-3 text-sm" x-text="doc.title"></h3>
-                                <div class="h-96 border border-slate-200 rounded-xl mb-3 overflow-hidden">
+                            <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                                <h3 class="font-bold text-[#2D2926] mb-3 text-sm" x-text="doc.title"></h3>
+                                <div class="h-96 border border-[#E6E1D8] rounded-xl mb-3 overflow-hidden">
                                     <iframe :src="doc.drive_url" class="w-full h-full" frameborder="0"></iframe>
                                 </div>
-                                <a :href="doc.drive_url.replace('/preview', '/view')" target="_blank" class="inline-block bg-slate-100 text-blue-600 text-xs px-3 py-1.5 rounded-lg border border-slate-200">Mở / Tải về Google Drive</a>
+                                <a :href="doc.drive_url.replace('/preview', '/view')" target="_blank" class="inline-block bg-[#FAF8F5] text-[#B8502B] text-xs px-3 py-1.5 rounded-lg border border-[#E6E1D8] font-semibold hover:bg-[#F7ECE7]">Mở / Tải về Google Drive</a>
                             </div>
                         </template>
                     </div>
@@ -708,46 +733,46 @@
 
                 <!-- 5. ĐỀ THI & MATHML -->
                 <section x-show="activeTab === 'exams'" class="space-y-6">
-                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Câu Hỏi MathML / LaTeX</h3>
-                        <input type="text" x-model="newExam.title" placeholder="Tiêu đề câu hỏi" class="border border-slate-200 p-2 rounded-xl text-xs w-full mb-3">
-                        <textarea x-model="newExam.question_mathml" placeholder="Dán mã MathML hoặc LaTeX" class="border border-slate-200 p-2 rounded-xl text-xs font-mono w-full mb-3" rows="4"></textarea>
-                        <button @click="addExam()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Thêm Mã Toán Học</button>
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                        <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Câu Hỏi MathML / LaTeX</h3>
+                        <input type="text" x-model="newExam.title" placeholder="Tiêu đề câu hỏi" class="border border-[#E6E1D8] p-2 rounded-xl text-xs w-full mb-3 bg-[#FAF8F5]">
+                        <textarea x-model="newExam.question_mathml" placeholder="Dán mã MathML hoặc LaTeX" class="border border-[#E6E1D8] p-2 rounded-xl text-xs font-mono w-full mb-3 bg-[#FAF8F5]" rows="4"></textarea>
+                        <button @click="addExam()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Thêm Mã Toán Học</button>
                     </div>
                     <div class="space-y-4">
                         <template x-for="exam in exams" :key="exam.id">
-                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                <h3 class="font-bold text-blue-600 mb-2 text-sm" x-text="exam.title"></h3>
-                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl math-content text-sm" x-html="exam.question_mathml"></div>
+                            <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                                <h3 class="font-bold text-[#B8502B] mb-2 text-sm" x-text="exam.title"></h3>
+                                <div class="p-4 bg-[#FAF8F5] border border-[#E6E1D8] rounded-xl math-content text-sm" x-html="exam.question_mathml"></div>
                             </div>
                         </template>
                     </div>
                 </section>
 
                 <!-- 6. QUẢN LÝ HỌC SINH -->
-                <section x-show="activeTab === 'students' && role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-3 text-sm">Thêm Học Sinh Mới</h3>
+                <section x-show="activeTab === 'students' && role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                    <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Học Sinh Mới</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                        <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh" class="border border-slate-200 p-2 rounded-xl text-xs">
-                        <input type="text" x-model="newStudent.full_name" placeholder="Họ và tên" class="border border-slate-200 p-2 rounded-xl text-xs">
-                        <button @click="addStudent()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Thêm Vào Danh Sách</button>
+                        <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                        <input type="text" x-model="newStudent.full_name" placeholder="Họ và tên" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                        <button @click="addStudent()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Thêm Vào Danh Sách</button>
                     </div>
-                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-100 border-b border-slate-200 text-xs">
+                                <tr class="bg-[#FAF8F5] border-b border-[#E6E1D8] text-xs font-bold text-[#2D2926]">
                                     <th class="p-3">Mã HS</th>
                                     <th class="p-3">Họ và Tên</th>
                                     <th class="p-3 text-right">Thao Tác</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs divide-y divide-slate-100">
+                            <tbody class="text-xs divide-y divide-[#E6E1D8]">
                                 <template x-for="s in students" :key="s.id">
-                                    <tr class="hover:bg-slate-50">
-                                        <td class="p-3 font-mono text-slate-500" x-text="s.student_code"></td>
-                                        <td class="p-3 font-semibold text-slate-800" x-text="s.full_name"></td>
+                                    <tr class="hover:bg-[#FAF8F5]">
+                                        <td class="p-3 font-mono text-[#78716C]" x-text="s.student_code"></td>
+                                        <td class="p-3 font-semibold text-[#2D2926]" x-text="s.full_name"></td>
                                         <td class="p-3 text-right">
-                                            <button @click="deleteStudent(s.id)" class="text-red-600 hover:underline font-medium">Xóa</button>
+                                            <button @click="deleteStudent(s.id)" class="text-rose-600 hover:underline font-medium">Xóa</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -768,6 +793,9 @@
                 authError: '',
                 loginForm: { username: '', password: '' },
                 regForm: { username: '', password: '', full_name: '', role: 'student' },
+
+                sidebarOpen: true,
+                isLoadingContent: false,
 
                 activeTab: 'dashboard',
                 students: [],
@@ -832,6 +860,7 @@
                         this.authError = 'Vui lòng điền đầy đủ thông tin!';
                         return;
                     }
+                    this.isLoadingContent = true;
                     try {
                         let res = await fetch('/api/login', {
                             method: 'POST',
@@ -841,6 +870,7 @@
                         if (!res.ok) {
                             let data = await res.json();
                             this.authError = data.detail || 'Đăng nhập thất bại!';
+                            this.isLoadingContent = false;
                             return;
                         }
                         this.currentUser = await res.json();
@@ -850,6 +880,8 @@
                         await this.loadAppContent();
                     } catch (e) {
                         this.authError = 'Lỗi kết nối máy chủ!';
+                    } finally {
+                        this.isLoadingContent = false;
                     }
                 },
 
@@ -885,14 +917,21 @@
                 },
 
                 async loadAppContent() {
-                    await this.fetchStudents();
-                    await this.fetchAttendance();
-                    await this.fetchAttendanceDates();
-                    await this.fetchVideos();
-                    await this.fetchDocuments();
-                    await this.fetchAssignments();
-                    await this.fetchExams();
-                    this.renderMath();
+                    this.isLoadingContent = true;
+                    try {
+                        await Promise.all([
+                            this.fetchStudents(),
+                            this.fetchAttendance(),
+                            this.fetchAttendanceDates(),
+                            this.fetchVideos(),
+                            this.fetchDocuments(),
+                            this.fetchAssignments(),
+                            this.fetchExams()
+                        ]);
+                        this.renderMath();
+                    } finally {
+                        this.isLoadingContent = false;
+                    }
                 },
 
                 getTabTitle() {
@@ -905,7 +944,7 @@
                         'documents': 'Tài liệu PDF',
                         'exams': 'Đề thi & MathML'
                     };
-                    return titles[this.activeTab] || 'Quản Lý Lớp Học';
+                    return titles[this.activeTab] || 'Quản Lý Học Tập';
                 },
 
                 renderMath() {
@@ -1244,18 +1283,18 @@
                 },
                 getStatusColorClass(status) {
                     switch (status) {
-                        case 'Có mặt': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                        case 'Vắng phép': return 'bg-sky-50 text-sky-700 border-sky-200';
-                        case 'Vắng không phép': return 'bg-rose-50 text-rose-700 border-rose-200';
-                        default: return 'bg-slate-50 text-slate-400 border-slate-200';
+                        case 'Có mặt': return 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                        case 'Vắng phép': return 'bg-[#F7ECE7] text-[#B8502B] border-[#E6CFC3]';
+                        case 'Vắng không phép': return 'bg-rose-50 text-rose-800 border-rose-200';
+                        default: return 'bg-[#FAF8F5] text-[#78716C] border-[#E6E1D8]';
                     }
                 },
                 getStatusBadgeClass(status) {
                     switch (status) {
-                        case 'Có mặt': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-                        case 'Vắng phép': return 'bg-sky-50 text-sky-700 border border-sky-200';
-                        case 'Vắng không phép': return 'bg-rose-50 text-rose-700 border border-rose-200';
-                        default: return 'bg-slate-100 text-slate-400 border border-slate-200';
+                        case 'Có mặt': return 'bg-emerald-50 text-emerald-800 border border-emerald-200';
+                        case 'Vắng phép': return 'bg-[#F7ECE7] text-[#B8502B] border border-[#E6CFC3]';
+                        case 'Vắng không phép': return 'bg-rose-50 text-rose-800 border border-rose-200';
+                        default: return 'bg-[#FAF8F5] text-[#78716C] border border-[#E6E1D8]';
                     }
                 },
 
