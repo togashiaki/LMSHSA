@@ -35,7 +35,7 @@
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 </div>
                 <div>
-                    <h2 class="text-xs font-bold tracking-wider text-[#78716C] uppercase">LMS by aki</h2>
+                    <h2 class="text-xs font-bold tracking-wider text-[#78716C] uppercase">Phần mềm quản lý học tập</h2>
                 </div>
             </div>
 
@@ -555,7 +555,10 @@
                             <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm flex flex-col justify-between">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="bg-emerald-50 text-emerald-800 border-emerald-200 px-2.5 py-1 rounded-full text-[11px] font-medium border">Đề kiểm tra</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="bg-emerald-50 text-emerald-800 border-emerald-200 px-2.5 py-1 rounded-full text-[11px] font-medium border">Đề kiểm tra</span>
+                                            <span x-show="ex.duration_minutes > 0" class="bg-amber-50 text-amber-800 border-amber-200 px-2 py-0.5 rounded-md text-[10px] font-bold border" x-text="ex.duration_minutes + ' phút'"></span>
+                                        </div>
                                         <span class="text-xs text-[#78716C] font-mono" x-text="ex.due_date ? 'Hạn: ' + formatDateTimeDisplay(ex.due_date) : 'Không giới hạn'"></span>
                                     </div>
                                     <h3 class="text-base font-bold text-[#2D2926] mb-2" x-text="ex.title"></h3>
@@ -817,6 +820,10 @@
                     <input type="text" x-model="examForm.title" placeholder="Ví dụ: Đề kiểm tra 1 tiết Đại Số Lớp 12" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
                 </div>
                 <div>
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Thời gian làm bài (Phút) *</label>
+                    <input type="number" min="0" x-model.number="examForm.duration_minutes" placeholder="Ví dụ: 60" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5] font-bold text-[#B8502B]">
+                </div>
+                <div>
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Đường dẫn File Đề Bài PDF *</label>
                     <input type="text" x-model="examForm.pdf_url" placeholder="Paste link file PDF đề thi từ Google Drive..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
                 </div>
@@ -943,20 +950,30 @@
         </div>
     </div>
 
-    <!-- MODAL LÀM BÀI CHUẨN STUDY4 -->
-    <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/60 backdrop-blur-sm flex items-center justify-center p-3">
-        <div class="bg-white w-full max-w-6xl h-[92vh] rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col overflow-hidden">
+    <!-- MODAL LÀM BÀI CHUẨN STUDY4 (TĂNG KÍCH THƯỚC POPUP LỚN GẦN HẾT MÀN HÌNH) -->
+    <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/60 backdrop-blur-sm flex items-center justify-center p-2">
+        <div class="bg-white w-full max-w-[98vw] h-[96vh] rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col overflow-hidden">
             <div class="h-14 bg-[#FAF8F5] border-b border-[#E6E1D8] px-6 flex items-center justify-between shrink-0">
                 <div class="flex items-center space-x-3 min-w-0">
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white bg-[#B8502B]" x-text="workType === 'exam' ? 'ĐỀ KIỂM TRA' : 'BÀI TẬP VỀ NHÀ'"></span>
                     <h3 class="text-sm font-bold text-[#2D2926] truncate" x-text="activeWorkItem ? activeWorkItem.title : ''"></h3>
                 </div>
+
+                <!-- ĐỒNG HỒ ĐẾM NGƯỢC THỜI GIAN DÀNH CHO HỌC SINH -->
+                <template x-if="workType === 'exam' && activeWorkItem && activeWorkItem.duration_minutes > 0">
+                    <div class="flex items-center space-x-2 bg-amber-50 border border-amber-300 text-amber-900 px-3 py-1 rounded-xl text-xs font-bold shadow-sm">
+                        <svg class="w-4 h-4 text-amber-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Thời gian còn lại:</span>
+                        <span class="font-mono text-sm text-[#B8502B]" x-text="formatTimerDisplay(remainingSeconds)"></span>
+                    </div>
+                </template>
+
                 <div class="flex items-center space-x-4 shrink-0">
                     <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-xl border border-[#E6E1D8]">
                         <span class="text-xs font-bold text-[#78716C]">Học sinh:</span>
                         <input type="text" x-model="studentAnswerSheet.student_name" placeholder="Nhập họ tên..." class="text-xs font-bold text-[#B8502B] focus:outline-none w-36">
                     </div>
-                    <button @click="studentWorkModalOpen = false" class="text-[#78716C] hover:text-[#2D2926] font-bold">✕ Đóng</button>
+                    <button @click="closeStudentWorkModal()" class="text-[#78716C] hover:text-[#2D2926] font-bold">✕ Đóng</button>
                 </div>
             </div>
 
@@ -1036,7 +1053,7 @@
                     </div>
 
                     <div class="pt-3 border-t border-[#E6E1D8] mt-4 flex justify-end space-x-2">
-                        <button @click="studentWorkModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#78716C] hover:bg-[#FAF8F5]">Hủy</button>
+                        <button @click="closeStudentWorkModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#78716C] hover:bg-[#FAF8F5]">Hủy</button>
                         <button @click="submitStudentWork()" class="bg-[#B8502B] text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-[#9E4221] shadow-sm transition">
                             Nộp Bài Ngay
                         </button>
@@ -1052,7 +1069,7 @@
             <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
                 <div>
                     <h3 class="text-base font-bold text-[#2D2926]" x-text="activeViewItem ? 'Bảng Điểm: ' + activeViewItem.title : 'Kết Quả Bài Nộp'"></h3>
-                    <p class="text-xs text-[#78716C]">Danh sách bài làm và kết quả điểm gốc / quy đổi thang 10</p>
+                    <p class="text-xs text-[#78716C]">Danh sách bài làm, thời gian hoàn thành và kết quả điểm quy đổi</p>
                 </div>
                 <button @click="viewSubmissionsOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
             </div>
@@ -1064,6 +1081,7 @@
                             <tr class="bg-[#FAF8F5] border-b border-[#E6E1D8] font-bold text-[#2D2926]">
                                 <th class="p-3">Họ tên HS</th>
                                 <th class="p-3">Thời gian nộp</th>
+                                <th class="p-3 text-center" x-show="workType === 'exam'">Thời gian làm</th>
                                 <th class="p-3 text-center">Điểm gốc</th>
                                 <th class="p-3 text-center">Quy đổi thang 10</th>
                                 <th class="p-3 text-right" x-show="role === 'teacher'">Thao tác</th>
@@ -1074,6 +1092,7 @@
                                 <tr class="hover:bg-[#FAF8F5]">
                                     <td class="p-3 font-semibold text-[#2D2926]" x-text="sub.student_name"></td>
                                     <td class="p-3 text-[#78716C] font-mono text-[11px]" x-text="sub.created_at ? formatDateTimeDisplay(sub.created_at) : ''"></td>
+                                    <td class="p-3 text-center font-bold text-[#B8502B]" x-show="workType === 'exam'" x-text="formatDurationDisplay(sub.time_taken)"></td>
                                     <td class="p-3 text-center font-bold text-sm text-[#2D2926]" x-text="sub.raw_score + ' / ' + sub.max_score"></td>
                                     <td class="p-3 text-center font-bold text-sm" :class="sub.score >= 5 ? 'text-emerald-700' : 'text-rose-700'" x-text="sub.score + ' đ'"></td>
                                     <td class="p-3 text-right" x-show="role === 'teacher'">
@@ -1168,6 +1187,7 @@
                     pdf_url: '',
                     content: '',
                     due_date: '',
+                    duration_minutes: 60,
                     mc_count: 10,
                     tf_count: 0,
                     sa_count: 0,
@@ -1184,6 +1204,11 @@
                 workType: 'assignment',
                 activeWorkItem: null,
                 studentAnswerSheet: { student_name: '', mc: {}, tf: {}, sa: {} },
+
+                // BIẾN BỔ SUNG CHO TÍNH NĂNG ĐẾM NGƯỢC THỜI GIAN
+                timerInterval: null,
+                remainingSeconds: 0,
+                examStartTime: null,
 
                 viewSubmissionsOpen: false,
                 activeViewItem: null,
@@ -1330,6 +1355,23 @@
                     } catch (e) {
                         return dtStr;
                     }
+                },
+
+                formatTimerDisplay(totalSec) {
+                    if (totalSec < 0) totalSec = 0;
+                    let m = Math.floor(totalSec / 60);
+                    let s = totalSec % 60;
+                    return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+                },
+
+                formatDurationDisplay(totalSec) {
+                    if (!totalSec || totalSec <= 0) return 'Dưới 1 phút';
+                    let m = Math.floor(totalSec / 60);
+                    let s = totalSec % 60;
+                    if (m > 0) {
+                        return `${m} phút ${s} giây`;
+                    }
+                    return `${s} giây`;
                 },
 
                 isAssignmentExpired(dueDateStr) {
@@ -1513,7 +1555,7 @@
                     this.isEditingExam = false;
                     this.editingExamId = null;
                     this.examForm = {
-                        title: '', pdf_url: '', content: '', due_date: '',
+                        title: '', pdf_url: '', content: '', due_date: '', duration_minutes: 60,
                         mc_count: 10, tf_count: 0, sa_count: 0,
                         mc_score_per_q: 0.25, tf_score_1: 0.10, tf_score_2: 0.25, tf_score_3: 0.50, tf_score_4: 1.00, sa_score_per_q: 0.50,
                         answer_key: { mc: {}, tf: {}, sa: {} }
@@ -1527,7 +1569,7 @@
                     let parsedKey = { mc: {}, tf: {}, sa: {} };
                     try { parsedKey = JSON.parse(ex.answer_key || '{}'); } catch (e) {}
                     this.examForm = {
-                        title: ex.title, pdf_url: ex.pdf_url || '', content: ex.content || '', due_date: ex.due_date || '',
+                        title: ex.title, pdf_url: ex.pdf_url || '', content: ex.content || '', due_date: ex.due_date || '', duration_minutes: ex.duration_minutes || 60,
                         mc_count: ex.mc_count || 0, tf_count: ex.tf_count || 0, sa_count: ex.sa_count || 0,
                         mc_score_per_q: ex.mc_score_per_q || 0.25, tf_score_1: ex.tf_score_1 || 0.10, tf_score_2: ex.tf_score_2 || 0.25,
                         tf_score_3: ex.tf_score_3 || 0.50, tf_score_4: ex.tf_score_4 || 1.00, sa_score_per_q: ex.sa_score_per_q || 0.50,
@@ -1563,6 +1605,10 @@
                 },
 
                 openStudentWorkModal(item, type) {
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
                     this.workType = type;
                     this.activeWorkItem = item;
                     this.studentAnswerSheet = {
@@ -1571,15 +1617,46 @@
                         tf: {},
                         sa: {}
                     };
+                    this.examStartTime = Date.now();
+                    this.remainingSeconds = 0;
+
+                    // KHỞI TẠO ĐỒNG HỒ ĐẾM NGƯỢC NẾU LÀ ĐỀ KIỂM TRA
+                    if (type === 'exam' && item.duration_minutes && item.duration_minutes > 0) {
+                        this.remainingSeconds = item.duration_minutes * 60;
+                        this.timerInterval = setInterval(() => {
+                            this.remainingSeconds--;
+                            if (this.remainingSeconds <= 0) {
+                                clearInterval(this.timerInterval);
+                                this.timerInterval = null;
+                                alert('Đã hết thời gian làm bài! Hệ thống tự động nộp bài kiểm tra.');
+                                this.submitStudentWork(true);
+                            }
+                        }, 1000);
+                    }
+
                     this.studentWorkModalOpen = true;
                     this.renderMath();
                 },
 
-                async submitStudentWork() {
+                closeStudentWorkModal() {
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
+                    this.studentWorkModalOpen = false;
+                },
+
+                async submitStudentWork(isAutoSubmit = false) {
                     if (!this.studentAnswerSheet.student_name) {
                         alert('Vui lòng nhập họ và tên học sinh!');
                         return;
                     }
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
+
+                    let timeTaken = Math.floor((Date.now() - (this.examStartTime || Date.now())) / 1000);
                     let isExam = (this.workType === 'exam');
                     let url = isExam ? '/api/exam_submissions' : '/api/submissions';
                     let payload = {
@@ -1590,13 +1667,19 @@
                             sa: this.studentAnswerSheet.sa
                         })
                     };
-                    if (isExam) payload.exam_id = this.activeWorkItem.id;
-                    else payload.assignment_id = this.activeWorkItem.id;
+                    if (isExam) {
+                        payload.exam_id = this.activeWorkItem.id;
+                        payload.time_taken = timeTaken;
+                    } else {
+                        payload.assignment_id = this.activeWorkItem.id;
+                    }
 
                     let res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     let data = await res.json();
                     if (res.ok) {
-                        alert(`Nộp bài thành công!\n- Điểm gốc: ${data.raw_score} / ${data.max_score}\n- Điểm quy đổi thang 10: ${data.score} điểm`);
+                        if (!isAutoSubmit) {
+                            alert(`Nộp bài thành công!\n- Thời gian làm bài: ${this.formatDurationDisplay(timeTaken)}\n- Điểm gốc: ${data.raw_score} / ${data.max_score}\n- Điểm quy đổi thang 10: ${data.score} điểm`);
+                        }
                         this.studentWorkModalOpen = false;
                         if (isExam) await this.fetchAllExamSubmissions();
                         else await this.fetchAllSubmissions();
