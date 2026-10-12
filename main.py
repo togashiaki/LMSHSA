@@ -57,6 +57,7 @@ def init_db():
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         drive_url TEXT NOT NULL,
+        chapter VARCHAR(100) DEFAULT 'Chương 1',
         category VARCHAR(100) DEFAULT 'Bài 1',
         doc_date TEXT DEFAULT ''
     );
@@ -102,6 +103,7 @@ def init_db():
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_4 NUMERIC(4, 2) DEFAULT 1.00;")
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS score NUMERIC(5, 2) DEFAULT 0;")
+    cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS chapter VARCHAR(100) DEFAULT 'Chương 1';")
     cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'Bài 1';")
     cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS doc_date TEXT DEFAULT '';")
 
@@ -399,7 +401,7 @@ def delete_video(video_id: int):
 def get_documents():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM documents ORDER BY category ASC, doc_date ASC, id DESC")
+    cursor.execute("SELECT * FROM documents ORDER BY chapter ASC, category ASC, doc_date ASC, id DESC")
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -408,6 +410,7 @@ def get_documents():
 class DocumentCreate(BaseModel):
     title: str
     drive_url: str
+    chapter: Optional[str] = "Chương 1"
     category: Optional[str] = "Bài 1"
     doc_date: Optional[str] = ""
 
@@ -415,12 +418,26 @@ class DocumentCreate(BaseModel):
 def create_document(d: DocumentCreate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO documents (title, drive_url, category, doc_date) VALUES (%s, %s, %s, %s)",
-                   (d.title, d.drive_url, d.category or "Bài 1", d.doc_date or ""))
+    cursor.execute("INSERT INTO documents (title, drive_url, chapter, category, doc_date) VALUES (%s, %s, %s, %s, %s)",
+                   (d.title, d.drive_url, d.chapter or "Chương 1", d.category or "Bài 1", d.doc_date or ""))
     conn.commit()
     cursor.close()
     conn.close()
     return {"message": "Đã thêm tài liệu"}
+
+@app.put("/api/documents/{doc_id}")
+def update_document(doc_id: int, d: DocumentCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE documents
+        SET title = %s, drive_url = %s, chapter = %s, category = %s, doc_date = %s
+        WHERE id = %s
+    """, (d.title, d.drive_url, d.chapter or "Chương 1", d.category or "Bài 1", d.doc_date or "", doc_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật thông tin tài liệu"}
 
 @app.delete("/api/documents/{doc_id}")
 def delete_document(doc_id: int):
