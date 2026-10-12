@@ -57,7 +57,8 @@ def init_db():
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         drive_url TEXT NOT NULL,
-        category VARCHAR(100) DEFAULT 'Chung'
+        category VARCHAR(100) DEFAULT 'Bài 1',
+        doc_date TEXT DEFAULT ''
     );
     CREATE TABLE IF NOT EXISTS assignments (
         id SERIAL PRIMARY KEY,
@@ -101,6 +102,8 @@ def init_db():
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_4 NUMERIC(4, 2) DEFAULT 1.00;")
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS score NUMERIC(5, 2) DEFAULT 0;")
+    cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'Bài 1';")
+    cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS doc_date TEXT DEFAULT '';")
 
     cursor.execute("SELECT COUNT(*) FROM users")
     res = cursor.fetchone()
@@ -396,7 +399,7 @@ def delete_video(video_id: int):
 def get_documents():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM documents ORDER BY id DESC")
+    cursor.execute("SELECT * FROM documents ORDER BY category ASC, doc_date ASC, id DESC")
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -405,18 +408,29 @@ def get_documents():
 class DocumentCreate(BaseModel):
     title: str
     drive_url: str
-    category: Optional[str] = "Chung"
+    category: Optional[str] = "Bài 1"
+    doc_date: Optional[str] = ""
 
 @app.post("/api/documents")
 def create_document(d: DocumentCreate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO documents (title, drive_url, category) VALUES (%s, %s, %s)",
-                   (d.title, d.drive_url, d.category))
+    cursor.execute("INSERT INTO documents (title, drive_url, category, doc_date) VALUES (%s, %s, %s, %s)",
+                   (d.title, d.drive_url, d.category or "Bài 1", d.doc_date or ""))
     conn.commit()
     cursor.close()
     conn.close()
     return {"message": "Đã thêm tài liệu"}
+
+@app.delete("/api/documents/{doc_id}")
+def delete_document(doc_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM documents WHERE id = %s", (doc_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa tài liệu"}
 
 # --- BÀI TẬP VỀ NHÀ & CHẤM ĐIỂM ---
 @app.get("/api/assignments")
