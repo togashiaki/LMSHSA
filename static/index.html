@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LMS by aki</title>
+    <title>Phần Mềm Quản Lý Học Tập</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -181,13 +181,10 @@
             </header>
 
             <main class="p-8 space-y-6 max-w-5xl w-full mx-auto transition-all duration-300">
-                <!-- 0. TỔNG QUAN (DASHBOARD CHUYÊN SÂU & BẢNG XẾP HẠNG TÁCH BIỆT HỌC SINH/GIÁO VIÊN) -->
+                <!-- 0. TỔNG QUAN -->
                 <section x-show="activeTab === 'dashboard'" class="space-y-6">
-                    
-                    <!-- DÀNH CHO GIÁO VIÊN: BÀN CÔNG TÁC TỔNG QUAN CÓ ĐẦY ĐỦ CARD SỐ LIỆU BAN ĐẦU + CHI TIẾT -->
                     <template x-if="role === 'teacher'">
                         <div class="space-y-6">
-                            <!-- 4 THẺ SỐ LIỆU TỔNG QUAN BAN ĐẦU -->
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
                                     <div class="text-xs text-[#78716C] font-medium">Tổng số học sinh</div>
@@ -207,7 +204,6 @@
                                 </div>
                             </div>
 
-                            <!-- CÁC CHỈ SỐ Bổ SUNG DÀNH CHO GV -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
                                     <div class="text-xs text-[#78716C] font-medium">Điểm TB Bài tập về nhà</div>
@@ -228,7 +224,7 @@
                         </div>
                     </template>
 
-                    <!-- 3 BẢNG XẾP HẠNG (HIỂN THỊ CHO CẢ HỌC SINH VÀ GIÁO VIÊN) -->
+                    <!-- 3 BẢNG XẾP HẠNG -->
                     <div class="space-y-4">
                         <div class="border-b border-[#E6E1D8] pb-2">
                             <h2 class="text-base font-bold text-[#2D2926]">Bảng Xếp Hạng & Lượt Tương Tác Tăng Cường</h2>
@@ -236,7 +232,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- BẢNG 1: XẾP HẠNG ĐIỂM TB BTVN -->
                             <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-3">
                                 <div class="flex items-center space-x-2 border-b border-[#E6E1D8] pb-2">
                                     <span class="w-2 h-2 rounded-full bg-[#B8502B]"></span>
@@ -252,13 +247,9 @@
                                             <span class="font-bold font-mono text-[#B8502B]" x-text="st.avg + 'đ'"></span>
                                         </div>
                                     </template>
-                                    <template x-if="dashboardStats.hwRankings.length === 0">
-                                        <p class="text-[11px] text-[#78716C] text-center py-3">Chưa có dữ liệu bài nộp</p>
-                                    </template>
                                 </div>
                             </div>
 
-                            <!-- BẢNG 2: XẾP HẠNG ĐIỂM TB BÀI KIỂM TRA -->
                             <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-3">
                                 <div class="flex items-center space-x-2 border-b border-[#E6E1D8] pb-2">
                                     <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
@@ -274,13 +265,9 @@
                                             <span class="font-bold font-mono text-emerald-700" x-text="st.avg + 'đ'"></span>
                                         </div>
                                     </template>
-                                    <template x-if="dashboardStats.examRankings.length === 0">
-                                        <p class="text-[11px] text-[#78716C] text-center py-3">Chưa có dữ liệu kiểm tra</p>
-                                    </template>
                                 </div>
                             </div>
 
-                            <!-- BẢNG 3: XẾP HẠNG SỐ LƯỢNG TRUY CẬP / TƯƠNG TÁC -->
                             <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-3">
                                 <div class="flex items-center space-x-2 border-b border-[#E6E1D8] pb-2">
                                     <span class="w-2 h-2 rounded-full bg-blue-600"></span>
@@ -307,12 +294,11 @@
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4 border-b border-[#E6E1D8] pb-4">
                         <div>
                             <h2 class="text-base font-bold text-[#2D2926]">Bảng Điểm Danh Lớp Học</h2>
-                            <p class="text-xs text-[#78716C] mt-0.5">Lọc danh sách ngày học theo Tháng để quản lý chuyên cần dễ dàng hơn</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="flex items-center space-x-2 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#E6E1D8]">
                                 <span class="text-xs font-bold text-[#78716C]">Tháng:</span>
-                                <select x-model="selectedAttendanceMonth" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B] font-semibold">
+                                <select x-model="selectedAttendanceMonth" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white font-semibold">
                                     <option value="Tất cả">Tất cả các tháng</option>
                                     <template x-for="m in getAttendanceMonths()" :key="m">
                                         <option :value="m" x-text="'Tháng ' + formatMonthDisplay(m)"></option>
@@ -321,8 +307,8 @@
                             </div>
 
                             <div x-show="role === 'teacher'" class="flex items-center space-x-2 bg-[#FAF8F5] p-1.5 rounded-xl border border-[#E6E1D8]">
-                                <input type="date" x-model="newAttendanceDate" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B]">
-                                <button @click="addAttendanceDate()" class="bg-[#B8502B] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#9E4221] transition">+ Thêm ngày học</button>
+                                <input type="date" x-model="newAttendanceDate" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white">
+                                <button @click="addAttendanceDate()" class="bg-[#B8502B] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#9E4221]">+ Thêm ngày học</button>
                             </div>
                         </div>
                     </div>
@@ -337,11 +323,8 @@
                                         <th class="p-3 text-center border-r border-[#44403C] min-w-[140px]">
                                             <div class="flex items-center justify-center space-x-1">
                                                 <span x-text="formatDateDisplay(d)" class="font-bold text-xs"></span>
-                                                <button x-show="role === 'teacher'" @click="deleteAttendanceDate(d)" class="text-stone-400 hover:text-rose-300 p-0.5 rounded transition" title="Xóa ngày học này">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                </button>
+                                                <button x-show="role === 'teacher'" @click="deleteAttendanceDate(d)" class="text-stone-400 hover:text-rose-300 p-0.5 transition">✕</button>
                                             </div>
-                                            <div class="text-[10px] font-normal text-stone-300">Điểm danh</div>
                                         </th>
                                     </template>
                                 </tr>
@@ -354,7 +337,7 @@
                                         <template x-for="d in filteredAttendanceDates()" :key="d">
                                             <td class="p-2 text-center border-r">
                                                 <template x-if="role === 'teacher'">
-                                                    <select :value="getAttendanceStatus(s.id, d)" @change="updateAttendance(s.id, d, $event.target.value)" :class="getStatusColorClass(getAttendanceStatus(s.id, d))" class="w-full p-1.5 rounded-lg border text-xs font-medium text-center cursor-pointer focus:outline-none">
+                                                    <select :value="getAttendanceStatus(s.id, d)" @change="updateAttendance(s.id, d, $event.target.value)" :class="getStatusColorClass(getAttendanceStatus(s.id, d))" class="w-full p-1.5 rounded-lg border text-xs font-medium text-center cursor-pointer">
                                                         <option value="">-- Chưa nhập --</option>
                                                         <option value="Có mặt">Có mặt</option>
                                                         <option value="Vắng phép">Vắng phép</option>
@@ -396,9 +379,7 @@
                                 <template x-for="v in videos" :key="v.id">
                                     <li class="py-3 flex items-center justify-between hover:bg-[#FAF8F5] rounded-lg px-2">
                                         <span @click="selectVideo(v)" class="font-medium text-xs text-[#2D2926] hover:text-[#B8502B] cursor-pointer flex-1 mr-2" x-text="v.title"></span>
-                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-600 hover:text-rose-800 p-1 rounded transition shrink-0" title="Xóa video">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
-                                        </button>
+                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-600 hover:text-rose-800 p-1 shrink-0">✕</button>
                                     </li>
                                 </template>
                             </ul>
@@ -417,12 +398,12 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="flex items-center space-x-2 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#E6E1D8]">
                                 <span class="text-xs font-bold text-[#78716C]">Lọc theo Hạn nộp:</span>
-                                <input type="month" x-model="selectedAssignmentMonth" class="border border-[#E6E1D8] p-1 rounded-lg text-xs bg-white focus:outline-none">
+                                <input type="month" x-model="selectedAssignmentMonth" class="border border-[#E6E1D8] p-1 rounded-lg text-xs bg-white">
                                 <button x-show="selectedAssignmentMonth" @click="selectedAssignmentMonth = ''" class="text-xs text-[#B8502B] underline">Xóa lọc</button>
                             </div>
 
-                            <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition flex items-center space-x-2">
-                                <span>+ Tạo Bài Tập Mới</span>
+                            <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition">
+                                + Tạo Bài Tập Mới
                             </button>
                         </div>
                     </div>
@@ -440,6 +421,8 @@
                                     <h3 class="text-base font-bold text-[#2D2926] mb-2" x-text="a.title"></h3>
                                     <p class="text-xs text-[#57534E] mb-4 whitespace-pre-line" x-text="a.content"></p>
                                     <div class="flex flex-wrap gap-2 text-[11px] text-[#78716C] font-medium bg-[#FAF8F5] p-2.5 rounded-xl mb-4 border border-[#E6E1D8]">
+                                        <span class="font-bold text-[#B8502B]" x-text="'⏱️ ' + (a.duration_minutes || 60) + ' phút'"></span>
+                                        <span>•</span>
                                         <span x-text="a.mc_count + ' câu TN (' + a.mc_score_per_q + 'đ/câu)'"></span>
                                         <span>•</span>
                                         <span x-text="a.tf_count + ' câu Đ/S'"></span>
@@ -458,12 +441,8 @@
                                         </button>
                                     </div>
                                     <div x-show="role === 'teacher'" class="flex space-x-1">
-                                        <button @click="openEditAssignmentModal(a)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg transition" title="Sửa bài tập & đáp án">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-                                        <button @click="deleteAssignment(a.id)" class="p-1.5 text-[#78716C] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa bài tập này">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
-                                        </button>
+                                        <button @click="openEditAssignmentModal(a)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg transition" title="Sửa bài tập & đáp án">✏️</button>
+                                        <button @click="deleteAssignment(a.id)" class="p-1.5 text-[#78716C] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa bài tập này">🗑️</button>
                                     </div>
                                 </div>
                             </div>
@@ -478,23 +457,23 @@
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Tên tài liệu *</label>
-                                <input type="text" x-model="newDoc.title" placeholder="Mô tả tệp tài liệu..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                                <input type="text" x-model="newDoc.title" placeholder="Mô tả tệp..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Chương *</label>
-                                <input type="text" x-model="newDoc.chapter" placeholder="Ví dụ: Chương 1, Chương 2..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                                <input type="text" x-model="newDoc.chapter" placeholder="Ví dụ: Chương 1..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Phân loại bài học *</label>
-                                <input type="text" x-model="newDoc.category" placeholder="Ví dụ: Bài 1, Bài 2..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Bài học *</label>
+                                <input type="text" x-model="newDoc.category" placeholder="Ví dụ: Bài 1..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Ngày học</label>
                                 <input type="date" x-model="newDoc.doc_date" class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Đường dẫn Google Drive *</label>
-                                <input type="text" x-model="newDoc.drive_url" placeholder="Paste Drive URL..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Link Drive *</label>
+                                <input type="text" x-model="newDoc.drive_url" placeholder="Paste link PDF..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
                             </div>
                         </div>
                         <div class="flex justify-end">
@@ -502,64 +481,28 @@
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-3">
-                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 border-b border-[#E6E1D8]">
-                            <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc Chương:</span>
-                            <button @click="selectedDocChapter = 'Tất cả'; selectedDocCategory = 'Tất cả'" :class="selectedDocChapter === 'Tất cả' ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0">Tất cả chương</button>
-                            <template x-for="ch in getDocChapters()" :key="ch">
-                                <button @click="selectedDocChapter = ch; selectedDocCategory = 'Tất cả'" :class="selectedDocChapter === ch ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0" x-text="ch"></button>
-                            </template>
-                        </div>
-
-                        <div class="flex items-center space-x-2 overflow-x-auto pt-1">
-                            <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc Bài học:</span>
-                            <button @click="selectedDocCategory = 'Tất cả'" :class="selectedDocCategory === 'Tất cả' ? 'bg-[#57534E] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0">Tất cả bài học</button>
-                            <template x-for="cat in getDocCategories()" :key="cat">
-                                <button @click="selectedDocCategory = cat" :class="selectedDocCategory === cat ? 'bg-[#57534E] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0" x-text="cat"></button>
-                            </template>
-                        </div>
-                    </div>
-
                     <div class="space-y-3">
-                        <template x-for="doc in filteredDocuments()" :key="doc.id">
-                            <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center justify-between hover:border-[#E6CFC3] transition">
-                                <div class="flex items-center space-x-3 min-w-0">
-                                    <div class="w-10 h-10 rounded-xl bg-[#F7ECE7] flex items-center justify-center text-[#B8502B] shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="text-sm font-bold text-[#2D2926] truncate" x-text="doc.title"></div>
-                                        <div class="flex items-center space-x-2 text-[11px] text-[#78716C] mt-0.5">
-                                            <span class="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" x-text="doc.chapter || 'Chương 1'"></span>
-                                            <span class="bg-[#FAF8F5] border border-[#E6E1D8] px-2 py-0.5 rounded-md font-semibold text-[#B8502B]" x-text="doc.category || 'Bài 1'"></span>
-                                            <span x-show="doc.doc_date">•</span>
-                                            <span x-show="doc.doc_date" class="font-mono" x-text="'Ngày học: ' + formatDateDisplay(doc.doc_date)"></span>
-                                        </div>
-                                    </div>
+                        <template x-for="doc in documents" :key="doc.id">
+                            <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center justify-between">
+                                <div>
+                                    <div class="text-sm font-bold text-[#2D2926]" x-text="doc.title"></div>
+                                    <div class="text-[11px] text-[#78716C] mt-0.5" x-text="(doc.chapter || '') + ' • ' + (doc.category || '')"></div>
                                 </div>
-                                <div class="flex items-center space-x-2 shrink-0">
-                                    <a :href="doc.drive_url" target="_blank" class="bg-[#FAF8F5] text-[#B8502B] text-xs px-3 py-1.5 rounded-xl border border-[#E6E1D8] font-semibold hover:bg-[#F7ECE7] transition flex items-center space-x-1">
-                                        <span>Mở / Tải về Google Drive</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                    </a>
-                                    <button x-show="role === 'teacher'" @click="openEditDocumentModal(doc)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg border border-slate-200 transition" title="Chỉnh sửa thông tin file">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </button>
-                                    <button x-show="role === 'teacher'" @click="deleteDocument(doc.id)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition" title="Xóa tài liệu">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
-                                    </button>
+                                <div class="flex items-center space-x-2">
+                                    <a :href="doc.drive_url" target="_blank" class="bg-[#FAF8F5] text-[#B8502B] text-xs px-3 py-1.5 rounded-xl border border-[#E6E1D8] font-semibold">Mở Google Drive ↗</a>
+                                    <button x-show="role === 'teacher'" @click="deleteDocument(doc.id)" class="text-rose-600 p-1">✕</button>
                                 </div>
                             </div>
                         </template>
                     </div>
                 </section>
 
-                <!-- 5. ĐỀ KIỂM TRA (TẠO CẤU HÌNH ĐỀ & GIAO DIỆN HỌC SINH TƯƠNG TỰ BTVN) -->
+                <!-- 5. ĐỀ KIỂM TRA -->
                 <section x-show="activeTab === 'exams'" class="space-y-6">
                     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
                         <div>
                             <h2 class="text-base font-bold text-[#2D2926]">Quản Lý Đề Kiểm Tra</h2>
-                            <p class="text-xs text-[#78716C]">Tạo đề kiểm tra trực tuyến, hỗ trợ chọn số câu, đáp án & đính kèm PDF đề bài</p>
+                            <p class="text-xs text-[#78716C]">Tạo đề kiểm tra trực tuyến, đặt thời gian làm bài & tự động tạo số lượng câu tương ứng</p>
                         </div>
                         <button x-show="role === 'teacher'" @click="openCreateExamModal()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition">
                             + Tạo Đề Kiểm Tra Mới
@@ -572,11 +515,13 @@
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="bg-emerald-50 text-emerald-800 border-emerald-200 px-2.5 py-1 rounded-full text-[11px] font-medium border">Đề kiểm tra</span>
-                                        <span class="text-xs text-[#78716C] font-mono" x-text="ex.due_date ? 'Hạn: ' + formatDateTimeDisplay(ex.due_date) : 'Không giới hạn'"></span>
+                                        <span class="text-xs text-[#78716C] font-mono" x-text="ex.due_date ? 'Hạn: ' + formatDateTimeDisplay(ex.due_date) : 'Không giới hạn hạn nộp'"></span>
                                     </div>
                                     <h3 class="text-base font-bold text-[#2D2926] mb-2" x-text="ex.title"></h3>
                                     <p class="text-xs text-[#57534E] mb-4 whitespace-pre-line" x-text="ex.content"></p>
                                     <div class="flex flex-wrap gap-2 text-[11px] text-[#78716C] font-medium bg-[#FAF8F5] p-2.5 rounded-xl mb-4 border border-[#E6E1D8]">
+                                        <span class="font-bold text-emerald-700" x-text="'⏱️ ' + (ex.duration_minutes || 60) + ' phút'"></span>
+                                        <span>•</span>
                                         <span x-text="ex.mc_count + ' câu TN (' + ex.mc_score_per_q + 'đ/câu)'"></span>
                                         <span>•</span>
                                         <span x-text="ex.tf_count + ' câu Đ/S'"></span>
@@ -595,12 +540,8 @@
                                         </button>
                                     </div>
                                     <div x-show="role === 'teacher'" class="flex space-x-1">
-                                        <button @click="openEditExamModal(ex)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg transition" title="Sửa đề thi">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-                                        <button @click="deleteExam(ex.id)" class="p-1.5 text-[#78716C] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa đề thi">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
-                                        </button>
+                                        <button @click="openEditExamModal(ex)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg transition" title="Sửa đề thi">✏️</button>
+                                        <button @click="deleteExam(ex.id)" class="p-1.5 text-[#78716C] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa đề thi">🗑️</button>
                                     </div>
                                 </div>
                             </div>
@@ -643,7 +584,7 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL TẠO/CHỈNH SỬA BTVN NÂNG CẤP LINK PDF ==================== -->
+    <!-- ==================== MODAL TẠO/CHỈNH SỬA BTVN (BỔ SUNG THỜI GIAN LÀM BÀI PHÚT) ==================== -->
     <div x-show="assignmentModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
             <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
@@ -658,15 +599,23 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Đường dẫn File Đề Bài PDF (Google Drive / Link trực tiếp)</label>
-                    <input type="text" x-model="assignmentForm.pdf_url" placeholder="Paste link file PDF từ Google Drive..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                    <input type="text" x-model="assignmentForm.pdf_url" placeholder="Paste link file PDF..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
                 </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-[#57534E] mb-1">Hạn nộp bài (Deadline)</label>
+                        <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-[#57534E] mb-1">Thời gian làm bài (Số phút) *</label>
+                        <input type="number" min="1" x-model.number="assignmentForm.duration_minutes" placeholder="Ví dụ: 60" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5] font-bold text-[#B8502B]">
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Mô tả / Hướng dẫn bài tập</label>
-                    <textarea x-model="assignmentForm.content" placeholder="Mô tả chi tiết bài tập..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]" rows="3"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Hạn nộp bài (Deadline)</label>
-                    <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                    <textarea x-model="assignmentForm.content" placeholder="Mô tả chi tiết bài tập..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]" rows="2"></textarea>
                 </div>
 
                 <div class="bg-[#F7ECE7]/60 p-4 rounded-xl border border-[#E6CFC3] space-y-3">
@@ -701,13 +650,16 @@
                     </div>
                 </div>
 
+                <!-- BẢNG ĐÁP ÁN CHUẨN MỞ RỘNG TỰ ĐỘNG CHO BTVN -->
                 <div class="space-y-4">
                     <h4 class="text-xs font-bold text-[#2D2926] border-b border-[#E6E1D8] pb-1">Bảng Đáp Án Chuẩn</h4>
-                    <template x-if="assignmentForm.mc_count > 0">
-                        <div>
-                            <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Trắc nghiệm</div>
+                    
+                    <!-- 1. PHẦN TRẮC NGHIỆM -->
+                    <template x-if="Number(assignmentForm.mc_count || 0) > 0">
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-[#B8502B]">Phần I. Trắc nghiệm (<span x-text="assignmentForm.mc_count"></span> câu)</div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <template x-for="i in assignmentForm.mc_count" :key="i">
+                                <template x-for="i in Number(assignmentForm.mc_count || 0)" :key="'assignment_mc_' + i">
                                     <div class="flex items-center justify-between p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
                                         <span class="font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></span>
                                         <select x-model="assignmentForm.answer_key.mc[i]" class="p-1 border rounded bg-white font-bold text-[#B8502B]">
@@ -717,6 +669,47 @@
                                             <option value="C">C</option>
                                             <option value="D">D</option>
                                         </select>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- 2. PHẦN ĐÚNG / SAI -->
+                    <template x-if="Number(assignmentForm.tf_count || 0) > 0">
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-[#B8502B]">Phần II. Đúng / Sai (<span x-text="assignmentForm.tf_count"></span> câu)</div>
+                            <div class="space-y-2">
+                                <template x-for="i in Number(assignmentForm.tf_count || 0)" :key="'assignment_tf_' + i">
+                                    <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E6E1D8] space-y-2">
+                                        <div class="text-xs font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                            <template x-for="sub in ['a', 'b', 'c', 'd']" :key="'assignment_tf_' + i + sub">
+                                                <div class="flex items-center justify-between p-1.5 bg-white rounded-lg border border-[#E6E1D8] text-xs">
+                                                    <span class="font-semibold text-[#57534E]" x-text="'Ý ' + sub + ')'"></span>
+                                                    <select x-model="assignmentForm.answer_key.tf[i + sub]" class="p-1 border rounded font-bold text-[#B8502B]">
+                                                        <option value="">--</option>
+                                                        <option value="Đúng">Đúng</option>
+                                                        <option value="Sai">Sai</option>
+                                                    </select>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- 3. PHẦN TRẢ LỜI NGẮN -->
+                    <template x-if="Number(assignmentForm.sa_count || 0) > 0">
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-[#B8502B]">Phần III. Trả lời ngắn (<span x-text="assignmentForm.sa_count"></span> câu)</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <template x-for="i in Number(assignmentForm.sa_count || 0)" :key="'assignment_sa_' + i">
+                                    <div class="flex items-center space-x-2 p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
+                                        <span class="font-bold text-[#2D2926] shrink-0" x-text="'Câu ' + i + ':'"></span>
+                                        <input type="text" x-model="assignmentForm.answer_key.sa[i]" placeholder="Đáp án đúng..." class="w-full p-1 border rounded bg-white font-medium text-[#B8502B]">
                                     </div>
                                 </template>
                             </div>
@@ -732,7 +725,7 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL TẠO/CHỈNH SỬA ĐỀ KIỂM TRA ==================== -->
+    <!-- ==================== MODAL TẠO/CHỈNH SỬA ĐỀ KIỂM TRA (CÓ BỔ SUNG THỜI GIAN LÀM BÀI PHÚT) ==================== -->
     <div x-show="examModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
             <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
@@ -749,6 +742,18 @@
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Đường dẫn File Đề Bài PDF (Google Drive / Link trực tiếp) *</label>
                     <input type="text" x-model="examForm.pdf_url" placeholder="Paste link file PDF đề thi từ Google Drive..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
                 </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-[#57534E] mb-1">Hạn nộp bài / Thời gian đóng đề thi (Deadline)</label>
+                        <input type="datetime-local" x-model="examForm.due_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-[#57534E] mb-1">Thời gian làm bài (Số phút) *</label>
+                        <input type="number" min="1" x-model.number="examForm.duration_minutes" placeholder="Ví dụ: 60" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5] font-bold text-[#B8502B]">
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Mô tả / Ghi chú đề thi</label>
                     <textarea x-model="examForm.content" placeholder="Mô tả nội dung kiểm tra..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]" rows="2"></textarea>
@@ -772,13 +777,16 @@
                     </div>
                 </div>
 
+                <!-- BẢNG ĐÁP ÁN CHUẨN MỞ RỘNG TỰ ĐỘNG CHO ĐỀ KIỂM TRA -->
                 <div class="space-y-4">
                     <h4 class="text-xs font-bold text-[#2D2926] border-b border-[#E6E1D8] pb-1">Bảng Đáp Án Chuẩn Đề Kiểm Tra</h4>
-                    <template x-if="examForm.mc_count > 0">
-                        <div>
-                            <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Trắc nghiệm</div>
+                    
+                    <!-- 1. PHẦN TRẮC NGHIỆM -->
+                    <template x-if="Number(examForm.mc_count || 0) > 0">
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-[#B8502B]">Phần I. Trắc nghiệm (<span x-text="examForm.mc_count"></span> câu)</div>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <template x-for="i in examForm.mc_count" :key="i">
+                                <template x-for="i in Number(examForm.mc_count || 0)" :key="'exam_mc_' + i">
                                     <div class="flex items-center justify-between p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
                                         <span class="font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></span>
                                         <select x-model="examForm.answer_key.mc[i]" class="p-1 border rounded bg-white font-bold text-[#B8502B]">
@@ -788,6 +796,47 @@
                                             <option value="C">C</option>
                                             <option value="D">D</option>
                                         </select>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- 2. PHẦN ĐÚNG / SAI -->
+                    <template x-if="Number(examForm.tf_count || 0) > 0">
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-[#B8502B]">Phần II. Đúng / Sai (<span x-text="examForm.tf_count"></span> câu)</div>
+                            <div class="space-y-2">
+                                <template x-for="i in Number(examForm.tf_count || 0)" :key="'exam_tf_' + i">
+                                    <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E6E1D8] space-y-2">
+                                        <div class="text-xs font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                            <template x-for="sub in ['a', 'b', 'c', 'd']" :key="'exam_tf_' + i + sub">
+                                                <div class="flex items-center justify-between p-1.5 bg-white rounded-lg border border-[#E6E1D8] text-xs">
+                                                    <span class="font-semibold text-[#57534E]" x-text="'Ý ' + sub + ')'"></span>
+                                                    <select x-model="examForm.answer_key.tf[i + sub]" class="p-1 border rounded font-bold text-[#B8502B]">
+                                                        <option value="">--</option>
+                                                        <option value="Đúng">Đúng</option>
+                                                        <option value="Sai">Sai</option>
+                                                    </select>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- 3. PHẦN TRẢ LỜI NGẮN -->
+                    <template x-if="Number(examForm.sa_count || 0) > 0">
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-[#B8502B]">Phần III. Trả lời ngắn (<span x-text="examForm.sa_count"></span> câu)</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <template x-for="i in Number(examForm.sa_count || 0)" :key="'exam_sa_' + i">
+                                    <div class="flex items-center space-x-2 p-2 bg-[#FAF8F5] rounded-lg border border-[#E6E1D8] text-xs">
+                                        <span class="font-bold text-[#2D2926] shrink-0" x-text="'Câu ' + i + ':'"></span>
+                                        <input type="text" x-model="examForm.answer_key.sa[i]" placeholder="Đáp án đúng..." class="w-full p-1 border rounded bg-white font-medium text-[#B8502B]">
                                     </div>
                                 </template>
                             </div>
@@ -803,15 +852,16 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL LÀM BÀI HAI CỘT CHUẨN STUDY4 (XEM PDF BÊN TRÁI & ĐIỀN ĐÁP ÁN BÊN PHẢI) ==================== -->
+    <!-- ==================== MODAL LÀM BÀI HAI CỘT CHUẨN STUDY4 ==================== -->
     <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/60 backdrop-blur-sm flex items-center justify-center p-3">
         <div class="bg-white w-full max-w-6xl h-[92vh] rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col overflow-hidden">
-            
-            <!-- HEADER MODAL -->
             <div class="h-14 bg-[#FAF8F5] border-b border-[#E6E1D8] px-6 flex items-center justify-between shrink-0">
                 <div class="flex items-center space-x-3 min-w-0">
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white bg-[#B8502B]" x-text="workType === 'exam' ? 'ĐỀ KIỂM TRA' : 'BÀI TẬP VỀ NHÀ'"></span>
                     <h3 class="text-sm font-bold text-[#2D2926] truncate" x-text="activeWorkItem ? activeWorkItem.title : ''"></h3>
+                    <template x-if="activeWorkItem && activeWorkItem.duration_minutes">
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300" x-text="'⏱️ ' + activeWorkItem.duration_minutes + ' Phút'"></span>
+                    </template>
                 </div>
                 <div class="flex items-center space-x-4 shrink-0">
                     <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-xl border border-[#E6E1D8]">
@@ -822,10 +872,7 @@
                 </div>
             </div>
 
-            <!-- BODY HÀI CỘT VUỐT TỰ DO -->
             <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-[#FAF8F5]">
-                
-                <!-- CỘT BÊN TRÁI: KHUNG XEM FILE PDF ĐỀ BÀI VUỐT LÊN VUỐT XUỐNG -->
                 <div class="lg:col-span-7 border-r border-[#E6E1D8] flex flex-col h-full bg-white p-3 overflow-y-auto">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-bold text-[#78716C]">Đề bài PDF (Vuốt lên/xuống để đọc)</span>
@@ -846,7 +893,6 @@
                     </template>
                 </div>
 
-                <!-- CỘT BÊN PHẢI: BẢNG CHỌN ĐÁP ÁN TO RÕ VUỐT LÊN VUỐT XUỐNG -->
                 <div class="lg:col-span-5 flex flex-col h-full bg-white p-4 overflow-y-auto">
                     <div class="mb-4 border-b border-[#E6E1D8] pb-2">
                         <h3 class="text-sm font-bold text-[#2D2926]">Phiếu Trả Lời Trực Tuyến</h3>
@@ -854,11 +900,10 @@
                     </div>
 
                     <div class="space-y-6 flex-1 pr-1">
-                        <!-- CÂU HỎI TRẮC NGHIỆM -->
                         <template x-if="activeWorkItem && activeWorkItem.mc_count > 0">
                             <div class="space-y-4">
                                 <div class="text-xs font-bold text-[#B8502B] uppercase tracking-wider border-b pb-1">I. Phần Trắc Nghiệm</div>
-                                <template x-for="i in activeWorkItem.mc_count" :key="i">
+                                <template x-for="i in Number(activeWorkItem.mc_count || 0)" :key="i">
                                     <div class="p-3 rounded-xl bg-[#FAF8F5] border border-[#E6E1D8] space-y-2">
                                         <div class="flex items-center justify-between">
                                             <span class="text-xs font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></span>
@@ -874,7 +919,6 @@
                             </div>
                         </template>
 
-                        <!-- CÂU HỎI ĐÚNG / SAI -->
                         <template x-if="activeWorkItem && activeWorkItem.tf_count > 0">
                             <div class="space-y-4">
                                 <div class="text-xs font-bold text-[#B8502B] uppercase tracking-wider border-b pb-1">II. Phần Đúng / Sai</div>
@@ -890,11 +934,10 @@
                             </div>
                         </template>
 
-                        <!-- CÂU HỎI TRẢ LỜI NGẮN -->
                         <template x-if="activeWorkItem && activeWorkItem.sa_count > 0">
                             <div class="space-y-4">
                                 <div class="text-xs font-bold text-[#B8502B] uppercase tracking-wider border-b pb-1">III. Phần Trả Lời Ngắn</div>
-                                <template x-for="i in activeWorkItem.sa_count" :key="i">
+                                <template x-for="i in Number(activeWorkItem.sa_count || 0)" :key="i">
                                     <div class="p-3 rounded-xl bg-[#FAF8F5] border border-[#E6E1D8] space-y-1">
                                         <label class="block text-xs font-bold text-[#2D2926]" x-text="'Câu ' + i + ':'"></label>
                                         <input type="text" x-model="studentAnswerSheet.sa[i]" placeholder="Nhập kết quả..." class="w-full p-2 border border-[#E6E1D8] rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B]">
@@ -982,8 +1025,6 @@
                 documents: [],
                 selectedDocChapter: 'Tất cả',
                 selectedDocCategory: 'Tất cả',
-                editDocModalOpen: false,
-                editDocForm: { id: null, title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: '' },
 
                 assignments: [],
                 selectedAssignmentMonth: '',
@@ -1013,6 +1054,7 @@
                     content: '',
                     pdf_url: '',
                     due_date: '',
+                    duration_minutes: 60,
                     mc_count: 12,
                     tf_count: 0,
                     sa_count: 0,
@@ -1033,6 +1075,7 @@
                     pdf_url: '',
                     content: '',
                     due_date: '',
+                    duration_minutes: 60,
                     mc_count: 10,
                     tf_count: 0,
                     sa_count: 0,
@@ -1203,7 +1246,8 @@
 
                 getTfSubQuestions(count) {
                     let res = [];
-                    for (let i = 1; i <= count; i++) {
+                    let c = Number(count || 0);
+                    for (let i = 1; i <= c; i++) {
                         ['a', 'b', 'c', 'd'].forEach(ch => res.push(i + ch));
                     }
                     return res;
@@ -1231,7 +1275,6 @@
                 },
 
                 calculateDashboardStats() {
-                    // 1. Thống kê BTVN
                     let hwMap = {};
                     let totalHwScore = 0;
                     this.allSubmissions.forEach(sub => {
@@ -1244,7 +1287,6 @@
                     let hwRankings = Object.values(hwMap).map(s => ({ name: s.name, avg: (s.total / s.count).toFixed(2) }));
                     hwRankings.sort((a, b) => b.avg - a.avg);
 
-                    // 2. Thống kê Bài kiểm tra
                     let exMap = {};
                     let totalExScore = 0;
                     this.allExamSubmissions.forEach(sub => {
@@ -1257,7 +1299,6 @@
                     let examRankings = Object.values(exMap).map(s => ({ name: s.name, avg: (s.total / s.count).toFixed(2) }));
                     examRankings.sort((a, b) => b.avg - a.avg);
 
-                    // 3. Xếp hạng truy cập
                     let visitRankings = [...this.allUsers].sort((a, b) => (b.visit_count || 0) - (a.visit_count || 0)).slice(0, 5);
 
                     let avgHw = this.allSubmissions.length > 0 ? (totalHwScore / this.allSubmissions.length).toFixed(1) : 0;
@@ -1277,7 +1318,6 @@
                     };
                 },
 
-                // --- ĐIỂM DANH LỌC THEO THÁNG ---
                 getAttendanceMonths() {
                     let months = new Set();
                     this.attendanceDates.forEach(d => {
@@ -1295,7 +1335,6 @@
                     return this.attendanceDates.filter(d => d.startsWith(this.selectedAttendanceMonth));
                 },
 
-                // --- BÀI TẬP VỀ NHÀ LỌC THEO THÁNG ---
                 filteredAssignments() {
                     if (!this.selectedAssignmentMonth) return this.assignments;
                     return this.assignments.filter(a => a.due_date && a.due_date.startsWith(this.selectedAssignmentMonth));
@@ -1310,7 +1349,7 @@
                     this.isEditingAssignment = false;
                     this.editingAssignmentId = null;
                     this.assignmentForm = {
-                        title: '', content: '', pdf_url: '', due_date: '',
+                        title: '', content: '', pdf_url: '', due_date: '', duration_minutes: 60,
                         mc_count: 12, tf_count: 0, sa_count: 0,
                         mc_score_per_q: 0.25, tf_score_1: 0.10, tf_score_2: 0.25, tf_score_3: 0.50, tf_score_4: 1.00, sa_score_per_q: 0.50,
                         answer_key: { mc: {}, tf: {}, sa: {} }
@@ -1327,6 +1366,7 @@
 
                     this.assignmentForm = {
                         title: a.title, content: a.content, pdf_url: a.pdf_url || '', due_date: a.due_date || '',
+                        duration_minutes: a.duration_minutes || 60,
                         mc_count: a.mc_count || 0, tf_count: a.tf_count || 0, sa_count: a.sa_count || 0,
                         mc_score_per_q: a.mc_score_per_q || 0.25, tf_score_1: a.tf_score_1 || 0.10, tf_score_2: a.tf_score_2 || 0.25,
                         tf_score_3: a.tf_score_3 || 0.50, tf_score_4: a.tf_score_4 || 1.00, sa_score_per_q: a.sa_score_per_q || 0.50,
@@ -1370,7 +1410,6 @@
                     this.calculateDashboardStats();
                 },
 
-                // --- CẤU HÌNH ĐỀ KIỂM TRA ---
                 async fetchExams() {
                     let res = await fetch('/api/exams');
                     this.exams = await res.json();
@@ -1379,7 +1418,7 @@
                     this.isEditingExam = false;
                     this.editingExamId = null;
                     this.examForm = {
-                        title: '', pdf_url: '', content: '', due_date: '',
+                        title: '', pdf_url: '', content: '', due_date: '', duration_minutes: 60,
                         mc_count: 10, tf_count: 0, sa_count: 0,
                         mc_score_per_q: 0.25, tf_score_1: 0.10, tf_score_2: 0.25, tf_score_3: 0.50, tf_score_4: 1.00, sa_score_per_q: 0.50,
                         answer_key: { mc: {}, tf: {}, sa: {} }
@@ -1394,6 +1433,7 @@
                     try { parsedKey = JSON.parse(ex.answer_key || '{}'); } catch (e) {}
                     this.examForm = {
                         title: ex.title, pdf_url: ex.pdf_url || '', content: ex.content || '', due_date: ex.due_date || '',
+                        duration_minutes: ex.duration_minutes || 60,
                         mc_count: ex.mc_count || 0, tf_count: ex.tf_count || 0, sa_count: ex.sa_count || 0,
                         mc_score_per_q: ex.mc_score_per_q || 0.25, tf_score_1: ex.tf_score_1 || 0.10, tf_score_2: ex.tf_score_2 || 0.25,
                         tf_score_3: ex.tf_score_3 || 0.50, tf_score_4: ex.tf_score_4 || 1.00, sa_score_per_q: ex.sa_score_per_q || 0.50,
@@ -1428,9 +1468,8 @@
                     this.calculateDashboardStats();
                 },
 
-                // --- GIAO DIỆN LÀM BÀI CHUẨN STUDY4 (MỞ BÀI TẬP HOẶC BÀI KIỂM TRA) ---
                 openStudentWorkModal(item, type) {
-                    this.workType = type; // 'assignment' hoặc 'exam'
+                    this.workType = type;
                     this.activeWorkItem = item;
                     this.studentAnswerSheet = {
                         student_name: this.currentUser ? this.currentUser.full_name : '',
@@ -1482,7 +1521,6 @@
                     this.viewSubmissionsOpen = true;
                 },
 
-                // --- CÁC THAO TÁC KHÁC ---
                 async fetchStudents() {
                     let res = await fetch('/api/students');
                     if (res.ok) this.students = await res.json();
@@ -1578,42 +1616,11 @@
                     let res = await fetch('/api/documents');
                     this.documents = await res.json();
                 },
-                getDocChapters() {
-                    let chs = new Set();
-                    this.documents.forEach(d => { if (d.chapter) chs.add(d.chapter); });
-                    return Array.from(chs).sort();
-                },
-                getDocCategories() {
-                    let cats = new Set();
-                    this.documents.forEach(d => {
-                        if (this.selectedDocChapter !== 'Tất cả' && d.chapter !== this.selectedDocChapter) return;
-                        if (d.category) cats.add(d.category);
-                    });
-                    return Array.from(cats).sort();
-                },
-                filteredDocuments() {
-                    return this.documents.filter(d => {
-                        let matchChapter = (this.selectedDocChapter === 'Tất cả' || d.chapter === this.selectedDocChapter);
-                        let matchCategory = (this.selectedDocCategory === 'Tất cả' || d.category === this.selectedDocCategory);
-                        return matchChapter && matchCategory;
-                    });
-                },
                 async addDocument() {
                     if (!this.newDoc.title || !this.newDoc.drive_url) return;
                     await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.newDoc) });
                     this.newDoc = { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] };
                     await this.fetchDocuments();
-                },
-                openEditDocumentModal(doc) {
-                    this.editDocForm = { id: doc.id, title: doc.title, drive_url: doc.drive_url, chapter: doc.chapter || 'Chương 1', category: doc.category || 'Bài 1', doc_date: doc.doc_date || '' };
-                    this.editDocModalOpen = true;
-                },
-                async saveEditedDocument() {
-                    let res = await fetch('/api/documents/' + this.editDocForm.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.editDocForm) });
-                    if (res.ok) {
-                        this.editDocModalOpen = false;
-                        await this.fetchDocuments();
-                    }
                 },
                 async deleteDocument(id) {
                     if (!confirm('Xóa tài liệu này?')) return;
