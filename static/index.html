@@ -16,7 +16,7 @@
 </head>
 <body class="bg-[#FAF8F5] text-[#2D2926] font-sans antialiased min-h-screen" x-data="classroomApp()" x-init="initData()">
 
-    <!-- MÀN HÌNH CHỜ TẢI DỮ LIỆU (LOADING OVERLAY) -->
+    <!-- MÀN HÌNH CHỜ TẢI DỮ LIỆU -->
     <div x-show="isLoadingContent" x-transition:enter="transition opacity ease-out duration-200" x-transition:leave="transition opacity ease-in duration-200" class="fixed inset-0 z-50 bg-[#2D2926]/40 backdrop-blur-sm flex flex-col items-center justify-center p-4">
         <div class="bg-[#FAF8F5] p-8 rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col items-center space-y-4 max-w-sm text-center">
             <div class="w-12 h-12 border-4 border-[#F2E8E1] border-t-[#B8502B] rounded-full animate-spin"></div>
@@ -97,7 +97,6 @@
                x-transition:leave-end="-ml-64 opacity-0"
                class="w-64 bg-white border-r border-[#E6E1D8] flex flex-col justify-between shrink-0 select-none z-20">
             <div class="p-5">
-                <!-- LOGO BÊN TRÁI (CHỈ ICON VÀ TÊN DƯỚI) -->
                 <div class="flex flex-col items-center text-center pb-4 mb-4 border-b border-[#E6E1D8] space-y-2">
                     <div class="w-12 h-12 rounded-2xl bg-[#B8502B] flex items-center justify-center text-white shadow-md">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
@@ -166,7 +165,6 @@
 
         <!-- MAIN WORKSPACE -->
         <div class="flex-1 flex flex-col min-w-0 overflow-y-auto transition-all duration-300">
-            <!-- HEADER VỚI NÚT ĐÓNG/MỞ SIDEBAR -->
             <header class="h-16 bg-white/90 backdrop-blur border-b border-[#E6E1D8] flex items-center justify-between px-6 sticky top-0 z-10">
                 <div class="flex items-center space-x-4">
                     <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-[#57534E] hover:text-[#2D2926] hover:bg-[#FAF8F5] rounded-xl border border-[#E6E1D8] transition cursor-pointer" title="Đóng/Mở Sidebar">
@@ -308,7 +306,6 @@
                         </button>
                     </div>
 
-                    <!-- DANH SÁCH BÀI TẬP -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <template x-for="a in assignments" :key="a.id">
                             <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm flex flex-col justify-between">
@@ -352,7 +349,7 @@
                         </template>
                     </div>
 
-                    <!-- MODAL TẠO / CHỈNH SỬA BTVN & THANG ĐIỂM -->
+                    <!-- MODAL TẠO / CHỈNH SỬA BTVN -->
                     <div x-show="assignmentModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                         <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
                             <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
@@ -374,7 +371,6 @@
                                     <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-[#B8502B] focus:outline-none bg-[#FAF8F5]">
                                 </div>
 
-                                <!-- CẤU HÌNH SỐ LƯỢNG CÂU HỎI -->
                                 <div class="bg-[#F7ECE7]/60 p-4 rounded-xl border border-[#E6CFC3] space-y-3">
                                     <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Cấu hình số lượng câu hỏi</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -393,7 +389,6 @@
                                     </div>
                                 </div>
 
-                                <!-- CẤU HÌNH THANG ĐIỂM -->
                                 <div class="bg-[#FAF8F5] p-4 rounded-xl border border-[#E6E1D8] space-y-3">
                                     <h4 class="text-xs font-bold text-[#2D2926] uppercase tracking-wider">Cấu hình thang điểm (Chuẩn GDPT 2018)</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -429,11 +424,9 @@
                                     </div>
                                 </div>
 
-                                <!-- THIẾT LẬP BẢNG ĐÁP ÁN CHUẨN -->
                                 <div class="space-y-4">
                                     <h4 class="text-xs font-bold text-[#2D2926] border-b border-[#E6E1D8] pb-1">Bảng Đáp Án Chuẩn</h4>
 
-                                    <!-- Đáp án Trắc nghiệm -->
                                     <template x-if="assignmentForm.mc_count > 0">
                                         <div>
                                             <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Trắc nghiệm (Chọn đáp án đúng)</div>
@@ -454,7 +447,6 @@
                                         </div>
                                     </template>
 
-                                    <!-- Đáp án Đúng / Sai -->
                                     <template x-if="assignmentForm.tf_count > 0">
                                         <div>
                                             <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Đúng / Sai</div>
@@ -473,7 +465,6 @@
                                         </div>
                                     </template>
 
-                                    <!-- Đáp án Trả lời ngắn -->
                                     <template x-if="assignmentForm.sa_count > 0">
                                         <div>
                                             <div class="text-xs font-bold text-[#B8502B] mb-2">Phần Trả lời ngắn (Nhập đáp án chuẩn)</div>
@@ -521,7 +512,6 @@
                                     <input type="text" x-model="studentFormAnswer.student_name" placeholder="Nhập đầy đủ họ và tên" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B] font-semibold">
                                 </div>
 
-                                <!-- PHẦN TRẮC NGHIỆM -->
                                 <template x-if="activeStudentAssignment && activeStudentAssignment.mc_count > 0">
                                     <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
                                         <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Phần Trắc Nghiệm *</h4>
@@ -554,7 +544,6 @@
                                     </div>
                                 </template>
 
-                                <!-- PHẦN ĐÚNG / SAI -->
                                 <template x-if="activeStudentAssignment && activeStudentAssignment.tf_count > 0">
                                     <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
                                         <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Phần Đúng / Sai *</h4>
@@ -581,7 +570,6 @@
                                     </div>
                                 </template>
 
-                                <!-- PHẦN TRẢ LỜI NGẮN -->
                                 <template x-if="activeStudentAssignment && activeStudentAssignment.sa_count > 0">
                                     <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
                                         <h4 class="text-xs font-bold text-[#B8502B] uppercase tracking-wider">Phần Trả Lời Ngắn *</h4>
@@ -606,7 +594,7 @@
                         </div>
                     </div>
 
-                    <!-- MODAL BẢNG ĐIỂM VÀ CHI TIẾT KẾT QUẢ BÀI NỘP -->
+                    <!-- MODAL BẢNG ĐIỂM -->
                     <div x-show="viewSubmissionsOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                         <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-[#E6E1D8] my-8">
                             <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
@@ -643,7 +631,6 @@
                                     </table>
                                 </div>
 
-                                <!-- KHUNG XEM CHI TIẾT BÀI LÀM -->
                                 <template x-if="selectedSubmission">
                                     <div class="bg-[#FAF8F5] p-5 rounded-2xl border border-[#E6E1D8] space-y-4">
                                         <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3">
@@ -653,7 +640,6 @@
                                             <div class="text-lg font-bold" :class="selectedSubmission.score >= 5 ? 'text-emerald-700' : 'text-rose-700'" x-text="'Điểm: ' + selectedSubmission.score"></div>
                                         </div>
 
-                                        <!-- CHI TIẾT CÂU TRẮC NGHIỆM -->
                                         <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.mc).length > 0">
                                             <div>
                                                 <div class="text-xs font-bold text-[#2D2926] mb-2">Phần Trắc Nghiệm:</div>
@@ -668,7 +654,6 @@
                                             </div>
                                         </template>
 
-                                        <!-- CHI TIẾT CÂU ĐÚNG / SAI -->
                                         <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.tf).length > 0">
                                             <div>
                                                 <div class="text-xs font-bold text-[#2D2926] mb-2">Phần Đúng / Sai:</div>
@@ -683,7 +668,6 @@
                                             </div>
                                         </template>
 
-                                        <!-- CHI TIẾT CÂU TRẢ LỜI NGẮN -->
                                         <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.sa).length > 0">
                                             <div>
                                                 <div class="text-xs font-bold text-[#2D2926] mb-2">Phần Trả Lời Ngắn:</div>
@@ -708,24 +692,69 @@
                     </div>
                 </section>
 
-                <!-- 4. TÀI LIỆU PDF -->
+                <!-- 4. TÀI LIỆU PDF (ĐÃ BỎ THUMBNAIL IFRAME & BỔ SUNG PHÂN LOẠI BÀI HỌC) -->
                 <section x-show="activeTab === 'documents'" class="space-y-6">
-                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                        <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Tệp PDF Từ Google Drive</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <input type="text" x-model="newDoc.title" placeholder="Tên tài liệu" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
-                            <input type="text" x-model="newDoc.drive_url" placeholder="Link xem PDF" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
-                            <button @click="addDocument()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Lưu Tài Liệu</button>
+                    <!-- FORM THÊM TÀI LIỆU (CHO GIÁO VIÊN) -->
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
+                        <h3 class="font-bold text-[#2D2926] text-sm">Thêm Tệp Tài Liệu PDF Mới</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Tên tài liệu *</label>
+                                <input type="text" x-model="newDoc.title" placeholder="Mô tả tệp tài liệu..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Phân loại bài học *</label>
+                                <input type="text" x-model="newDoc.category" placeholder="Ví dụ: Bài 1, Bài 2..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Ngày học</label>
+                                <input type="date" x-model="newDoc.doc_date" class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Đường dẫn Google Drive *</label>
+                                <input type="text" x-model="newDoc.drive_url" placeholder="Paste Drive URL..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button @click="addDocument()" class="bg-[#B8502B] text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition">Thêm Tài Liệu</button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <template x-for="doc in documents" :key="doc.id">
-                            <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                                <h3 class="font-bold text-[#2D2926] mb-3 text-sm" x-text="doc.title"></h3>
-                                <div class="h-96 border border-[#E6E1D8] rounded-xl mb-3 overflow-hidden">
-                                    <iframe :src="doc.drive_url" class="w-full h-full" frameborder="0"></iframe>
+
+                    <!-- THANH LỌC BÀI HỌC (TAB SELECTION) -->
+                    <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center space-x-2 overflow-x-auto">
+                        <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc theo bài học:</span>
+                        <button @click="selectedDocCategory = 'Tất cả'" :class="selectedDocCategory === 'Tất cả' ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1.5 rounded-xl text-xs transition shrink-0">Tất cả bài học</button>
+                        <template x-for="cat in getDocCategories()" :key="cat">
+                            <button @click="selectedDocCategory = cat" :class="selectedDocCategory === cat ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1.5 rounded-xl text-xs transition shrink-0" x-text="cat"></button>
+                        </template>
+                    </div>
+
+                    <!-- DANH SÁCH TÀI LIỆU DẠNG HÀNG GỌN GÀNG (KHÔNG IFRAME) -->
+                    <div class="space-y-3">
+                        <template x-for="doc in filteredDocuments()" :key="doc.id">
+                            <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center justify-between hover:border-[#E6CFC3] transition">
+                                <div class="flex items-center space-x-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-xl bg-[#F7ECE7] flex items-center justify-center text-[#B8502B] shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-bold text-[#2D2926] truncate" x-text="doc.title"></div>
+                                        <div class="flex items-center space-x-2 text-[11px] text-[#78716C] mt-0.5">
+                                            <span class="bg-[#FAF8F5] border border-[#E6E1D8] px-2 py-0.5 rounded-md font-semibold text-[#B8502B]" x-text="doc.category || 'Bài 1'"></span>
+                                            <span x-show="doc.doc_date">•</span>
+                                            <span x-show="doc.doc_date" class="font-mono" x-text="'Ngày học: ' + formatDateDisplay(doc.doc_date)"></span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <a :href="doc.drive_url.replace('/preview', '/view')" target="_blank" class="inline-block bg-[#FAF8F5] text-[#B8502B] text-xs px-3 py-1.5 rounded-lg border border-[#E6E1D8] font-semibold hover:bg-[#F7ECE7]">Mở / Tải về Google Drive</a>
+                                <div class="flex items-center space-x-2 shrink-0">
+                                    <a :href="doc.drive_url" target="_blank" class="bg-[#FAF8F5] text-[#B8502B] text-xs px-3 py-1.5 rounded-xl border border-[#E6E1D8] font-semibold hover:bg-[#F7ECE7] transition flex items-center space-x-1">
+                                        <span>Mở / Tải về Google Drive</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                    <button x-show="role === 'teacher'" @click="deleteDocument(doc.id)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition" title="Xóa tài liệu">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -808,6 +837,9 @@
                 currentVideoId: '',
                 currentVideoTitle: '',
 
+                selectedDocCategory: 'Tất cả',
+                newDoc: { title: '', drive_url: '', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] },
+
                 assignmentModalOpen: false,
                 isEditingAssignment: false,
                 editingAssignmentId: null,
@@ -840,7 +872,6 @@
                 newAttendanceDate: new Date().toISOString().split('T')[0],
                 newStudent: { student_code: '', full_name: '' },
                 newVideo: { title: '', youtube_id: '' },
-                newDoc: { title: '', drive_url: '' },
                 newExam: { title: '', question_mathml: '' },
 
                 async initData() {
@@ -1329,14 +1360,33 @@
                     let res = await fetch('/api/documents');
                     this.documents = await res.json();
                 },
+                getDocCategories() {
+                    let cats = new Set();
+                    this.documents.forEach(d => {
+                        if (d.category) cats.add(d.category);
+                    });
+                    return Array.from(cats).sort();
+                },
+                filteredDocuments() {
+                    if (this.selectedDocCategory === 'Tất cả') return this.documents;
+                    return this.documents.filter(d => d.category === this.selectedDocCategory);
+                },
                 async addDocument() {
-                    if (!this.newDoc.title || !this.newDoc.drive_url) return;
+                    if (!this.newDoc.title || !this.newDoc.drive_url) {
+                        alert('Vui lòng nhập tên tài liệu và link Google Drive!');
+                        return;
+                    }
                     await fetch('/api/documents', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(this.newDoc)
                     });
-                    this.newDoc = { title: '', drive_url: '' };
+                    this.newDoc = { title: '', drive_url: '', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] };
+                    await this.fetchDocuments();
+                },
+                async deleteDocument(id) {
+                    if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này không?')) return;
+                    await fetch('/api/documents/' + id, { method: 'DELETE' });
                     await this.fetchDocuments();
                 },
 
