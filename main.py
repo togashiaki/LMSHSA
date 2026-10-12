@@ -2,14 +2,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
+import json
+from datetime import datetime
 
 app = FastAPI(title="Hệ thống Quản lý Lớp học")
 
-# Lấy kết nối từ biến môi trường trên Render
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db():
@@ -62,13 +63,18 @@ def init_db():
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
-        due_date TEXT
+        due_date TEXT,
+        mc_count INTEGER DEFAULT 0,
+        tf_count INTEGER DEFAULT 0,
+        sa_count INTEGER DEFAULT 0,
+        answer_key TEXT DEFAULT '{}'
     );
     CREATE TABLE IF NOT EXISTS submissions (
         id SERIAL PRIMARY KEY,
         assignment_id INTEGER NOT NULL,
         student_name TEXT NOT NULL,
         answer_text TEXT NOT NULL,
+        score NUMERIC(5, 2) DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS exams (
@@ -78,6 +84,12 @@ def init_db():
     );
     """)
     
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS mc_count INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_count INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_count INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS answer_key TEXT DEFAULT '{}';")
+    cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS score NUMERIC(5, 2) DEFAULT 0;")
+
     cursor.execute("SELECT COUNT(*) FROM users")
     res = cursor.fetchone()
     user_count = res['count'] if res else 0
@@ -93,6 +105,58 @@ try:
     init_db()
 except Exception as e:
     print("Lỗi khởi tạo DB:", e)
+
+def calculate_submission_score(answer_key_raw: str, student_answers_raw: str):
+    try:
+        key = json.loads(answer_key_raw or "{}")
+    except Exception:
+        key = {}
+    try:
+        ans = json.loads(student_answers_raw or "{}")
+    except Exception:
+        ans = {}
+
+    total_items = 0
+    correct_count = 0
+
+    mc_key = key.get("mc", {})
+    mc_ans = ans.get("mc", {})
+    for q_num, correct_option in mc_key.items():
+        if not correct_option:
+            continue
+        total_items += 1
+        student_option = mc_ans.get(q_num, "")
+        if str(student_option).strip().upper() == str(correct_option).strip().upper():
+            correct_count += 1
+
+    tf_key = key.get("tf", {})
+    tf_ans = ans.get("tf", {})
+    for sub_q, correct_tf in tf_key.items():
+        if not correct_tf:
+            continue
+        total_items += 1
+        student_tf = tf_ans.get(sub_q, "")
+        if str(student_tf).strip() == str(correct_tf).strip():
+            correct_count += 1
+
+    sa_key = key.get("sa", {})
+    sa_ans = ans.get("sa", {})
+    for q_num, correct_val in sa_key.items():
+        if not correct_val:
+            continue
+        total_items += 1
+        student_val = sa_ans.get(q_num, "")
+        k_str = str(correct_val).strip().lower().replace(",", ".")
+        s_str = str(student_val).strip().lower().replace(",", ".")
+        if k_str == s_str and k_str != "":
+            correct_count += 1
+
+    if total_items == 0:
+        score = 10.0
+    else:
+        score = round((correct_count / total_items) * 10.0, 2)
+
+    return float(score)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -296,7 +360,7 @@ def create_document(d: DocumentCreate):
     conn.close()
     return {"message": "Đã thêm tài liệu"}
 
-# --- BÀI TẬP VỀ NHÀ ---
+# --- BÀI TẬP VỀ NHÀ & CHẤM ĐIỂM ---
 @app.get("/api/assignments")
 def get_assignments():
     conn = get_db()
@@ -311,30 +375,75 @@ class AssignmentCreate(BaseModel):
     title: str
     content: str
     due_date: Optional[str] = ""
+    mc_count: Optional[int] = 0
+    tf_count: Optional[int] = 0
+    sa_count: Optional[int] = 0
+    answer_key: Optional[str] = "{}"
 
 @app.post("/api/assignments")
 def create_assignment(a: AssignmentCreate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO assignments (title, content, due_date) VALUES (%s, %s, %s)",
-                   (a.title, a.content, a.due_date))
+    cursor.execute("""
+        INSERT INTO assignments (title, content, due_date, mc_count, tf_count, sa_count, answer_key)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (a.title, a.content, a.due_date, a.mc_count or 0, a.tf_count or 0, a.sa_count or 0, a.answer_key or "{}"))
     conn.commit()
     cursor.close()
     conn.close()
     return {"message": "Đã tạo bài tập"}
+
+@app.put("/api/assignments/{assignment_id}")
+def update_assignment(assignment_id: int, a: AssignmentCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE assignments
+        SET title = %s, content = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s
+        WHERE id = %s
+    """, (a.title, a.content, a.due_date, a.mc_count or 0, a.tf_count or 0, a.sa_count or 0, a.answer_key or "{}", assignment_id))
+    
+    # Tự động chấm lại toàn bộ bài nộp của học sinh với đáp án mới
+    cursor.execute("SELECT id, answer_text FROM submissions WHERE assignment_id = %s", (assignment_id,))
+    subs = cursor.fetchall()
+    for sub in subs:
+        score = calculate_submission_score(a.answer_key or "{}", sub["answer_text"])
+        cursor.execute("UPDATE submissions SET score = %s WHERE id = %s", (score, sub["id"]))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật bài tập và tự động chấm lại toàn bộ bài nộp!"}
+
+@app.delete("/api/assignments/{assignment_id}")
+def delete_assignment(assignment_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM submissions WHERE assignment_id = %s", (assignment_id,))
+    cursor.execute("DELETE FROM assignments WHERE id = %s", (assignment_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa bài tập"}
 
 @app.get("/api/submissions")
 def get_submissions(assignment_id: Optional[int] = None):
     conn = get_db()
     cursor = conn.cursor()
     if assignment_id:
-        cursor.execute("SELECT * FROM submissions WHERE assignment_id = %s ORDER BY id DESC", (assignment_id,))
+        cursor.execute("SELECT * FROM submissions WHERE assignment_id = %s ORDER BY score DESC, id DESC", (assignment_id,))
     else:
         cursor.execute("SELECT * FROM submissions ORDER BY id DESC")
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [dict(r) for r in rows]
+    
+    res = []
+    for r in rows:
+        item = dict(r)
+        item["score"] = float(item["score"]) if item["score"] is not None else 0.0
+        res.append(item)
+    return res
 
 class SubmissionCreate(BaseModel):
     assignment_id: int
@@ -345,12 +454,39 @@ class SubmissionCreate(BaseModel):
 def create_submission(s: SubmissionCreate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO submissions (assignment_id, student_name, answer_text) VALUES (%s, %s, %s)",
-                   (s.assignment_id, s.student_name, s.answer_text))
+    
+    cursor.execute("SELECT * FROM assignments WHERE id = %s", (s.assignment_id,))
+    assign = cursor.fetchone()
+    if not assign:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Bài tập không tồn tại!")
+    
+    # Kiểm tra Deadline
+    due_date_str = assign.get("due_date")
+    if due_date_str:
+        try:
+            due_dt = datetime.fromisoformat(due_date_str)
+            if datetime.now() > due_dt:
+                cursor.close()
+                conn.close()
+                raise HTTPException(status_code=400, detail="Bài tập đã hết hạn nộp bài!")
+        except ValueError:
+            pass
+
+    # Chấm điểm tự động
+    answer_key_raw = assign.get("answer_key", "{}")
+    score = calculate_submission_score(answer_key_raw, s.answer_text)
+
+    cursor.execute("""
+        INSERT INTO submissions (assignment_id, student_name, answer_text, score)
+        VALUES (%s, %s, %s, %s)
+    """, (s.assignment_id, s.student_name, s.answer_text, score))
+    
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Nộp bài thành công"}
+    return {"message": "Nộp bài thành công!", "score": score}
 
 # --- ĐỀ KIỂM TRA & MATHML ---
 @app.get("/api/exams")
