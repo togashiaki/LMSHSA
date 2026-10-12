@@ -27,16 +27,13 @@
                 </div>
             </div>
 
-            <!-- Tab Đăng nhập / Đăng ký -->
             <div class="flex border-b border-slate-200 mb-6">
                 <button @click="authTab = 'login'" :class="authTab === 'login' ? 'border-blue-600 text-blue-600 font-bold' : 'text-slate-400'" class="flex-1 py-2 text-sm border-b-2 text-center">Đăng nhập</button>
                 <button @click="authTab = 'register'" :class="authTab === 'register' ? 'border-blue-600 text-blue-600 font-bold' : 'text-slate-400'" class="flex-1 py-2 text-sm border-b-2 text-center">Tạo tài khoản</button>
             </div>
 
-            <!-- Thông báo lỗi -->
             <div x-show="authError" class="p-3 bg-rose-50 text-rose-600 rounded-xl text-xs font-medium mb-4" x-text="authError"></div>
 
-            <!-- FORM ĐĂNG NHẬP -->
             <div x-show="authTab === 'login'" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Tên đăng nhập</label>
@@ -50,7 +47,6 @@
                 <p class="text-[11px] text-slate-400 text-center mt-2">Tài khoản GV mặc định: admin / 123456</p>
             </div>
 
-            <!-- FORM ĐĂNG KÝ -->
             <div x-show="authTab === 'register'" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Họ và tên</label>
@@ -76,10 +72,10 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH CHÍNH CỦA ỨNG DỤNG -->
+    <!-- MÀN HÌNH CHÍNH -->
     <div x-show="currentUser" class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR BÊN TRÁI -->
+        <!-- SIDEBAR -->
         <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 select-none">
             <div class="p-4">
                 <div class="flex items-center space-x-3 px-2 py-3 mb-4">
@@ -133,7 +129,6 @@
                 </nav>
             </div>
 
-            <!-- Profile & Nút Đăng xuất -->
             <div class="p-4 border-t border-slate-200 bg-slate-50/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3 min-w-0">
@@ -185,7 +180,7 @@
                     </div>
                 </section>
 
-                <!-- 1. BẢNG ĐIỂM DANH MA TRẬN -->
+                <!-- 1. BẢNG ĐIỂM DANH -->
                 <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                         <div>
@@ -266,7 +261,7 @@
                                 <template x-for="v in videos" :key="v.id">
                                     <li class="py-3 flex items-center justify-between hover:bg-slate-50 rounded-lg px-2">
                                         <span @click="selectVideo(v)" class="font-medium text-xs text-slate-800 hover:text-blue-600 cursor-pointer flex-1 mr-2" x-text="v.title"></span>
-                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-500 hover:text-rose-700 p-1 rounded transition shrink-0" title="Xóa video này">
+                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-500 hover:text-rose-700 p-1 rounded transition shrink-0" title="Xóa video">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </li>
@@ -276,37 +271,381 @@
                     </div>
                 </section>
 
-                <!-- 3. BÀI TẬP VỀ NHÀ -->
+                <!-- 3. BÀI TẬP VỀ NHÀ & CHẤM ĐIỂM -->
                 <section x-show="activeTab === 'assignments'" class="space-y-6">
-                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="font-bold text-slate-900 mb-3 text-sm">Tạo Form Bài Tập Mới</h3>
-                        <input type="text" x-model="newAssignment.title" placeholder="Tên bài tập" class="border border-slate-200 p-2 rounded-xl text-xs w-full mb-3">
-                        <textarea x-model="newAssignment.content" placeholder="Nội dung bài tập" class="border border-slate-200 p-2 rounded-xl text-xs w-full mb-3" rows="3"></textarea>
-                        <button @click="addAssignment()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Đăng Bài Tập</button>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Quản Lý Bài Tập Về Nhà</h2>
+                            <p class="text-xs text-slate-500">Hệ thống giao bài, làm phiếu trắc nghiệm trực tuyến & chấm điểm tự động</p>
+                        </div>
+                        <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 transition flex items-center space-x-2">
+                            <span>+ Tạo Bài Tập Mới</span>
+                        </button>
                     </div>
 
+                    <!-- DANH SÁCH BÀI TẬP -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <template x-for="a in assignments" :key="a.id">
                             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                                 <div>
-                                    <h3 class="text-sm font-bold text-blue-600 mb-2" x-text="a.title"></h3>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span :class="isAssignmentExpired(a.due_date) ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'" class="px-2.5 py-1 rounded-full text-[11px] font-medium border">
+                                            <span x-text="isAssignmentExpired(a.due_date) ? 'Đã hết hạn' : 'Đang diễn ra'"></span>
+                                        </span>
+                                        <span class="text-xs text-slate-400 font-mono" x-text="a.due_date ? 'Hạn: ' + formatDateTimeDisplay(a.due_date) : 'Không có hạn'"></span>
+                                    </div>
+                                    <h3 class="text-base font-bold text-slate-900 mb-2" x-text="a.title"></h3>
                                     <p class="text-xs text-slate-600 mb-4 whitespace-pre-line" x-text="a.content"></p>
+                                    <div class="flex flex-wrap gap-2 text-[11px] text-slate-500 font-medium bg-slate-50 p-2.5 rounded-xl mb-4 border border-slate-100">
+                                        <span x-text="a.mc_count + ' câu Trắc nghiệm (A,B,C,D)'"></span>
+                                        <span>•</span>
+                                        <span x-text="a.tf_count + ' câu Đúng/Sai'"></span>
+                                        <span>•</span>
+                                        <span x-text="a.sa_count + ' câu Trả lời ngắn'"></span>
+                                    </div>
                                 </div>
-                                <div x-show="role === 'student'" class="border-t border-slate-100 pt-4">
-                                    <input type="text" x-model="submissionForms[a.id].student_name" placeholder="Họ và tên học sinh" class="border border-slate-200 p-2 rounded-xl w-full mb-2 text-xs">
-                                    <textarea x-model="submissionForms[a.id].answer_text" placeholder="Nhập đáp án..." class="border border-slate-200 p-2 rounded-xl w-full mb-2 text-xs" rows="2"></textarea>
-                                    <button @click="submitHomework(a.id)" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-700">Nộp Bài</button>
-                                </div>
-                                <div x-show="role === 'teacher'" class="border-t border-slate-100 pt-4">
-                                    <button @click="loadSubmissions(a.id)" class="text-xs text-blue-600 underline mb-2">Xem danh sách bài nộp</button>
-                                    <ul class="text-xs divide-y divide-slate-100 max-h-40 overflow-y-auto">
-                                        <template x-for="sub in currentSubmissions[a.id] || []" :key="sub.id">
-                                            <li class="py-2"><span class="font-bold text-slate-800" x-text="sub.student_name"></span>: <span class="text-slate-600" x-text="sub.answer_text"></span></li>
-                                        </template>
-                                    </ul>
+
+                                <div class="border-t border-slate-100 pt-4 flex items-center justify-between gap-2">
+                                    <div class="flex space-x-2">
+                                        <button @click="openStudentForm(a)" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">
+                                            <span x-text="role === 'teacher' ? 'Xem Form Bài Làm' : 'Làm Bài / Nộp Phiếu'"></span>
+                                        </button>
+                                        <button @click="viewAssignmentSubmissions(a)" class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-slate-200 transition">
+                                            <span x-text="role === 'teacher' ? 'Bảng Điểm Lớp' : 'Xem Kết Quả'"></span>
+                                        </button>
+                                    </div>
+                                    <div x-show="role === 'teacher'" class="flex space-x-1">
+                                        <button @click="openEditAssignmentModal(a)" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Sửa bài tập & đáp án">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        </button>
+                                        <button @click="deleteAssignment(a.id)" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa bài tập này">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </template>
+                    </div>
+
+                    <!-- MODAL TẠO / CHỈNH SỬA BTVN & ĐÁP ÁN CHUẨN (DÀNH CHO GIÁO VIÊN) -->
+                    <div x-show="assignmentModalOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
+                            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                                <h3 class="text-base font-bold text-slate-900" x-text="isEditingAssignment ? 'Chỉnh Sửa Bài Tập & Đáp Án' : 'Tạo Bài Tập Về Nhà Mới'"></h3>
+                                <button @click="assignmentModalOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                            </div>
+
+                            <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tiêu đề bài tập *</label>
+                                    <input type="text" x-model="assignmentForm.title" placeholder="Ví dụ: Bài tập Ôn tập Hàm Số Lớp 12" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nội dung / Hướng dẫn đề bài</label>
+                                    <textarea x-model="assignmentForm.content" placeholder="Mô tả hoặc dán link đề bài PDF..." class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="3"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Hạn nộp bài (Deadline)</label>
+                                    <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </div>
+
+                                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
+                                    <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider">Cấu hình số lượng câu hỏi</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Trắc nghiệm (A,B,C,D)</label>
+                                            <input type="number" min="0" x-model.number="assignmentForm.mc_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Đúng/Sai (Mỗi câu 4 ý)</label>
+                                            <input type="number" min="0" x-model.number="assignmentForm.tf_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Trả lời ngắn</label>
+                                            <input type="number" min="0" x-model.number="assignmentForm.sa_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- THIẾT LẬP BẢNG ĐÁP ÁN CHUẨN -->
+                                <div class="space-y-4">
+                                    <h4 class="text-xs font-bold text-slate-900 border-b pb-1">Bảng Đáp Án Chuẩn (Dùng để hệ thống tự động chấm điểm)</h4>
+
+                                    <!-- Đáp án Trắc nghiệm -->
+                                    <template x-if="assignmentForm.mc_count > 0">
+                                        <div>
+                                            <div class="text-xs font-bold text-blue-700 mb-2">Phần Trắc nghiệm (Chọn đáp án đúng)</div>
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                <template x-for="i in assignmentForm.mc_count" :key="i">
+                                                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                                                        <span class="font-bold text-slate-700" x-text="'Câu ' + i + ':'"></span>
+                                                        <select x-model="assignmentForm.answer_key.mc[i]" class="p-1 border rounded bg-white font-bold text-blue-600">
+                                                            <option value="">--</option>
+                                                            <option value="A">A</option>
+                                                            <option value="B">B</option>
+                                                            <option value="C">C</option>
+                                                            <option value="D">D</option>
+                                                        </select>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Đáp án Đúng / Sai -->
+                                    <template x-if="assignmentForm.tf_count > 0">
+                                        <div>
+                                            <div class="text-xs font-bold text-blue-700 mb-2">Phần Đúng / Sai</div>
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                <template x-for="q in getTfSubQuestions(assignmentForm.tf_count)" :key="q">
+                                                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                                                        <span class="font-bold text-slate-700" x-text="'Câu ' + q + ':'"></span>
+                                                        <select x-model="assignmentForm.answer_key.tf[q]" class="p-1 border rounded bg-white font-bold text-blue-600">
+                                                            <option value="">--</option>
+                                                            <option value="Đúng">Đúng</option>
+                                                            <option value="Sai">Sai</option>
+                                                        </select>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Đáp án Trả lời ngắn -->
+                                    <template x-if="assignmentForm.sa_count > 0">
+                                        <div>
+                                            <div class="text-xs font-bold text-blue-700 mb-2">Phần Trả lời ngắn (Nhập đáp án chuẩn)</div>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <template x-for="i in assignmentForm.sa_count" :key="i">
+                                                    <div class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                                                        <span class="font-bold text-slate-700 min-w-[60px]" x-text="'Câu ' + i + ':'"></span>
+                                                        <input type="text" x-model="assignmentForm.answer_key.sa[i]" placeholder="Nhập đáp án (VD: 12.5)" class="w-full p-1 border rounded bg-white text-xs">
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
+                                <button @click="assignmentModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Hủy</button>
+                                <button @click="saveAssignment()" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Lưu Bài Tập</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL FORM LÀM BÀI PHIẾU TRẢ LỜI CỦA HỌC SINH (GOOGLE FORMS STYLE) -->
+                    <div x-show="studentFormOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
+                            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900" x-text="activeStudentAssignment ? activeStudentAssignment.title : ''"></h3>
+                                    <p class="text-xs text-slate-500">Phiếu làm bài trực tuyến</p>
+                                </div>
+                                <button @click="studentFormOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                            </div>
+
+                            <!-- CẢNH BÁO QUÁ HẠN NỘP BÀI -->
+                            <template x-if="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date)">
+                                <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold mb-4 flex items-center space-x-2">
+                                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Bài tập này đã quá hạn nộp bài. Bạn chỉ có thể xem nội dung phiếu trả lời và không thể nộp bài được nữa.</span>
+                                </div>
+                            </template>
+
+                            <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+                                <!-- Họ tên học sinh -->
+                                <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Họ tên học sinh *</label>
+                                    <input type="text" x-model="studentFormAnswer.student_name" placeholder="Nhập đầy đủ họ và tên" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
+                                </div>
+
+                                <!-- PHẦN TRẮC NGHIỆM -->
+                                <template x-if="activeStudentAssignment && activeStudentAssignment.mc_count > 0">
+                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                        <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Phần Trắc Nghiệm *</h4>
+                                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                            <table class="w-full text-center border-collapse text-xs">
+                                                <thead>
+                                                    <tr class="bg-slate-100 border-b font-bold text-slate-700">
+                                                        <th class="p-3 text-left w-24">Câu hỏi</th>
+                                                        <th class="p-3 w-16">A</th>
+                                                        <th class="p-3 w-16">B</th>
+                                                        <th class="p-3 w-16">C</th>
+                                                        <th class="p-3 w-16">D</th>
+                                                        <th class="p-3 w-28">Em không biết</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-100">
+                                                    <template x-for="i in activeStudentAssignment.mc_count" :key="i">
+                                                        <tr class="hover:bg-slate-50/80">
+                                                            <td class="p-3 text-left font-bold text-slate-800" x-text="'Câu ' + i"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="A" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="B" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="C" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="D" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-blue-600"></td>
+                                                            <td class="p-3"><input type="radio" :name="'mc_' + i" value="" x-model="studentFormAnswer.mc[i]" class="w-4 h-4 text-slate-400"></td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- PHẦN ĐÚNG / SAI -->
+                                <template x-if="activeStudentAssignment && activeStudentAssignment.tf_count > 0">
+                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                        <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Phần Đúng / Sai *</h4>
+                                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                            <table class="w-full text-center border-collapse text-xs">
+                                                <thead>
+                                                    <tr class="bg-slate-100 border-b font-bold text-slate-700">
+                                                        <th class="p-3 text-left">Câu hỏi</th>
+                                                        <th class="p-3 w-32">Đúng</th>
+                                                        <th class="p-3 w-32">Sai</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-100">
+                                                    <template x-for="q in getTfSubQuestions(activeStudentAssignment.tf_count)" :key="q">
+                                                        <tr class="hover:bg-slate-50/80">
+                                                            <td class="p-3 text-left font-bold text-slate-800" x-text="'Câu ' + q"></td>
+                                                            <td class="p-3"><input type="radio" :name="'tf_' + q" value="Đúng" x-model="studentFormAnswer.tf[q]" class="w-4 h-4 text-blue-600"></td>
+                                                            <td class="p-3"><input type="radio" :name="'tf_' + q" value="Sai" x-model="studentFormAnswer.tf[q]" class="w-4 h-4 text-blue-600"></td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- PHẦN TRẢ LỜI NGẮN -->
+                                <template x-if="activeStudentAssignment && activeStudentAssignment.sa_count > 0">
+                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                        <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Phần Trả Lời Ngắn *</h4>
+                                        <div class="space-y-3">
+                                            <template x-for="i in activeStudentAssignment.sa_count" :key="i">
+                                                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                                    <label class="block text-xs font-bold text-slate-800 mb-1" x-text="'Câu ' + i + ' *'"></label>
+                                                    <input type="text" x-model="studentFormAnswer.sa[i]" placeholder="Short answer text..." class="w-full border border-slate-200 p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
+                                <button @click="studentFormOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Đóng</button>
+                                <button @click="submitStudentAssignment()" :disabled="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date)" :class="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date) ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-700'" class="px-6 py-2 rounded-xl text-xs font-semibold transition">
+                                    <span>Nộp Bài Ngay</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL BẢNG ĐIỂM VÀ CHI TIẾT KẾT QUẢ BÀI NỘP -->
+                    <div x-show="viewSubmissionsOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
+                            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900" x-text="activeViewAssignment ? 'Bảng Điểm: ' + activeViewAssignment.title : 'Kết Quả Bài Nộp'"></h3>
+                                    <p class="text-xs text-slate-500">Danh sách bài làm và chi tiết chấm điểm</p>
+                                </div>
+                                <button @click="viewSubmissionsOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+                            </div>
+
+                            <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+                                <!-- DANH SÁCH BÀI NỘP -->
+                                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-100 border-b font-bold text-slate-700">
+                                                <th class="p-3">Họ tên HS</th>
+                                                <th class="p-3">Thời gian nộp</th>
+                                                <th class="p-3 text-center">Điểm số</th>
+                                                <th class="p-3 text-right">Chi tiết</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            <template x-for="sub in currentSubmissions" :key="sub.id">
+                                                <tr class="hover:bg-slate-50">
+                                                    <td class="p-3 font-semibold text-slate-800" x-text="sub.student_name"></td>
+                                                    <td class="p-3 text-slate-500 font-mono text-[11px]" x-text="sub.created_at ? formatDateTimeDisplay(sub.created_at) : ''"></td>
+                                                    <td class="p-3 text-center font-bold text-sm" :class="sub.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="sub.score + ' / 10'"></td>
+                                                    <td class="p-3 text-right">
+                                                        <button @click="inspectSubmission(sub)" class="text-blue-600 hover:underline font-semibold">Xem bài làm</button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- KHUNG XEM CHI TIẾT BÀI LÀM ĐƯỢC CHỌN -->
+                                <template x-if="selectedSubmission">
+                                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                                        <div class="flex items-center justify-between border-b pb-3">
+                                            <div>
+                                                <div class="text-xs text-slate-500">Bài làm của: <span class="font-bold text-slate-900" x-text="selectedSubmission.student_name"></span></div>
+                                            </div>
+                                            <div class="text-lg font-bold" :class="selectedSubmission.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="'Điểm: ' + selectedSubmission.score + ' / 10'"></div>
+                                        </div>
+
+                                        <!-- CHI TIẾT CÂU TRẮC NGHIỆM -->
+                                        <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.mc).length > 0">
+                                            <div>
+                                                <div class="text-xs font-bold text-slate-800 mb-2">Phần Trắc Nghiệm:</div>
+                                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                    <template x-for="(val, q) in selectedSubmissionDetails.mc" :key="q">
+                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'" class="p-2.5 rounded-xl border text-xs">
+                                                            <div class="font-bold" x-text="'Câu ' + q + ': ' + (val.student || 'Bỏ trống')"></div>
+                                                            <div x-show="!val.is_correct" class="text-[10px] mt-0.5" x-text="'Đáp án đúng: ' + val.correct"></div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- CHI TIẾT CÂU ĐÚNG / SAI -->
+                                        <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.tf).length > 0">
+                                            <div>
+                                                <div class="text-xs font-bold text-slate-800 mb-2">Phần Đúng / Sai:</div>
+                                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                    <template x-for="(val, q) in selectedSubmissionDetails.tf" :key="q">
+                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'" class="p-2.5 rounded-xl border text-xs">
+                                                            <div class="font-bold" x-text="'Câu ' + q + ': ' + (val.student || 'Bỏ trống')"></div>
+                                                            <div x-show="!val.is_correct" class="text-[10px] mt-0.5" x-text="'Đáp án đúng: ' + val.correct"></div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- CHI TIẾT CÂU TRẢ LỜI NGẮN -->
+                                        <template x-if="selectedSubmissionDetails && Object.keys(selectedSubmissionDetails.sa).length > 0">
+                                            <div>
+                                                <div class="text-xs font-bold text-slate-800 mb-2">Phần Trả Lời Ngắn:</div>
+                                                <div class="space-y-2">
+                                                    <template x-for="(val, q) in selectedSubmissionDetails.sa" :key="q">
+                                                        <div :class="val.is_correct ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'" class="p-2.5 rounded-xl border text-xs">
+                                                            <div class="font-bold" x-text="'Câu ' + q + ' - Bài làm: ' + (val.student || 'Bỏ trống')"></div>
+                                                            <div x-show="!val.is_correct" class="text-[11px] font-semibold mt-0.5" x-text="'Đáp án đúng: ' + val.correct"></div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="flex justify-end border-t pt-4 mt-4">
+                                <button @click="viewSubmissionsOpen = false" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-300">Đóng</button>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -406,13 +745,35 @@
                 exams: [],
                 currentVideoId: '',
                 currentVideoTitle: '',
-                submissionForms: {},
-                currentSubmissions: {},
+
+                // PHẦN BÀI TẬP VỀ NHÀ
+                assignmentModalOpen: false,
+                isEditingAssignment: false,
+                editingAssignmentId: null,
+                assignmentForm: {
+                    title: '',
+                    content: '',
+                    due_date: '',
+                    mc_count: 12,
+                    tf_count: 2,
+                    sa_count: 6,
+                    answer_key: { mc: {}, tf: {}, sa: {} }
+                },
+
+                studentFormOpen: false,
+                activeStudentAssignment: null,
+                studentFormAnswer: { student_name: '', mc: {}, tf: {}, sa: {} },
+
+                viewSubmissionsOpen: false,
+                activeViewAssignment: null,
+                currentSubmissions: [],
+                selectedSubmission: null,
+                selectedSubmissionDetails: null,
+
                 newAttendanceDate: new Date().toISOString().split('T')[0],
                 newStudent: { student_code: '', full_name: '' },
                 newVideo: { title: '', youtube_id: '' },
                 newDoc: { title: '', drive_url: '' },
-                newAssignment: { title: '', content: '' },
                 newExam: { title: '', question_mathml: '' },
 
                 async initData() {
@@ -516,50 +877,275 @@
                     });
                 },
 
+                formatDateTimeDisplay(dtStr) {
+                    if (!dtStr) return '';
+                    try {
+                        let d = new Date(dtStr);
+                        return d.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+                    } catch (e) {
+                        return dtStr;
+                    }
+                },
+
+                isAssignmentExpired(dueDateStr) {
+                    if (!dueDateStr) return false;
+                    try {
+                        return new Date() > new Date(dueDateStr);
+                    } catch (e) {
+                        return false;
+                    }
+                },
+
+                getTfSubQuestions(count) {
+                    let res = [];
+                    for (let i = 1; i <= count; i++) {
+                        ['a', 'b', 'c', 'd'].forEach(ch => res.push(i + ch));
+                    }
+                    return res;
+                },
+
+                async fetchAssignments() {
+                    let res = await fetch('/api/assignments');
+                    this.assignments = await res.json();
+                },
+
+                openCreateAssignmentModal() {
+                    this.isEditingAssignment = false;
+                    this.editingAssignmentId = null;
+                    this.assignmentForm = {
+                        title: '',
+                        content: '',
+                        due_date: '',
+                        mc_count: 12,
+                        tf_count: 2,
+                        sa_count: 6,
+                        answer_key: { mc: {}, tf: {}, sa: {} }
+                    };
+                    this.updateAnswerKeyFields();
+                    this.assignmentModalOpen = true;
+                },
+
+                openEditAssignmentModal(a) {
+                    this.isEditingAssignment = true;
+                    this.editingAssignmentId = a.id;
+                    let parsedKey = { mc: {}, tf: {}, sa: {} };
+                    try {
+                        parsedKey = JSON.parse(a.answer_key || '{}');
+                        if (!parsedKey.mc) parsedKey.mc = {};
+                        if (!parsedKey.tf) parsedKey.tf = {};
+                        if (!parsedKey.sa) parsedKey.sa = {};
+                    } catch (e) {}
+
+                    this.assignmentForm = {
+                        title: a.title,
+                        content: a.content,
+                        due_date: a.due_date || '',
+                        mc_count: a.mc_count || 0,
+                        tf_count: a.tf_count || 0,
+                        sa_count: a.sa_count || 0,
+                        answer_key: parsedKey
+                    };
+                    this.updateAnswerKeyFields();
+                    this.assignmentModalOpen = true;
+                },
+
+                updateAnswerKeyFields() {
+                    if (!this.assignmentForm.answer_key.mc) this.assignmentForm.answer_key.mc = {};
+                    if (!this.assignmentForm.answer_key.tf) this.assignmentForm.answer_key.tf = {};
+                    if (!this.assignmentForm.answer_key.sa) this.assignmentForm.answer_key.sa = {};
+                },
+
+                async saveAssignment() {
+                    if (!this.assignmentForm.title) {
+                        alert('Vui lòng nhập tiêu đề bài tập!');
+                        return;
+                    }
+                    let payload = {
+                        title: this.assignmentForm.title,
+                        content: this.assignmentForm.content,
+                        due_date: this.assignmentForm.due_date,
+                        mc_count: this.assignmentForm.mc_count,
+                        tf_count: this.assignmentForm.tf_count,
+                        sa_count: this.assignmentForm.sa_count,
+                        answer_key: JSON.stringify(this.assignmentForm.answer_key)
+                    };
+
+                    let url = this.isEditingAssignment ? '/api/assignments/' + this.editingAssignmentId : '/api/assignments';
+                    let method = this.isEditingAssignment ? 'PUT' : 'POST';
+
+                    try {
+                        let res = await fetch(url, {
+                            method: method,
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            alert(this.isEditingAssignment ? 'Đã cập nhật bài tập và chấm lại điểm thành công!' : 'Đã tạo bài tập thành công!');
+                            this.assignmentModalOpen = false;
+                            await this.fetchAssignments();
+                        } else {
+                            alert('Không thể lưu bài tập!');
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
+                },
+
+                async deleteAssignment(id) {
+                    if (!confirm('Bạn có chắc chắn muốn xóa bài tập này cùng toàn bộ kết quả bài nộp liên quan không?')) return;
+                    try {
+                        let res = await fetch('/api/assignments/' + id, { method: 'DELETE' });
+                        if (res.ok) {
+                            alert('Đã xóa bài tập thành công!');
+                            await this.fetchAssignments();
+                        } else {
+                            alert('Xóa thất bại!');
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
+                },
+
+                openStudentForm(a) {
+                    this.activeStudentAssignment = a;
+                    this.studentFormAnswer = {
+                        student_name: this.currentUser ? this.currentUser.full_name : '',
+                        mc: {},
+                        tf: {},
+                        sa: {}
+                    };
+                    this.studentFormOpen = true;
+                },
+
+                async submitStudentAssignment() {
+                    if (!this.studentFormAnswer.student_name) {
+                        alert('Vui lòng nhập họ và tên học sinh!');
+                        return;
+                    }
+                    let payload = {
+                        assignment_id: this.activeStudentAssignment.id,
+                        student_name: this.studentFormAnswer.student_name,
+                        answer_text: JSON.stringify({
+                            mc: this.studentFormAnswer.mc,
+                            tf: this.studentFormAnswer.tf,
+                            sa: this.studentFormAnswer.sa
+                        })
+                    };
+
+                    try {
+                        let res = await fetch('/api/submissions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        let data = await res.json();
+                        if (res.ok) {
+                            alert(`Nộp bài thành công! Kết quả của bạn: ${data.score} / 10 điểm`);
+                            this.studentFormOpen = false;
+                            await this.viewAssignmentSubmissions(this.activeStudentAssignment);
+                        } else {
+                            alert(data.detail || 'Nộp bài thất bại!');
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
+                },
+
+                async viewAssignmentSubmissions(a) {
+                    this.activeViewAssignment = a;
+                    this.selectedSubmission = null;
+                    this.selectedSubmissionDetails = null;
+                    try {
+                        let res = await fetch('/api/submissions?assignment_id=' + a.id);
+                        this.currentSubmissions = await res.json();
+                        this.viewSubmissionsOpen = true;
+                    } catch (e) {
+                        alert('Lỗi khi tải bảng điểm!');
+                    }
+                },
+
+                inspectSubmission(sub) {
+                    this.selectedSubmission = sub;
+                    let key = { mc: {}, tf: {}, sa: {} };
+                    let ans = { mc: {}, tf: {}, sa: {} };
+                    try { key = JSON.parse(this.activeViewAssignment.answer_key || '{}'); } catch (e) {}
+                    try { ans = JSON.parse(sub.answer_text || '{}'); } catch (e) {}
+
+                    let mcDetails = {};
+                    if (key.mc) {
+                        Object.keys(key.mc).forEach(q => {
+                            if (key.mc[q]) {
+                                let st = ans.mc ? ans.mc[q] : '';
+                                mcDetails[q] = {
+                                    student: st,
+                                    correct: key.mc[q],
+                                    is_correct: (st || '').toUpperCase() === (key.mc[q] || '').toUpperCase()
+                                };
+                            }
+                        });
+                    }
+
+                    let tfDetails = {};
+                    if (key.tf) {
+                        Object.keys(key.tf).forEach(q => {
+                            if (key.tf[q]) {
+                                let st = ans.tf ? ans.tf[q] : '';
+                                tfDetails[q] = {
+                                    student: st,
+                                    correct: key.tf[q],
+                                    is_correct: st === key.tf[q]
+                                };
+                            }
+                        });
+                    }
+
+                    let saDetails = {};
+                    if (key.sa) {
+                        Object.keys(key.sa).forEach(q => {
+                            if (key.sa[q]) {
+                                let st = ans.sa ? ans.sa[q] : '';
+                                let k_str = (key.sa[q] || '').toString().trim().toLowerCase().replace(',', '.');
+                                let s_str = (st || '').toString().trim().toLowerCase().replace(',', '.');
+                                saDetails[q] = {
+                                    student: st,
+                                    correct: key.sa[q],
+                                    is_correct: (k_str === s_str && k_str !== '')
+                                };
+                            }
+                        });
+                    }
+
+                    this.selectedSubmissionDetails = { mc: mcDetails, tf: tfDetails, sa: saDetails };
+                },
+
+                // APIS KHÁC
                 async fetchStudents() {
                     try {
                         let res = await fetch('/api/students');
-                        if (res.ok) {
-                            this.students = await res.json();
-                        }
-                    } catch (e) {
-                        console.error('Lỗi khi tải danh sách học sinh:', e);
-                    }
+                        if (res.ok) this.students = await res.json();
+                    } catch (e) {}
                 },
                 async addStudent() {
                     if (!this.newStudent.student_code || !this.newStudent.full_name) {
-                        alert('Vui lòng nhập đầy đủ Mã học sinh và Họ và tên!');
+                        alert('Vui lòng nhập đầy đủ Mã học sinh và Họ tên!');
                         return;
                     }
-                    try {
-                        let res = await fetch('/api/students', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.newStudent)
-                        });
-                        if (!res.ok) {
-                            let data = await res.json();
-                            alert(data.detail || 'Không thể thêm học sinh! Có thể mã học sinh đã tồn tại.');
-                            return;
-                        }
+                    let res = await fetch('/api/students', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newStudent)
+                    });
+                    if (res.ok) {
                         this.newStudent = { student_code: '', full_name: '' };
                         await this.fetchStudents();
-                    } catch (e) {
-                        alert('Lỗi kết nối máy chủ!');
+                    } else {
+                        alert('Không thể thêm học sinh!');
                     }
                 },
                 async deleteStudent(id) {
                     if (!confirm('Bạn có chắc chắn muốn xóa học sinh này không?')) return;
-                    try {
-                        let res = await fetch('/api/students/' + id, { method: 'DELETE' });
-                        if (!res.ok) {
-                            alert('Xóa thất bại!');
-                            return;
-                        }
-                        await this.fetchStudents();
-                    } catch (e) {
-                        alert('Lỗi kết nối máy chủ!');
-                    }
+                    await fetch('/api/students/' + id, { method: 'DELETE' });
+                    await this.fetchStudents();
                 },
 
                 async fetchAttendance() {
@@ -578,7 +1164,7 @@
                     }
                 },
                 async deleteAttendanceDate(dateStr) {
-                    if (!confirm(`Bạn có chắc chắn muốn xóa ngày ${this.formatDateDisplay(dateStr)} cùng toàn bộ dữ liệu điểm danh của ngày này không?`)) return;
+                    if (!confirm(`Xóa ngày điểm danh ${dateStr}?`)) return;
                     await fetch('/api/attendance/dates/' + dateStr, { method: 'DELETE' });
                     await this.fetchAttendanceDates();
                     await this.fetchAttendance();
@@ -618,21 +1204,10 @@
                 },
 
                 async fetchVideos() {
-                    try {
-                        let res = await fetch('/api/videos');
-                        if (res.ok) {
-                            this.videos = await res.json();
-                            if (this.videos.length > 0) {
-                                if (!this.currentVideoId || !this.videos.some(v => v.youtube_id === this.currentVideoId)) {
-                                    this.selectVideo(this.videos[0]);
-                                }
-                            } else {
-                                this.currentVideoId = '';
-                                this.currentVideoTitle = '';
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Lỗi khi tải danh sách video:', e);
+                    let res = await fetch('/api/videos');
+                    this.videos = await res.json();
+                    if (this.videos.length > 0 && !this.currentVideoId) {
+                        this.selectVideo(this.videos[0]);
                     }
                 },
                 selectVideo(v) {
@@ -641,34 +1216,18 @@
                 },
                 async addVideo() {
                     if (!this.newVideo.title || !this.newVideo.youtube_id) return;
-                    try {
-                        let res = await fetch('/api/videos', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.newVideo)
-                        });
-                        if (res.ok) {
-                            this.newVideo = { title: '', youtube_id: '' };
-                            await this.fetchVideos();
-                        } else {
-                            alert('Thêm video thất bại!');
-                        }
-                    } catch (e) {
-                        alert('Lỗi kết nối máy chủ!');
-                    }
+                    await fetch('/api/videos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newVideo)
+                    });
+                    this.newVideo = { title: '', youtube_id: '' };
+                    await this.fetchVideos();
                 },
                 async deleteVideo(id) {
                     if (!confirm('Bạn có chắc chắn muốn xóa video này không?')) return;
-                    try {
-                        let res = await fetch('/api/videos/' + id, { method: 'DELETE' });
-                        if (!res.ok) {
-                            alert('Xóa video thất bại!');
-                            return;
-                        }
-                        await this.fetchVideos();
-                    } catch (e) {
-                        alert('Lỗi kết nối máy chủ!');
-                    }
+                    await fetch('/api/videos/' + id, { method: 'DELETE' });
+                    await this.fetchVideos();
                 },
 
                 async fetchDocuments() {
@@ -684,43 +1243,6 @@
                     });
                     this.newDoc = { title: '', drive_url: '' };
                     await this.fetchDocuments();
-                },
-
-                async fetchAssignments() {
-                    let res = await fetch('/api/assignments');
-                    this.assignments = await res.json();
-                    this.assignments.forEach(a => {
-                        this.submissionForms[a.id] = { student_name: this.currentUser ? this.currentUser.full_name : '', answer_text: '' };
-                    });
-                },
-                async addAssignment() {
-                    if (!this.newAssignment.title) return;
-                    await fetch('/api/assignments', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.newAssignment)
-                    });
-                    this.newAssignment = { title: '', content: '' };
-                    await this.fetchAssignments();
-                },
-                async submitHomework(assignmentId) {
-                    let form = this.submissionForms[assignmentId];
-                    if (!form.student_name || !form.answer_text) return;
-                    await fetch('/api/submissions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            assignment_id: assignmentId,
-                            student_name: form.student_name,
-                            answer_text: form.answer_text
-                        })
-                    });
-                    alert('Nộp bài thành công!');
-                    this.submissionForms[assignmentId].answer_text = '';
-                },
-                async loadSubmissions(assignmentId) {
-                    let res = await fetch('/api/submissions?assignment_id=' + assignmentId);
-                    this.currentSubmissions[assignmentId] = await res.json();
                 },
 
                 async fetchExams() {
