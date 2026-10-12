@@ -30,7 +30,8 @@ def init_db():
         username VARCHAR(255) UNIQUE NOT NULL,
         password TEXT NOT NULL,
         full_name TEXT NOT NULL,
-        role VARCHAR(50) NOT NULL DEFAULT 'student'
+        role VARCHAR(50) NOT NULL DEFAULT 'student',
+        visit_count INTEGER DEFAULT 1
     );
     CREATE TABLE IF NOT EXISTS students (
         id SERIAL PRIMARY KEY,
@@ -65,6 +66,7 @@ def init_db():
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
+        pdf_url TEXT DEFAULT '',
         due_date TEXT,
         mc_count INTEGER DEFAULT 0,
         tf_count INTEGER DEFAULT 0,
@@ -82,37 +84,66 @@ def init_db():
         assignment_id INTEGER NOT NULL,
         student_name TEXT NOT NULL,
         answer_text TEXT NOT NULL,
+        raw_score NUMERIC(5, 2) DEFAULT 0,
+        max_score NUMERIC(5, 2) DEFAULT 0,
         score NUMERIC(5, 2) DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS exams (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
-        question_mathml TEXT NOT NULL
+        pdf_url TEXT DEFAULT '',
+        content TEXT DEFAULT '',
+        question_mathml TEXT DEFAULT '',
+        due_date TEXT DEFAULT '',
+        mc_count INTEGER DEFAULT 0,
+        tf_count INTEGER DEFAULT 0,
+        sa_count INTEGER DEFAULT 0,
+        answer_key TEXT DEFAULT '{}',
+        mc_score_per_q NUMERIC(4, 2) DEFAULT 0.25,
+        tf_score_1 NUMERIC(4, 2) DEFAULT 0.10,
+        tf_score_2 NUMERIC(4, 2) DEFAULT 0.25,
+        tf_score_3 NUMERIC(4, 2) DEFAULT 0.50,
+        tf_score_4 NUMERIC(4, 2) DEFAULT 1.00,
+        sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50
+    );
+    CREATE TABLE IF NOT EXISTS exam_submissions (
+        id SERIAL PRIMARY KEY,
+        exam_id INTEGER NOT NULL,
+        student_name TEXT NOT NULL,
+        answer_text TEXT NOT NULL,
+        raw_score NUMERIC(5, 2) DEFAULT 0,
+        max_score NUMERIC(5, 2) DEFAULT 0,
+        score NUMERIC(5, 2) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
     
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS mc_count INTEGER DEFAULT 0;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_count INTEGER DEFAULT 0;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_count INTEGER DEFAULT 0;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS answer_key TEXT DEFAULT '{}';")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS mc_score_per_q NUMERIC(4, 2) DEFAULT 0.25;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_1 NUMERIC(4, 2) DEFAULT 0.10;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_2 NUMERIC(4, 2) DEFAULT 0.25;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_3 NUMERIC(4, 2) DEFAULT 0.50;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_4 NUMERIC(4, 2) DEFAULT 1.00;")
-    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50;")
-    cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS score NUMERIC(5, 2) DEFAULT 0;")
-    cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS chapter VARCHAR(100) DEFAULT 'Chương 1';")
-    cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'Bài 1';")
-    cursor.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS doc_date TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS visit_count INTEGER DEFAULT 1;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS pdf_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS raw_score NUMERIC(5, 2) DEFAULT 0;")
+    cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS max_score NUMERIC(5, 2) DEFAULT 0;")
+    
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS pdf_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS content TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS due_date TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS mc_count INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_count INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS sa_count INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS answer_key TEXT DEFAULT '{}';")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS mc_score_per_q NUMERIC(4, 2) DEFAULT 0.25;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_score_1 NUMERIC(4, 2) DEFAULT 0.10;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_score_2 NUMERIC(4, 2) DEFAULT 0.25;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_score_3 NUMERIC(4, 2) DEFAULT 0.50;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS tf_score_4 NUMERIC(4, 2) DEFAULT 1.00;")
+    cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50;")
 
     cursor.execute("SELECT COUNT(*) FROM users")
     res = cursor.fetchone()
     user_count = res['count'] if res else 0
     if user_count == 0:
-        cursor.execute("INSERT INTO users (username, password, full_name, role) VALUES (%s, %s, %s, %s)",
-                       ("admin", "123456", "Giáo viên Admin", "teacher"))
+        cursor.execute("INSERT INTO users (username, password, full_name, role, visit_count) VALUES (%s, %s, %s, %s, %s)",
+                       ("admin", "123456", "Giáo viên Admin", "teacher", 10))
 
     conn.commit()
     cursor.close()
@@ -148,7 +179,7 @@ def sanitize_and_clean_answer_key(answer_key_raw: str, mc_count: int, tf_count: 
 
     return json.dumps({"mc": clean_mc, "tf": clean_tf, "sa": clean_sa})
 
-def calculate_submission_score(
+def calculate_submission_score_details(
     answer_key_raw: str,
     student_answers_raw: str,
     mc_count: int,
@@ -160,7 +191,7 @@ def calculate_submission_score(
     tf_score_3: float = 0.50,
     tf_score_4: float = 1.00,
     sa_score_per_q: float = 0.50
-) -> float:
+):
     try:
         key = json.loads(answer_key_raw or "{}")
     except Exception:
@@ -170,7 +201,12 @@ def calculate_submission_score(
     except Exception:
         ans = {}
 
-    total_score = 0.0
+    max_mc = float(mc_count or 0) * float(mc_score_per_q or 0.25)
+    max_tf = float(tf_count or 0) * float(tf_score_4 or 1.0)
+    max_sa = float(sa_count or 0) * float(sa_score_per_q or 0.5)
+    max_score = round(max_mc + max_tf + max_sa, 2)
+
+    raw_score = 0.0
 
     mc_key = key.get("mc", {})
     mc_ans = ans.get("mc", {})
@@ -181,7 +217,7 @@ def calculate_submission_score(
             continue
         student_opt = mc_ans.get(q_num, "")
         if str(student_opt).strip().upper() == str(correct_opt).strip().upper():
-            total_score += float(mc_score_per_q)
+            raw_score += float(mc_score_per_q)
 
     tf_key = key.get("tf", {})
     tf_ans = ans.get("tf", {})
@@ -198,13 +234,13 @@ def calculate_submission_score(
                     correct_in_this_q += 1
         if has_key:
             if correct_in_this_q == 1:
-                total_score += float(tf_score_1)
+                raw_score += float(tf_score_1)
             elif correct_in_this_q == 2:
-                total_score += float(tf_score_2)
+                raw_score += float(tf_score_2)
             elif correct_in_this_q == 3:
-                total_score += float(tf_score_3)
+                raw_score += float(tf_score_3)
             elif correct_in_this_q == 4:
-                total_score += float(tf_score_4)
+                raw_score += float(tf_score_4)
 
     sa_key = key.get("sa", {})
     sa_ans = ans.get("sa", {})
@@ -217,9 +253,12 @@ def calculate_submission_score(
         k_str = str(correct_val).strip().lower().replace(",", ".")
         s_str = str(student_val).strip().lower().replace(",", ".")
         if k_str == s_str and k_str != "":
-            total_score += float(sa_score_per_q)
+            raw_score += float(sa_score_per_q)
 
-    return round(total_score, 2)
+    raw_score = round(raw_score, 2)
+    score_10 = round((raw_score / max_score) * 10, 2) if max_score > 0 else round(raw_score, 2)
+
+    return raw_score, max_score, score_10
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -227,7 +266,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def read_root():
     return FileResponse("static/index.html")
 
-# --- XÁC THỰC & TÀI KHOẢN ---
+# --- XÁC THỰC & DANH SÁCH TÀI KHOẢN ---
 class UserRegister(BaseModel):
     username: str
     password: str
@@ -243,8 +282,8 @@ def register(u: UserRegister):
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO users (username, password, full_name, role) VALUES (%s, %s, %s, %s)",
-                       (u.username.strip(), u.password, u.full_name.strip(), u.role))
+        cursor.execute("INSERT INTO users (username, password, full_name, role, visit_count) VALUES (%s, %s, %s, %s, %s)",
+                       (u.username.strip(), u.password, u.full_name.strip(), u.role, 1))
         conn.commit()
     except Exception:
         conn.close()
@@ -257,14 +296,30 @@ def register(u: UserRegister):
 def login(u: UserLogin):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, username, full_name, role FROM users WHERE username = %s AND password = %s",
+    cursor.execute("SELECT id, username, full_name, role, visit_count FROM users WHERE username = %s AND password = %s",
                    (u.username.strip(), u.password))
     user = cursor.fetchone()
+    if not user:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=401, detail="Tên đăng nhập hoặc mật khẩu không đúng!")
+    
+    cursor.execute("UPDATE users SET visit_count = COALESCE(visit_count, 0) + 1 WHERE id = %s", (user["id"],))
+    conn.commit()
+    user["visit_count"] = (user.get("visit_count") or 0) + 1
     cursor.close()
     conn.close()
-    if not user:
-        raise HTTPException(status_code=401, detail="Tên đăng nhập hoặc mật khẩu không đúng!")
     return dict(user)
+
+@app.get("/api/users")
+def get_users():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username, full_name, role, COALESCE(visit_count, 1) as visit_count FROM users ORDER BY visit_count DESC")
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [dict(r) for r in rows]
 
 # --- QUẢN LÝ HỌC SINH ---
 @app.get("/api/students")
@@ -474,6 +529,7 @@ def get_assignments():
 class AssignmentCreate(BaseModel):
     title: str
     content: str
+    pdf_url: Optional[str] = ""
     due_date: Optional[str] = ""
     mc_count: Optional[int] = 0
     tf_count: Optional[int] = 0
@@ -490,18 +546,17 @@ class AssignmentCreate(BaseModel):
 def create_assignment(a: AssignmentCreate):
     conn = get_db()
     cursor = conn.cursor()
-    
     mc_c = a.mc_count or 0
     tf_c = a.tf_count or 0
     sa_c = a.sa_count or 0
     cleaned_key = sanitize_and_clean_answer_key(a.answer_key or "{}", mc_c, tf_c, sa_c)
 
     cursor.execute("""
-        INSERT INTO assignments (title, content, due_date, mc_count, tf_count, sa_count, answer_key,
+        INSERT INTO assignments (title, content, pdf_url, due_date, mc_count, tf_count, sa_count, answer_key,
                                  mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        a.title, a.content, a.due_date, mc_c, tf_c, sa_c, cleaned_key,
+        a.title, a.content, a.pdf_url or "", a.due_date, mc_c, tf_c, sa_c, cleaned_key,
         a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
         a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50
     ))
@@ -514,7 +569,6 @@ def create_assignment(a: AssignmentCreate):
 def update_assignment(assignment_id: int, a: AssignmentCreate):
     conn = get_db()
     cursor = conn.cursor()
-    
     mc_c = a.mc_count or 0
     tf_c = a.tf_count or 0
     sa_c = a.sa_count or 0
@@ -522,11 +576,11 @@ def update_assignment(assignment_id: int, a: AssignmentCreate):
 
     cursor.execute("""
         UPDATE assignments
-        SET title = %s, content = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
+        SET title = %s, content = %s, pdf_url = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
             mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
         WHERE id = %s
     """, (
-        a.title, a.content, a.due_date, mc_c, tf_c, sa_c, cleaned_key,
+        a.title, a.content, a.pdf_url or "", a.due_date, mc_c, tf_c, sa_c, cleaned_key,
         a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
         a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50,
         assignment_id
@@ -535,7 +589,7 @@ def update_assignment(assignment_id: int, a: AssignmentCreate):
     cursor.execute("SELECT id, answer_text FROM submissions WHERE assignment_id = %s", (assignment_id,))
     subs = cursor.fetchall()
     for sub in subs:
-        score = calculate_submission_score(
+        raw_score, max_score, score_10 = calculate_submission_score_details(
             cleaned_key, sub["answer_text"],
             mc_count=mc_c, tf_count=tf_c, sa_count=sa_c,
             mc_score_per_q=a.mc_score_per_q or 0.25,
@@ -545,7 +599,8 @@ def update_assignment(assignment_id: int, a: AssignmentCreate):
             tf_score_4=a.tf_score_4 or 1.00,
             sa_score_per_q=a.sa_score_per_q or 0.50
         )
-        cursor.execute("UPDATE submissions SET score = %s WHERE id = %s", (score, sub["id"]))
+        cursor.execute("UPDATE submissions SET raw_score = %s, max_score = %s, score = %s WHERE id = %s",
+                       (raw_score, max_score, score_10, sub["id"]))
 
     conn.commit()
     cursor.close()
@@ -578,7 +633,9 @@ def get_submissions(assignment_id: Optional[int] = None):
     res = []
     for r in rows:
         item = dict(r)
-        item["score"] = float(item["score"]) if item["score"] is not None else 0.0
+        item["raw_score"] = float(item["raw_score"]) if item.get("raw_score") is not None else 0.0
+        item["max_score"] = float(item["max_score"]) if item.get("max_score") is not None else 0.0
+        item["score"] = float(item["score"]) if item.get("score") is not None else 0.0
         res.append(item)
     return res
 
@@ -591,35 +648,19 @@ class SubmissionCreate(BaseModel):
 def create_submission(s: SubmissionCreate):
     conn = get_db()
     cursor = conn.cursor()
-    
     cursor.execute("SELECT * FROM assignments WHERE id = %s", (s.assignment_id,))
     assign = cursor.fetchone()
     if not assign:
         cursor.close()
         conn.close()
         raise HTTPException(status_code=404, detail="Bài tập không tồn tại!")
-    
-    due_date_str = assign.get("due_date")
-    if due_date_str:
-        try:
-            due_dt = datetime.fromisoformat(due_date_str)
-            if datetime.now() > due_dt:
-                cursor.close()
-                conn.close()
-                raise HTTPException(status_code=400, detail="Bài tập đã hết hạn nộp bài!")
-        except ValueError:
-            pass
 
-    mc_c = assign.get("mc_count", 0)
-    tf_c = assign.get("tf_count", 0)
-    sa_c = assign.get("sa_count", 0)
-
-    score = calculate_submission_score(
+    raw_score, max_score, score_10 = calculate_submission_score_details(
         assign.get("answer_key", "{}"),
         s.answer_text,
-        mc_count=mc_c,
-        tf_count=tf_c,
-        sa_count=sa_c,
+        mc_count=assign.get("mc_count", 0),
+        tf_count=assign.get("tf_count", 0),
+        sa_count=assign.get("sa_count", 0),
         mc_score_per_q=assign.get("mc_score_per_q", 0.25),
         tf_score_1=assign.get("tf_score_1", 0.10),
         tf_score_2=assign.get("tf_score_2", 0.25),
@@ -629,16 +670,16 @@ def create_submission(s: SubmissionCreate):
     )
 
     cursor.execute("""
-        INSERT INTO submissions (assignment_id, student_name, answer_text, score)
-        VALUES (%s, %s, %s, %s)
-    """, (s.assignment_id, s.student_name, s.answer_text, score))
+        INSERT INTO submissions (assignment_id, student_name, answer_text, raw_score, max_score, score)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (s.assignment_id, s.student_name, s.answer_text, raw_score, max_score, score_10))
     
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Nộp bài thành công!", "score": score}
+    return {"message": "Nộp bài thành công!", "raw_score": raw_score, "max_score": max_score, "score": score_10}
 
-# --- ĐỀ KIỂM TRA & MATHML ---
+# --- ĐỀ KIỂM TRA & BÀI NỘP BÀI KIỂM TRA ---
 @app.get("/api/exams")
 def get_exams():
     conn = get_db()
@@ -647,18 +688,170 @@ def get_exams():
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [dict(r) for r in rows]
+    
+    res = []
+    for r in rows:
+        item = dict(r)
+        item["mc_score_per_q"] = float(item["mc_score_per_q"]) if item.get("mc_score_per_q") is not None else 0.25
+        item["tf_score_1"] = float(item["tf_score_1"]) if item.get("tf_score_1") is not None else 0.10
+        item["tf_score_2"] = float(item["tf_score_2"]) if item.get("tf_score_2") is not None else 0.25
+        item["tf_score_3"] = float(item["tf_score_3"]) if item.get("tf_score_3") is not None else 0.50
+        item["tf_score_4"] = float(item["tf_score_4"]) if item.get("tf_score_4") is not None else 1.00
+        item["sa_score_per_q"] = float(item["sa_score_per_q"]) if item.get("sa_score_per_q") is not None else 0.50
+        res.append(item)
+    return res
 
 class ExamCreate(BaseModel):
     title: str
-    question_mathml: str
+    pdf_url: Optional[str] = ""
+    content: Optional[str] = ""
+    question_mathml: Optional[str] = ""
+    due_date: Optional[str] = ""
+    mc_count: Optional[int] = 0
+    tf_count: Optional[int] = 0
+    sa_count: Optional[int] = 0
+    answer_key: Optional[str] = "{}"
+    mc_score_per_q: Optional[float] = 0.25
+    tf_score_1: Optional[float] = 0.10
+    tf_score_2: Optional[float] = 0.25
+    tf_score_3: Optional[float] = 0.50
+    tf_score_4: Optional[float] = 1.00
+    sa_score_per_q: Optional[float] = 0.50
 
 @app.post("/api/exams")
 def create_exam(e: ExamCreate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO exams (title, question_mathml) VALUES (%s, %s)", (e.title, e.question_mathml))
+    mc_c = e.mc_count or 0
+    tf_c = e.tf_count or 0
+    sa_c = e.sa_count or 0
+    cleaned_key = sanitize_and_clean_answer_key(e.answer_key or "{}", mc_c, tf_c, sa_c)
+
+    cursor.execute("""
+        INSERT INTO exams (title, pdf_url, content, question_mathml, due_date, mc_count, tf_count, sa_count, answer_key,
+                           mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", mc_c, tf_c, sa_c, cleaned_key,
+        e.mc_score_per_q or 0.25, e.tf_score_1 or 0.10, e.tf_score_2 or 0.25,
+        e.tf_score_3 or 0.50, e.tf_score_4 or 1.00, e.sa_score_per_q or 0.50
+    ))
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Đã thêm câu hỏi/đề thi"}
+    return {"message": "Đã tạo đề kiểm tra thành công"}
+
+@app.put("/api/exams/{exam_id}")
+def update_exam(exam_id: int, e: ExamCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    mc_c = e.mc_count or 0
+    tf_c = e.tf_count or 0
+    sa_c = e.sa_count or 0
+    cleaned_key = sanitize_and_clean_answer_key(e.answer_key or "{}", mc_c, tf_c, sa_c)
+
+    cursor.execute("""
+        UPDATE exams
+        SET title = %s, pdf_url = %s, content = %s, question_mathml = %s, due_date = %s,
+            mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
+            mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
+        WHERE id = %s
+    """, (
+        e.title, e.pdf_url or "", e.content or "", e.question_mathml or "", e.due_date or "", mc_c, tf_c, sa_c, cleaned_key,
+        e.mc_score_per_q or 0.25, e.tf_score_1 or 0.10, e.tf_score_2 or 0.25,
+        e.tf_score_3 or 0.50, e.tf_score_4 or 1.00, e.sa_score_per_q or 0.50,
+        exam_id
+    ))
+    
+    cursor.execute("SELECT id, answer_text FROM exam_submissions WHERE exam_id = %s", (exam_id,))
+    subs = cursor.fetchall()
+    for sub in subs:
+        raw_score, max_score, score_10 = calculate_submission_score_details(
+            cleaned_key, sub["answer_text"],
+            mc_count=mc_c, tf_count=tf_c, sa_count=sa_c,
+            mc_score_per_q=e.mc_score_per_q or 0.25,
+            tf_score_1=e.tf_score_1 or 0.10,
+            tf_score_2=e.tf_score_2 or 0.25,
+            tf_score_3=e.tf_score_3 or 0.50,
+            tf_score_4=e.tf_score_4 or 1.00,
+            sa_score_per_q=e.sa_score_per_q or 0.50
+        )
+        cursor.execute("UPDATE exam_submissions SET raw_score = %s, max_score = %s, score = %s WHERE id = %s",
+                       (raw_score, max_score, score_10, sub["id"]))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật đề thi và chấm lại điểm!"}
+
+@app.delete("/api/exams/{exam_id}")
+def delete_exam(exam_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM exam_submissions WHERE exam_id = %s", (exam_id,))
+    cursor.execute("DELETE FROM exams WHERE id = %s", (exam_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa đề thi"}
+
+@app.get("/api/exam_submissions")
+def get_exam_submissions(exam_id: Optional[int] = None):
+    conn = get_db()
+    cursor = conn.cursor()
+    if exam_id:
+        cursor.execute("SELECT * FROM exam_submissions WHERE exam_id = %s ORDER BY score DESC, id DESC", (exam_id,))
+    else:
+        cursor.execute("SELECT * FROM exam_submissions ORDER BY id DESC")
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    res = []
+    for r in rows:
+        item = dict(r)
+        item["raw_score"] = float(item["raw_score"]) if item.get("raw_score") is not None else 0.0
+        item["max_score"] = float(item["max_score"]) if item.get("max_score") is not None else 0.0
+        item["score"] = float(item["score"]) if item.get("score") is not None else 0.0
+        res.append(item)
+    return res
+
+class ExamSubmissionCreate(BaseModel):
+    exam_id: int
+    student_name: str
+    answer_text: str
+
+@app.post("/api/exam_submissions")
+def create_exam_submission(s: ExamSubmissionCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM exams WHERE id = %s", (s.exam_id,))
+    ex = cursor.fetchone()
+    if not ex:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Đề thi không tồn tại!")
+
+    raw_score, max_score, score_10 = calculate_submission_score_details(
+        ex.get("answer_key", "{}"),
+        s.answer_text,
+        mc_count=ex.get("mc_count", 0),
+        tf_count=ex.get("tf_count", 0),
+        sa_count=ex.get("sa_count", 0),
+        mc_score_per_q=ex.get("mc_score_per_q", 0.25),
+        tf_score_1=ex.get("tf_score_1", 0.10),
+        tf_score_2=ex.get("tf_score_2", 0.25),
+        tf_score_3=ex.get("tf_score_3", 0.50),
+        tf_score_4=ex.get("tf_score_4", 1.00),
+        sa_score_per_q=ex.get("sa_score_per_q", 0.50)
+    )
+
+    cursor.execute("""
+        INSERT INTO exam_submissions (exam_id, student_name, answer_text, raw_score, max_score, score)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (s.exam_id, s.student_name, s.answer_text, raw_score, max_score, score_10))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Nộp bài kiểm tra thành công!", "raw_score": raw_score, "max_score": max_score, "score": score_10}
