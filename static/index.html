@@ -297,11 +297,11 @@
                                     <h3 class="text-base font-bold text-slate-900 mb-2" x-text="a.title"></h3>
                                     <p class="text-xs text-slate-600 mb-4 whitespace-pre-line" x-text="a.content"></p>
                                     <div class="flex flex-wrap gap-2 text-[11px] text-slate-500 font-medium bg-slate-50 p-2.5 rounded-xl mb-4 border border-slate-100">
-                                        <span x-text="a.mc_count + ' câu Trắc nghiệm (A,B,C,D)'"></span>
+                                        <span x-text="a.mc_count + ' câu TN (' + a.mc_score_per_q + 'đ/câu)'"></span>
                                         <span>•</span>
-                                        <span x-text="a.tf_count + ' câu Đúng/Sai'"></span>
+                                        <span x-text="a.tf_count + ' câu Đ/S'"></span>
                                         <span>•</span>
-                                        <span x-text="a.sa_count + ' câu Trả lời ngắn'"></span>
+                                        <span x-text="a.sa_count + ' câu TLN (' + a.sa_score_per_q + 'đ/câu)'"></span>
                                     </div>
                                 </div>
 
@@ -327,11 +327,11 @@
                         </template>
                     </div>
 
-                    <!-- MODAL TẠO / CHỈNH SỬA BTVN & ĐÁP ÁN CHUẨN (DÀNH CHO GIÁO VIÊN) -->
+                    <!-- MODAL TẠO / CHỈNH SỬA BTVN & THANG ĐIỂM -->
                     <div x-show="assignmentModalOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                         <div class="bg-white w-full max-w-3xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
                             <div class="flex items-center justify-between border-b pb-3 mb-4">
-                                <h3 class="text-base font-bold text-slate-900" x-text="isEditingAssignment ? 'Chỉnh Sửa Bài Tập & Đáp Án' : 'Tạo Bài Tập Về Nhà Mới'"></h3>
+                                <h3 class="text-base font-bold text-slate-900" x-text="isEditingAssignment ? 'Chỉnh Sửa Bài Tập & Cấu Hình Điểm' : 'Tạo Bài Tập Về Nhà Mới'"></h3>
                                 <button @click="assignmentModalOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
                             </div>
 
@@ -349,27 +349,64 @@
                                     <input type="datetime-local" x-model="assignmentForm.due_date" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 </div>
 
+                                <!-- CẤU HÌNH SỐ LƯỢNG CÂU HỎI -->
                                 <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
                                     <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider">Cấu hình số lượng câu hỏi</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Trắc nghiệm (A,B,C,D)</label>
-                                            <input type="number" min="0" x-model.number="assignmentForm.mc_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white">
+                                            <input type="number" min="0" x-model.number="assignmentForm.mc_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white font-bold text-blue-600">
                                         </div>
                                         <div>
                                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Đúng/Sai (Mỗi câu 4 ý)</label>
-                                            <input type="number" min="0" x-model.number="assignmentForm.tf_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white">
+                                            <input type="number" min="0" x-model.number="assignmentForm.tf_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white font-bold text-blue-600">
                                         </div>
                                         <div>
                                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Số câu Trả lời ngắn</label>
-                                            <input type="number" min="0" x-model.number="assignmentForm.sa_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white">
+                                            <input type="number" min="0" x-model.number="assignmentForm.sa_count" @input="updateAnswerKeyFields()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-white font-bold text-blue-600">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CẤU HÌNH THANG ĐIỂM (GDPT 2018) -->
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Cấu hình thang điểm (Chuẩn GDPT 2018)</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Điểm 1 câu Trắc nghiệm đúng</label>
+                                            <input type="number" step="0.05" x-model.number="assignmentForm.mc_score_per_q" class="w-full border border-slate-200 p-2 rounded-lg bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Điểm 1 câu Trả lời ngắn đúng</label>
+                                            <input type="number" step="0.05" x-model.number="assignmentForm.sa_score_per_q" class="w-full border border-slate-200 p-2 rounded-lg bg-white">
+                                        </div>
+                                    </div>
+                                    <div class="pt-2 border-t border-slate-200">
+                                        <div class="text-[11px] font-bold text-slate-700 mb-1.5">Thang điểm câu Đúng/Sai (Điểm cộng trong cùng 1 câu):</div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                            <div>
+                                                <span class="text-[10px] text-slate-500">Đúng 1 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_1" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-500">Đúng 2 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_2" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-500">Đúng 3 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_3" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-500">Đúng 4 ý</span>
+                                                <input type="number" step="0.05" x-model.number="assignmentForm.tf_score_4" class="w-full border border-slate-200 p-1.5 rounded-lg bg-white">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- THIẾT LẬP BẢNG ĐÁP ÁN CHUẨN -->
                                 <div class="space-y-4">
-                                    <h4 class="text-xs font-bold text-slate-900 border-b pb-1">Bảng Đáp Án Chuẩn (Dùng để hệ thống tự động chấm điểm)</h4>
+                                    <h4 class="text-xs font-bold text-slate-900 border-b pb-1">Bảng Đáp Án Chuẩn</h4>
 
                                     <!-- Đáp án Trắc nghiệm -->
                                     <template x-if="assignmentForm.mc_count > 0">
@@ -419,7 +456,7 @@
                                                 <template x-for="i in assignmentForm.sa_count" :key="i">
                                                     <div class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
                                                         <span class="font-bold text-slate-700 min-w-[60px]" x-text="'Câu ' + i + ':'"></span>
-                                                        <input type="text" x-model="assignmentForm.answer_key.sa[i]" placeholder="Nhập đáp án (VD: 12.5)" class="w-full p-1 border rounded bg-white text-xs">
+                                                        <input type="text" x-model="assignmentForm.answer_key.sa[i]" placeholder="Nhập đáp án" class="w-full p-1 border rounded bg-white text-xs">
                                                     </div>
                                                 </template>
                                             </div>
@@ -435,7 +472,7 @@
                         </div>
                     </div>
 
-                    <!-- MODAL FORM LÀM BÀI PHIẾU TRẢ LỜI CỦA HỌC SINH (GOOGLE FORMS STYLE) -->
+                    <!-- MODAL FORM LÀM BÀI PHIẾU TRẢ LỜI CỦA HỌC SINH -->
                     <div x-show="studentFormOpen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                         <div class="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-xl border border-slate-100 my-8">
                             <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -446,7 +483,6 @@
                                 <button @click="studentFormOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
                             </div>
 
-                            <!-- CẢNH BÁO QUÁ HẠN NỘP BÀI -->
                             <template x-if="activeStudentAssignment && isAssignmentExpired(activeStudentAssignment.due_date)">
                                 <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold mb-4 flex items-center space-x-2">
                                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -455,7 +491,6 @@
                             </template>
 
                             <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
-                                <!-- Họ tên học sinh -->
                                 <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
                                     <label class="block text-xs font-bold text-slate-700 mb-1">Họ tên học sinh *</label>
                                     <input type="text" x-model="studentFormAnswer.student_name" placeholder="Nhập đầy đủ họ và tên" class="w-full border border-slate-200 p-2.5 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
@@ -558,7 +593,6 @@
                             </div>
 
                             <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
-                                <!-- DANH SÁCH BÀI NỘP -->
                                 <div class="overflow-x-auto border border-slate-200 rounded-xl">
                                     <table class="w-full text-left border-collapse text-xs">
                                         <thead>
@@ -574,7 +608,7 @@
                                                 <tr class="hover:bg-slate-50">
                                                     <td class="p-3 font-semibold text-slate-800" x-text="sub.student_name"></td>
                                                     <td class="p-3 text-slate-500 font-mono text-[11px]" x-text="sub.created_at ? formatDateTimeDisplay(sub.created_at) : ''"></td>
-                                                    <td class="p-3 text-center font-bold text-sm" :class="sub.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="sub.score + ' / 10'"></td>
+                                                    <td class="p-3 text-center font-bold text-sm" :class="sub.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="sub.score + ' Điểm'"></td>
                                                     <td class="p-3 text-right">
                                                         <button @click="inspectSubmission(sub)" class="text-blue-600 hover:underline font-semibold">Xem bài làm</button>
                                                     </td>
@@ -584,14 +618,14 @@
                                     </table>
                                 </div>
 
-                                <!-- KHUNG XEM CHI TIẾT BÀI LÀM ĐƯỢC CHỌN -->
+                                <!-- KHUNG XEM CHI TIẾT BÀI LÀM -->
                                 <template x-if="selectedSubmission">
                                     <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                                         <div class="flex items-center justify-between border-b pb-3">
                                             <div>
                                                 <div class="text-xs text-slate-500">Bài làm của: <span class="font-bold text-slate-900" x-text="selectedSubmission.student_name"></span></div>
                                             </div>
-                                            <div class="text-lg font-bold" :class="selectedSubmission.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="'Điểm: ' + selectedSubmission.score + ' / 10'"></div>
+                                            <div class="text-lg font-bold" :class="selectedSubmission.score >= 5 ? 'text-emerald-600' : 'text-rose-600'" x-text="'Điểm: ' + selectedSubmission.score"></div>
                                         </div>
 
                                         <!-- CHI TIẾT CÂU TRẮC NGHIỆM -->
@@ -746,7 +780,6 @@
                 currentVideoId: '',
                 currentVideoTitle: '',
 
-                // PHẦN BÀI TẬP VỀ NHÀ
                 assignmentModalOpen: false,
                 isEditingAssignment: false,
                 editingAssignmentId: null,
@@ -757,6 +790,12 @@
                     mc_count: 12,
                     tf_count: 2,
                     sa_count: 6,
+                    mc_score_per_q: 0.25,
+                    tf_score_1: 0.10,
+                    tf_score_2: 0.25,
+                    tf_score_3: 0.50,
+                    tf_score_4: 1.00,
+                    sa_score_per_q: 0.50,
                     answer_key: { mc: {}, tf: {}, sa: {} }
                 },
 
@@ -919,6 +958,12 @@
                         mc_count: 12,
                         tf_count: 2,
                         sa_count: 6,
+                        mc_score_per_q: 0.25,
+                        tf_score_1: 0.10,
+                        tf_score_2: 0.25,
+                        tf_score_3: 0.50,
+                        tf_score_4: 1.00,
+                        sa_score_per_q: 0.50,
                         answer_key: { mc: {}, tf: {}, sa: {} }
                     };
                     this.updateAnswerKeyFields();
@@ -943,6 +988,12 @@
                         mc_count: a.mc_count || 0,
                         tf_count: a.tf_count || 0,
                         sa_count: a.sa_count || 0,
+                        mc_score_per_q: a.mc_score_per_q !== undefined ? a.mc_score_per_q : 0.25,
+                        tf_score_1: a.tf_score_1 !== undefined ? a.tf_score_1 : 0.10,
+                        tf_score_2: a.tf_score_2 !== undefined ? a.tf_score_2 : 0.25,
+                        tf_score_3: a.tf_score_3 !== undefined ? a.tf_score_3 : 0.50,
+                        tf_score_4: a.tf_score_4 !== undefined ? a.tf_score_4 : 1.00,
+                        sa_score_per_q: a.sa_score_per_q !== undefined ? a.sa_score_per_q : 0.50,
                         answer_key: parsedKey
                     };
                     this.updateAnswerKeyFields();
@@ -967,6 +1018,12 @@
                         mc_count: this.assignmentForm.mc_count,
                         tf_count: this.assignmentForm.tf_count,
                         sa_count: this.assignmentForm.sa_count,
+                        mc_score_per_q: this.assignmentForm.mc_score_per_q,
+                        tf_score_1: this.assignmentForm.tf_score_1,
+                        tf_score_2: this.assignmentForm.tf_score_2,
+                        tf_score_3: this.assignmentForm.tf_score_3,
+                        tf_score_4: this.assignmentForm.tf_score_4,
+                        sa_score_per_q: this.assignmentForm.sa_score_per_q,
                         answer_key: JSON.stringify(this.assignmentForm.answer_key)
                     };
 
@@ -1040,7 +1097,7 @@
                         });
                         let data = await res.json();
                         if (res.ok) {
-                            alert(`Nộp bài thành công! Kết quả của bạn: ${data.score} / 10 điểm`);
+                            alert(`Nộp bài thành công! Kết quả của bạn: ${data.score} Điểm`);
                             this.studentFormOpen = false;
                             await this.viewAssignmentSubmissions(this.activeStudentAssignment);
                         } else {
@@ -1071,54 +1128,53 @@
                     try { key = JSON.parse(this.activeViewAssignment.answer_key || '{}'); } catch (e) {}
                     try { ans = JSON.parse(sub.answer_text || '{}'); } catch (e) {}
 
+                    let mc_c = this.activeViewAssignment.mc_count || 0;
+                    let tf_c = this.activeViewAssignment.tf_count || 0;
+                    let sa_c = this.activeViewAssignment.sa_count || 0;
+
                     let mcDetails = {};
-                    if (key.mc) {
-                        Object.keys(key.mc).forEach(q => {
-                            if (key.mc[q]) {
-                                let st = ans.mc ? ans.mc[q] : '';
-                                mcDetails[q] = {
-                                    student: st,
-                                    correct: key.mc[q],
-                                    is_correct: (st || '').toUpperCase() === (key.mc[q] || '').toUpperCase()
-                                };
-                            }
-                        });
+                    for (let i = 1; i <= mc_c; i++) {
+                        let q = i.toString();
+                        let correct_val = key.mc ? key.mc[q] : '';
+                        let st = ans.mc ? ans.mc[q] : '';
+                        mcDetails[q] = {
+                            student: st,
+                            correct: correct_val,
+                            is_correct: (st || '').toUpperCase() === (correct_val || '').toUpperCase() && correct_val !== ''
+                        };
                     }
 
                     let tfDetails = {};
-                    if (key.tf) {
-                        Object.keys(key.tf).forEach(q => {
-                            if (key.tf[q]) {
-                                let st = ans.tf ? ans.tf[q] : '';
-                                tfDetails[q] = {
-                                    student: st,
-                                    correct: key.tf[q],
-                                    is_correct: st === key.tf[q]
-                                };
-                            }
+                    for (let i = 1; i <= tf_c; i++) {
+                        ['a', 'b', 'c', 'd'].forEach(sub_char => {
+                            let q = i + sub_char;
+                            let correct_val = key.tf ? key.tf[q] : '';
+                            let st = ans.tf ? ans.tf[q] : '';
+                            tfDetails[q] = {
+                                student: st,
+                                correct: correct_val,
+                                is_correct: st === correct_val && correct_val !== ''
+                            };
                         });
                     }
 
                     let saDetails = {};
-                    if (key.sa) {
-                        Object.keys(key.sa).forEach(q => {
-                            if (key.sa[q]) {
-                                let st = ans.sa ? ans.sa[q] : '';
-                                let k_str = (key.sa[q] || '').toString().trim().toLowerCase().replace(',', '.');
-                                let s_str = (st || '').toString().trim().toLowerCase().replace(',', '.');
-                                saDetails[q] = {
-                                    student: st,
-                                    correct: key.sa[q],
-                                    is_correct: (k_str === s_str && k_str !== '')
-                                };
-                            }
-                        });
+                    for (let i = 1; i <= sa_c; i++) {
+                        let q = i.toString();
+                        let correct_val = key.sa ? key.sa[q] : '';
+                        let st = ans.sa ? ans.sa[q] : '';
+                        let k_str = (correct_val || '').toString().trim().toLowerCase().replace(',', '.');
+                        let s_str = (st || '').toString().trim().toLowerCase().replace(',', '.');
+                        saDetails[q] = {
+                            student: st,
+                            correct: correct_val,
+                            is_correct: (k_str === s_str && k_str !== '')
+                        };
                     }
 
                     this.selectedSubmissionDetails = { mc: mcDetails, tf: tfDetails, sa: saDetails };
                 },
 
-                // APIS KHÁC
                 async fetchStudents() {
                     try {
                         let res = await fetch('/api/students');
