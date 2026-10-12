@@ -67,7 +67,13 @@ def init_db():
         mc_count INTEGER DEFAULT 0,
         tf_count INTEGER DEFAULT 0,
         sa_count INTEGER DEFAULT 0,
-        answer_key TEXT DEFAULT '{}'
+        answer_key TEXT DEFAULT '{}',
+        mc_score_per_q NUMERIC(4, 2) DEFAULT 0.25,
+        tf_score_1 NUMERIC(4, 2) DEFAULT 0.10,
+        tf_score_2 NUMERIC(4, 2) DEFAULT 0.25,
+        tf_score_3 NUMERIC(4, 2) DEFAULT 0.50,
+        tf_score_4 NUMERIC(4, 2) DEFAULT 1.00,
+        sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50
     );
     CREATE TABLE IF NOT EXISTS submissions (
         id SERIAL PRIMARY KEY,
@@ -88,6 +94,12 @@ def init_db():
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_count INTEGER DEFAULT 0;")
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_count INTEGER DEFAULT 0;")
     cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS answer_key TEXT DEFAULT '{}';")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS mc_score_per_q NUMERIC(4, 2) DEFAULT 0.25;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_1 NUMERIC(4, 2) DEFAULT 0.10;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_2 NUMERIC(4, 2) DEFAULT 0.25;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_3 NUMERIC(4, 2) DEFAULT 0.50;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS tf_score_4 NUMERIC(4, 2) DEFAULT 1.00;")
+    cursor.execute("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50;")
     cursor.execute("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS score NUMERIC(5, 2) DEFAULT 0;")
 
     cursor.execute("SELECT COUNT(*) FROM users")
@@ -106,7 +118,44 @@ try:
 except Exception as e:
     print("Lỗi khởi tạo DB:", e)
 
-def calculate_submission_score(answer_key_raw: str, student_answers_raw: str):
+def sanitize_and_clean_answer_key(answer_key_raw: str, mc_count: int, tf_count: int, sa_count: int) -> str:
+    try:
+        key = json.loads(answer_key_raw or "{}")
+    except Exception:
+        key = {}
+
+    clean_mc = {}
+    mc_key = key.get("mc", {})
+    for i in range(1, mc_count + 1):
+        clean_mc[str(i)] = mc_key.get(str(i), "")
+
+    clean_tf = {}
+    tf_key = key.get("tf", {})
+    for i in range(1, tf_count + 1):
+        for sub in ['a', 'b', 'c', 'd']:
+            sub_q = f"{i}{sub}"
+            clean_tf[sub_q] = tf_key.get(sub_q, "")
+
+    clean_sa = {}
+    sa_key = key.get("sa", {})
+    for i in range(1, sa_count + 1):
+        clean_sa[str(i)] = sa_key.get(str(i), "")
+
+    return json.dumps({"mc": clean_mc, "tf": clean_tf, "sa": clean_sa})
+
+def calculate_submission_score(
+    answer_key_raw: str,
+    student_answers_raw: str,
+    mc_count: int,
+    tf_count: int,
+    sa_count: int,
+    mc_score_per_q: float = 0.25,
+    tf_score_1: float = 0.10,
+    tf_score_2: float = 0.25,
+    tf_score_3: float = 0.50,
+    tf_score_4: float = 1.00,
+    sa_score_per_q: float = 0.50
+) -> float:
     try:
         key = json.loads(answer_key_raw or "{}")
     except Exception:
@@ -116,47 +165,56 @@ def calculate_submission_score(answer_key_raw: str, student_answers_raw: str):
     except Exception:
         ans = {}
 
-    total_items = 0
-    correct_count = 0
+    total_score = 0.0
 
     mc_key = key.get("mc", {})
     mc_ans = ans.get("mc", {})
-    for q_num, correct_option in mc_key.items():
-        if not correct_option:
+    for i in range(1, mc_count + 1):
+        q_num = str(i)
+        correct_opt = mc_key.get(q_num)
+        if not correct_opt:
             continue
-        total_items += 1
-        student_option = mc_ans.get(q_num, "")
-        if str(student_option).strip().upper() == str(correct_option).strip().upper():
-            correct_count += 1
+        student_opt = mc_ans.get(q_num, "")
+        if str(student_opt).strip().upper() == str(correct_opt).strip().upper():
+            total_score += float(mc_score_per_q)
 
     tf_key = key.get("tf", {})
     tf_ans = ans.get("tf", {})
-    for sub_q, correct_tf in tf_key.items():
-        if not correct_tf:
-            continue
-        total_items += 1
-        student_tf = tf_ans.get(sub_q, "")
-        if str(student_tf).strip() == str(correct_tf).strip():
-            correct_count += 1
+    for i in range(1, tf_count + 1):
+        correct_in_this_q = 0
+        has_key = False
+        for sub in ['a', 'b', 'c', 'd']:
+            sub_q = f"{i}{sub}"
+            correct_tf = tf_key.get(sub_q)
+            if correct_tf:
+                has_key = True
+                student_tf = tf_ans.get(sub_q, "")
+                if str(student_tf).strip() == str(correct_tf).strip():
+                    correct_in_this_q += 1
+        if has_key:
+            if correct_in_this_q == 1:
+                total_score += float(tf_score_1)
+            elif correct_in_this_q == 2:
+                total_score += float(tf_score_2)
+            elif correct_in_this_q == 3:
+                total_score += float(tf_score_3)
+            elif correct_in_this_q == 4:
+                total_score += float(tf_score_4)
 
     sa_key = key.get("sa", {})
     sa_ans = ans.get("sa", {})
-    for q_num, correct_val in sa_key.items():
+    for i in range(1, sa_count + 1):
+        q_num = str(i)
+        correct_val = sa_key.get(q_num)
         if not correct_val:
             continue
-        total_items += 1
         student_val = sa_ans.get(q_num, "")
         k_str = str(correct_val).strip().lower().replace(",", ".")
         s_str = str(student_val).strip().lower().replace(",", ".")
         if k_str == s_str and k_str != "":
-            correct_count += 1
+            total_score += float(sa_score_per_q)
 
-    if total_items == 0:
-        score = 10.0
-    else:
-        score = round((correct_count / total_items) * 10.0, 2)
-
-    return float(score)
+    return round(total_score, 2)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -369,7 +427,18 @@ def get_assignments():
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [dict(r) for r in rows]
+    
+    res = []
+    for r in rows:
+        item = dict(r)
+        item["mc_score_per_q"] = float(item["mc_score_per_q"]) if item.get("mc_score_per_q") is not None else 0.25
+        item["tf_score_1"] = float(item["tf_score_1"]) if item.get("tf_score_1") is not None else 0.10
+        item["tf_score_2"] = float(item["tf_score_2"]) if item.get("tf_score_2") is not None else 0.25
+        item["tf_score_3"] = float(item["tf_score_3"]) if item.get("tf_score_3") is not None else 0.50
+        item["tf_score_4"] = float(item["tf_score_4"]) if item.get("tf_score_4") is not None else 1.00
+        item["sa_score_per_q"] = float(item["sa_score_per_q"]) if item.get("sa_score_per_q") is not None else 0.50
+        res.append(item)
+    return res
 
 class AssignmentCreate(BaseModel):
     title: str
@@ -379,15 +448,32 @@ class AssignmentCreate(BaseModel):
     tf_count: Optional[int] = 0
     sa_count: Optional[int] = 0
     answer_key: Optional[str] = "{}"
+    mc_score_per_q: Optional[float] = 0.25
+    tf_score_1: Optional[float] = 0.10
+    tf_score_2: Optional[float] = 0.25
+    tf_score_3: Optional[float] = 0.50
+    tf_score_4: Optional[float] = 1.00
+    sa_score_per_q: Optional[float] = 0.50
 
 @app.post("/api/assignments")
 def create_assignment(a: AssignmentCreate):
     conn = get_db()
     cursor = conn.cursor()
+    
+    mc_c = a.mc_count or 0
+    tf_c = a.tf_count or 0
+    sa_c = a.sa_count or 0
+    cleaned_key = sanitize_and_clean_answer_key(a.answer_key or "{}", mc_c, tf_c, sa_c)
+
     cursor.execute("""
-        INSERT INTO assignments (title, content, due_date, mc_count, tf_count, sa_count, answer_key)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (a.title, a.content, a.due_date, a.mc_count or 0, a.tf_count or 0, a.sa_count or 0, a.answer_key or "{}"))
+        INSERT INTO assignments (title, content, due_date, mc_count, tf_count, sa_count, answer_key,
+                                 mc_score_per_q, tf_score_1, tf_score_2, tf_score_3, tf_score_4, sa_score_per_q)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        a.title, a.content, a.due_date, mc_c, tf_c, sa_c, cleaned_key,
+        a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
+        a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50
+    ))
     conn.commit()
     cursor.close()
     conn.close()
@@ -397,17 +483,37 @@ def create_assignment(a: AssignmentCreate):
 def update_assignment(assignment_id: int, a: AssignmentCreate):
     conn = get_db()
     cursor = conn.cursor()
+    
+    mc_c = a.mc_count or 0
+    tf_c = a.tf_count or 0
+    sa_c = a.sa_count or 0
+    cleaned_key = sanitize_and_clean_answer_key(a.answer_key or "{}", mc_c, tf_c, sa_c)
+
     cursor.execute("""
         UPDATE assignments
-        SET title = %s, content = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s
+        SET title = %s, content = %s, due_date = %s, mc_count = %s, tf_count = %s, sa_count = %s, answer_key = %s,
+            mc_score_per_q = %s, tf_score_1 = %s, tf_score_2 = %s, tf_score_3 = %s, tf_score_4 = %s, sa_score_per_q = %s
         WHERE id = %s
-    """, (a.title, a.content, a.due_date, a.mc_count or 0, a.tf_count or 0, a.sa_count or 0, a.answer_key or "{}", assignment_id))
+    """, (
+        a.title, a.content, a.due_date, mc_c, tf_c, sa_c, cleaned_key,
+        a.mc_score_per_q or 0.25, a.tf_score_1 or 0.10, a.tf_score_2 or 0.25,
+        a.tf_score_3 or 0.50, a.tf_score_4 or 1.00, a.sa_score_per_q or 0.50,
+        assignment_id
+    ))
     
-    # Tự động chấm lại toàn bộ bài nộp của học sinh với đáp án mới
     cursor.execute("SELECT id, answer_text FROM submissions WHERE assignment_id = %s", (assignment_id,))
     subs = cursor.fetchall()
     for sub in subs:
-        score = calculate_submission_score(a.answer_key or "{}", sub["answer_text"])
+        score = calculate_submission_score(
+            cleaned_key, sub["answer_text"],
+            mc_count=mc_c, tf_count=tf_c, sa_count=sa_c,
+            mc_score_per_q=a.mc_score_per_q or 0.25,
+            tf_score_1=a.tf_score_1 or 0.10,
+            tf_score_2=a.tf_score_2 or 0.25,
+            tf_score_3=a.tf_score_3 or 0.50,
+            tf_score_4=a.tf_score_4 or 1.00,
+            sa_score_per_q=a.sa_score_per_q or 0.50
+        )
         cursor.execute("UPDATE submissions SET score = %s WHERE id = %s", (score, sub["id"]))
 
     conn.commit()
@@ -462,7 +568,6 @@ def create_submission(s: SubmissionCreate):
         conn.close()
         raise HTTPException(status_code=404, detail="Bài tập không tồn tại!")
     
-    # Kiểm tra Deadline
     due_date_str = assign.get("due_date")
     if due_date_str:
         try:
@@ -474,9 +579,23 @@ def create_submission(s: SubmissionCreate):
         except ValueError:
             pass
 
-    # Chấm điểm tự động
-    answer_key_raw = assign.get("answer_key", "{}")
-    score = calculate_submission_score(answer_key_raw, s.answer_text)
+    mc_c = assign.get("mc_count", 0)
+    tf_c = assign.get("tf_count", 0)
+    sa_c = assign.get("sa_count", 0)
+
+    score = calculate_submission_score(
+        assign.get("answer_key", "{}"),
+        s.answer_text,
+        mc_count=mc_c,
+        tf_count=tf_c,
+        sa_count=sa_c,
+        mc_score_per_q=assign.get("mc_score_per_q", 0.25),
+        tf_score_1=assign.get("tf_score_1", 0.10),
+        tf_score_2=assign.get("tf_score_2", 0.25),
+        tf_score_3=assign.get("tf_score_3", 0.50),
+        tf_score_4=assign.get("tf_score_4", 1.00),
+        sa_score_per_q=assign.get("sa_score_per_q", 0.50)
+    )
 
     cursor.execute("""
         INSERT INTO submissions (assignment_id, student_name, answer_text, score)
