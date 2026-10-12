@@ -181,47 +181,146 @@
             </header>
 
             <main class="p-8 space-y-6 max-w-5xl w-full mx-auto transition-all duration-300">
-                <!-- 0. TỔNG QUAN -->
+                <!-- 0. TỔNG QUAN (DASHBOARD CẢI TIẾN THỐNG KÊ & BẢNG BIỂU) -->
                 <section x-show="activeTab === 'dashboard'" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- THẺ SỐ LIỆU CHÍNH -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                            <div class="text-xs text-[#78716C] font-medium">Tổng số học sinh</div>
-                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="students.length"></div>
+                            <div class="text-xs text-[#78716C] font-medium">Học sinh cao điểm nhất</div>
+                            <div class="text-lg font-bold text-[#B8502B] mt-1 truncate" x-text="dashboardStats.topStudent ? dashboardStats.topStudent.name : 'Chưa có'"></div>
+                            <div class="text-[11px] text-[#78716C] mt-0.5" x-text="dashboardStats.topStudent ? 'Thang điểm 10: ' + dashboardStats.topStudent.score + 'đ' : '—'"></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                            <div class="text-xs text-[#78716C] font-medium">Video bài giảng</div>
-                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="videos.length"></div>
+                            <div class="text-xs text-[#78716C] font-medium">Điểm TB BTVN toàn lớp</div>
+                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="dashboardStats.avgScore + ' / 10'"></div>
+                            <div class="text-[11px] text-emerald-700 font-medium mt-0.5">Tỷ lệ nộp bài: <span x-text="dashboardStats.submissionRate + '%'"></span></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                            <div class="text-xs text-[#78716C] font-medium">Bài tập đã giao</div>
-                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="assignments.length"></div>
+                            <div class="text-xs text-[#78716C] font-medium">Tổng số bài nộp</div>
+                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="allSubmissions.length"></div>
+                            <div class="text-[11px] text-[#78716C] mt-0.5">Trên <span x-text="assignments.length"></span> bài tập đã giao</div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                            <div class="text-xs text-[#78716C] font-medium">Tài liệu & Đề thi</div>
-                            <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="documents.length + exams.length"></div>
+                            <div class="text-xs text-[#78716C] font-medium">Tỷ lệ chuyên cần</div>
+                            <div class="text-2xl font-bold text-emerald-700 mt-1" x-text="dashboardStats.attendanceRate + '%'"></div>
+                            <div class="text-[11px] text-[#78716C] mt-0.5"><span x-text="attendanceDates.length"></span> buổi học đã điểm danh</div>
+                        </div>
+                    </div>
+
+                    <!-- BẢNG BIỂU & BẢNG XẾP HẠNG -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- BẢNG XẾP HẠNG TOP HỌC SINH -->
+                        <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <div class="flex items-center justify-between mb-4 border-b border-[#E6E1D8] pb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-[#2D2926]">Top Học Sinh Điểm Cao Nhất (BTVN)</h3>
+                                    <p class="text-[11px] text-[#78716C]">Xếp hạng theo điểm trung bình bài làm</p>
+                                </div>
+                                <span class="text-xs font-bold text-[#B8502B] bg-[#F7ECE7] px-2.5 py-1 rounded-lg">Thang điểm 10</span>
+                            </div>
+                            <div class="space-y-3">
+                                <template x-for="(st, index) in dashboardStats.leaderboard" :key="st.name">
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-[#FAF8F5] border border-[#E6E1D8]">
+                                        <div class="flex items-center space-x-3">
+                                            <div :class="index === 0 ? 'bg-amber-500 text-white' : (index === 1 ? 'bg-slate-400 text-white' : (index === 2 ? 'bg-amber-700 text-white' : 'bg-[#E6E1D8] text-[#57534E]'))" class="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0" x-text="index + 1"></div>
+                                            <span class="text-xs font-bold text-[#2D2926]" x-text="st.name"></span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-[#78716C]" x-text="st.count + ' bài nộp'"></span>
+                                            <span class="text-xs font-bold text-[#B8502B] font-mono" x-text="st.avg + 'đ'"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="dashboardStats.leaderboard.length === 0">
+                                    <p class="text-xs text-[#78716C] text-center py-4">Chưa có bài nộp nào để tổng hợp xếp hạng.</p>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- PHÂN BỔ ĐIỂM SỐ BÀI TẬP (BAR CHART BẰNG HTML/CSS) -->
+                        <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <div class="mb-4 border-b border-[#E6E1D8] pb-3">
+                                <h3 class="text-sm font-bold text-[#2D2926]">Biểu Đồ Phân Bổ Điểm BTVN</h3>
+                                <p class="text-[11px] text-[#78716C]">Số lượng bài nộp theo các khoảng điểm</p>
+                            </div>
+                            <div class="space-y-4 pt-2">
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-emerald-800">Giỏi & Xuất sắc (8.0 - 10.0)</span>
+                                        <span class="text-[#2D2926]" x-text="dashboardStats.distribution.high + ' bài'"></span>
+                                    </div>
+                                    <div class="w-full bg-[#FAF8F5] rounded-full h-3 border border-[#E6E1D8] overflow-hidden">
+                                        <div class="bg-emerald-600 h-3 rounded-full transition-all duration-500" :style="'width: ' + getPercent(dashboardStats.distribution.high, allSubmissions.length) + '%'"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-blue-800">Khá (6.5 - 7.9)</span>
+                                        <span class="text-[#2D2926]" x-text="dashboardStats.distribution.medium + ' bài'"></span>
+                                    </div>
+                                    <div class="w-full bg-[#FAF8F5] rounded-full h-3 border border-[#E6E1D8] overflow-hidden">
+                                        <div class="bg-blue-500 h-3 rounded-full transition-all duration-500" :style="'width: ' + getPercent(dashboardStats.distribution.medium, allSubmissions.length) + '%'"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-amber-800">Trung bình (5.0 - 6.4)</span>
+                                        <span class="text-[#2D2926]" x-text="dashboardStats.distribution.average + ' bài'"></span>
+                                    </div>
+                                    <div class="w-full bg-[#FAF8F5] rounded-full h-3 border border-[#E6E1D8] overflow-hidden">
+                                        <div class="bg-amber-500 h-3 rounded-full transition-all duration-500" :style="'width: ' + getPercent(dashboardStats.distribution.average, allSubmissions.length) + '%'"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-rose-800">Cần cố gắng (&lt; 5.0)</span>
+                                        <span class="text-[#2D2926]" x-text="dashboardStats.distribution.low + ' bài'"></span>
+                                    </div>
+                                    <div class="w-full bg-[#FAF8F5] rounded-full h-3 border border-[#E6E1D8] overflow-hidden">
+                                        <div class="bg-rose-500 h-3 rounded-full transition-all duration-500" :style="'width: ' + getPercent(dashboardStats.distribution.low, allSubmissions.length) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 1. BẢNG ĐIỂM DANH -->
+                <!-- 1. BẢNG ĐIỂM DANH (CÓ CHỌN MÀN HÌNH THEO THÁNG) -->
                 <section x-show="activeTab === 'attendance'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4 border-b border-[#E6E1D8] pb-4">
                         <div>
-                            <h2 class="text-base font-bold text-[#2D2926]">Bảng Điểm Danh Tổng Thể</h2>
-                            <p class="text-xs text-[#78716C] mt-0.5">Theo dõi lịch sử chuyên cần của lớp học</p>
+                            <h2 class="text-base font-bold text-[#2D2926]">Bảng Điểm Danh Lớp Học</h2>
+                            <p class="text-xs text-[#78716C] mt-0.5">Lọc danh sách ngày học theo Tháng để quản lý chuyên cần dễ dàng hơn</p>
                         </div>
-                        <div x-show="role === 'teacher'" class="flex items-center space-x-2 bg-[#FAF8F5] p-1.5 rounded-xl border border-[#E6E1D8]">
-                            <input type="date" x-model="newAttendanceDate" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B]">
-                            <button @click="addAttendanceDate()" class="bg-[#B8502B] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#9E4221] transition">+ Thêm ngày học</button>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- CHỌN THÁNG HỌC -->
+                            <div class="flex items-center space-x-2 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#E6E1D8]">
+                                <span class="text-xs font-bold text-[#78716C]">Tháng:</span>
+                                <select x-model="selectedAttendanceMonth" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B] font-semibold">
+                                    <option value="Tất cả">Tất cả các tháng</option>
+                                    <template x-for="m in getAttendanceMonths()" :key="m">
+                                        <option :value="m" x-text="'Tháng ' + formatMonthDisplay(m)"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div x-show="role === 'teacher'" class="flex items-center space-x-2 bg-[#FAF8F5] p-1.5 rounded-xl border border-[#E6E1D8]">
+                                <input type="date" x-model="newAttendanceDate" class="border border-[#E6E1D8] p-1.5 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#B8502B]">
+                                <button @click="addAttendanceDate()" class="bg-[#B8502B] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#9E4221] transition">+ Thêm ngày học</button>
+                            </div>
                         </div>
                     </div>
+
                     <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                         <table class="w-full text-left border-collapse min-w-max">
                             <thead>
                                 <tr class="bg-[#2D2926] text-white text-xs">
                                     <th class="p-3 border-r border-[#44403C] w-12 text-center font-bold">STT</th>
                                     <th class="p-3 border-r border-[#44403C] min-w-[200px] font-bold">Họ và tên HS</th>
-                                    <template x-for="d in attendanceDates" :key="d">
+                                    <template x-for="d in filteredAttendanceDates()" :key="d">
                                         <th class="p-3 text-center border-r border-[#44403C] min-w-[140px]">
                                             <div class="flex items-center justify-center space-x-1">
                                                 <span x-text="formatDateDisplay(d)" class="font-bold text-xs"></span>
@@ -239,7 +338,7 @@
                                     <tr class="hover:bg-[#FAF8F5]">
                                         <td class="p-3 text-center border-r font-mono text-[#A8A29E]" x-text="index + 1"></td>
                                         <td class="p-3 font-semibold border-r text-[#2D2926]" x-text="s.full_name"></td>
-                                        <template x-for="d in attendanceDates" :key="d">
+                                        <template x-for="d in filteredAttendanceDates()" :key="d">
                                             <td class="p-2 text-center border-r">
                                                 <template x-if="role === 'teacher'">
                                                     <select :value="getAttendanceStatus(s.id, d)" @change="updateAttendance(s.id, d, $event.target.value)" :class="getStatusColorClass(getAttendanceStatus(s.id, d))" class="w-full p-1.5 rounded-lg border text-xs font-medium text-center cursor-pointer focus:outline-none">
@@ -294,20 +393,30 @@
                     </div>
                 </section>
 
-                <!-- 3. BÀI TẬP VỀ NHÀ & CHẤM ĐIỂM -->
+                <!-- 3. BÀI TẬP VỀ NHÀ (CÓ BỘ LỌC THEO THÁNG / NGÀY HẠN) -->
                 <section x-show="activeTab === 'assignments'" class="space-y-6">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
                         <div>
                             <h2 class="text-base font-bold text-[#2D2926]">Quản Lý Bài Tập Về Nhà</h2>
                             <p class="text-xs text-[#78716C]">Hệ thống giao bài, làm phiếu trắc nghiệm trực tuyến & chấm điểm tự động</p>
                         </div>
-                        <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition flex items-center space-x-2">
-                            <span>+ Tạo Bài Tập Mới</span>
-                        </button>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- BỘ LỌC THEO THÁNG / NGÀY BÀI TẬP -->
+                            <div class="flex items-center space-x-2 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#E6E1D8]">
+                                <span class="text-xs font-bold text-[#78716C]">Lọc theo Hạn nộp:</span>
+                                <input type="month" x-model="selectedAssignmentMonth" class="border border-[#E6E1D8] p-1 rounded-lg text-xs bg-white focus:outline-none">
+                                <button x-show="selectedAssignmentMonth" @click="selectedAssignmentMonth = ''" class="text-xs text-[#B8502B] underline">Xóa lọc</button>
+                            </div>
+
+                            <button x-show="role === 'teacher'" @click="openCreateAssignmentModal()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition flex items-center space-x-2">
+                                <span>+ Tạo Bài Tập Mới</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <template x-for="a in assignments" :key="a.id">
+                        <template x-for="a in filteredAssignments()" :key="a.id">
                             <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm flex flex-col justify-between">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
@@ -692,15 +801,19 @@
                     </div>
                 </section>
 
-                <!-- 4. TÀI LIỆU PDF (ĐÃ BỎ THUMBNAIL IFRAME & BỔ SUNG PHÂN LOẠI BÀI HỌC) -->
+                <!-- 4. TÀI LIỆU PDF (PHÂN LOẠI CHƯƠNG/BÀI & SỬA THÔNG TIN FILE) -->
                 <section x-show="activeTab === 'documents'" class="space-y-6">
                     <!-- FORM THÊM TÀI LIỆU (CHO GIÁO VIÊN) -->
                     <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
                         <h3 class="font-bold text-[#2D2926] text-sm">Thêm Tệp Tài Liệu PDF Mới</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Tên tài liệu *</label>
                                 <input type="text" x-model="newDoc.title" placeholder="Mô tả tệp tài liệu..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Chương *</label>
+                                <input type="text" x-model="newDoc.chapter" placeholder="Ví dụ: Chương 1, Chương 2..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Phân loại bài học *</label>
@@ -720,16 +833,26 @@
                         </div>
                     </div>
 
-                    <!-- THANH LỌC BÀI HỌC (TAB SELECTION) -->
-                    <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center space-x-2 overflow-x-auto">
-                        <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc theo bài học:</span>
-                        <button @click="selectedDocCategory = 'Tất cả'" :class="selectedDocCategory === 'Tất cả' ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1.5 rounded-xl text-xs transition shrink-0">Tất cả bài học</button>
-                        <template x-for="cat in getDocCategories()" :key="cat">
-                            <button @click="selectedDocCategory = cat" :class="selectedDocCategory === cat ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1.5 rounded-xl text-xs transition shrink-0" x-text="cat"></button>
-                        </template>
+                    <!-- THANH LỌC CHƯƠNG & BÀI HỌC (2 CẤP LỌC) -->
+                    <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-3">
+                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 border-b border-[#E6E1D8]">
+                            <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc Chương:</span>
+                            <button @click="selectedDocChapter = 'Tất cả'; selectedDocCategory = 'Tất cả'" :class="selectedDocChapter === 'Tất cả' ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0">Tất cả chương</button>
+                            <template x-for="ch in getDocChapters()" :key="ch">
+                                <button @click="selectedDocChapter = ch; selectedDocCategory = 'Tất cả'" :class="selectedDocChapter === ch ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0" x-text="ch"></button>
+                            </template>
+                        </div>
+
+                        <div class="flex items-center space-x-2 overflow-x-auto pt-1">
+                            <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc Bài học:</span>
+                            <button @click="selectedDocCategory = 'Tất cả'" :class="selectedDocCategory === 'Tất cả' ? 'bg-[#57534E] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0">Tất cả bài học</button>
+                            <template x-for="cat in getDocCategories()" :key="cat">
+                                <button @click="selectedDocCategory = cat" :class="selectedDocCategory === cat ? 'bg-[#57534E] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0" x-text="cat"></button>
+                            </template>
+                        </div>
                     </div>
 
-                    <!-- DANH SÁCH TÀI LIỆU DẠNG HÀNG GỌN GÀNG (KHÔNG IFRAME) -->
+                    <!-- DANH SÁCH TÀI LIỆU DẠNG HÀNG GỌN GÀNG -->
                     <div class="space-y-3">
                         <template x-for="doc in filteredDocuments()" :key="doc.id">
                             <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center justify-between hover:border-[#E6CFC3] transition">
@@ -740,6 +863,7 @@
                                     <div class="min-w-0">
                                         <div class="text-sm font-bold text-[#2D2926] truncate" x-text="doc.title"></div>
                                         <div class="flex items-center space-x-2 text-[11px] text-[#78716C] mt-0.5">
+                                            <span class="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" x-text="doc.chapter || 'Chương 1'"></span>
                                             <span class="bg-[#FAF8F5] border border-[#E6E1D8] px-2 py-0.5 rounded-md font-semibold text-[#B8502B]" x-text="doc.category || 'Bài 1'"></span>
                                             <span x-show="doc.doc_date">•</span>
                                             <span x-show="doc.doc_date" class="font-mono" x-text="'Ngày học: ' + formatDateDisplay(doc.doc_date)"></span>
@@ -751,12 +875,55 @@
                                         <span>Mở / Tải về Google Drive</span>
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                     </a>
+                                    <button x-show="role === 'teacher'" @click="openEditDocumentModal(doc)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg border border-slate-200 transition" title="Chỉnh sửa thông tin file">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </button>
                                     <button x-show="role === 'teacher'" @click="deleteDocument(doc.id)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition" title="Xóa tài liệu">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </div>
                             </div>
                         </template>
+                    </div>
+
+                    <!-- MODAL CHỈNH SỬA THÔNG TIN FILE TÀI LIỆU -->
+                    <div x-show="editDocModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div class="bg-white w-full max-w-lg p-6 rounded-2xl shadow-xl border border-[#E6E1D8]">
+                            <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
+                                <h3 class="text-base font-bold text-[#2D2926]">Chỉnh Sửa Thông Tin Tài Liệu</h3>
+                                <button @click="editDocModalOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Tên tài liệu *</label>
+                                    <input type="text" x-model="editDocForm.title" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-[#57534E] mb-1">Chương *</label>
+                                        <input type="text" x-model="editDocForm.chapter" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-[#57534E] mb-1">Bài học *</label>
+                                        <input type="text" x-model="editDocForm.category" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Ngày học</label>
+                                    <input type="date" x-model="editDocForm.doc_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Đường dẫn Google Drive *</label>
+                                    <input type="text" x-model="editDocForm.drive_url" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-2 border-t border-[#E6E1D8] pt-4 mt-6">
+                                <button @click="editDocModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#78716C] hover:bg-[#FAF8F5]">Hủy</button>
+                                <button @click="saveEditedDocument()" class="bg-[#B8502B] text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Lưu Thay Đổi</button>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -830,15 +997,32 @@
                 students: [],
                 attendance: [],
                 attendanceDates: [],
+                selectedAttendanceMonth: 'Tất cả',
+
                 videos: [],
                 documents: [],
+                selectedDocChapter: 'Tất cả',
+                selectedDocCategory: 'Tất cả',
+                editDocModalOpen: false,
+                editDocForm: { id: null, title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: '' },
+
                 assignments: [],
+                selectedAssignmentMonth: '',
+                allSubmissions: [],
                 exams: [],
                 currentVideoId: '',
                 currentVideoTitle: '',
 
-                selectedDocCategory: 'Tất cả',
-                newDoc: { title: '', drive_url: '', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] },
+                dashboardStats: {
+                    topStudent: null,
+                    avgScore: 0,
+                    submissionRate: 0,
+                    attendanceRate: 0,
+                    leaderboard: [],
+                    distribution: { high: 0, medium: 0, average: 0, low: 0 }
+                },
+
+                newDoc: { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] },
 
                 assignmentModalOpen: false,
                 isEditingAssignment: false,
@@ -957,8 +1141,10 @@
                             this.fetchVideos(),
                             this.fetchDocuments(),
                             this.fetchAssignments(),
+                            this.fetchAllSubmissions(),
                             this.fetchExams()
                         ]);
+                        this.calculateDashboardStats();
                         this.renderMath();
                     } finally {
                         this.isLoadingContent = false;
@@ -1011,6 +1197,109 @@
                         ['a', 'b', 'c', 'd'].forEach(ch => res.push(i + ch));
                     }
                     return res;
+                },
+
+                async fetchAllSubmissions() {
+                    try {
+                        let res = await fetch('/api/submissions');
+                        if (res.ok) this.allSubmissions = await res.json();
+                    } catch (e) {}
+                },
+
+                calculateDashboardStats() {
+                    if (!this.allSubmissions || this.allSubmissions.length === 0) {
+                        this.dashboardStats = {
+                            topStudent: null,
+                            avgScore: 0,
+                            submissionRate: 0,
+                            attendanceRate: 0,
+                            leaderboard: [],
+                            distribution: { high: 0, medium: 0, average: 0, low: 0 }
+                        };
+                        return;
+                    }
+
+                    let studentMap = {};
+                    let totalScore = 0;
+                    let dist = { high: 0, medium: 0, average: 0, low: 0 };
+
+                    this.allSubmissions.forEach(sub => {
+                        let score = parseFloat(sub.score) || 0;
+                        totalScore += score;
+
+                        if (score >= 8.0) dist.high++;
+                        else if (score >= 6.5) dist.medium++;
+                        else if (score >= 5.0) dist.average++;
+                        else dist.low++;
+
+                        if (!studentMap[sub.student_name]) {
+                            studentMap[sub.student_name] = { name: sub.student_name, totalScore: 0, count: 0 };
+                        }
+                        studentMap[sub.student_name].totalScore += score;
+                        studentMap[sub.student_name].count += 1;
+                    });
+
+                    let leaderboard = Object.values(studentMap).map(s => ({
+                        name: s.name,
+                        count: s.count,
+                        avg: (s.totalScore / s.count).toFixed(2)
+                    }));
+                    leaderboard.sort((a, b) => b.avg - a.avg);
+
+                    let topStudent = leaderboard.length > 0 ? { name: leaderboard[0].name, score: leaderboard[0].avg } : null;
+                    let avgScore = (totalScore / this.allSubmissions.length).toFixed(1);
+
+                    let expectedSubmissions = (this.students.length || 1) * (this.assignments.length || 1);
+                    let subRate = Math.min(100, Math.round((this.allSubmissions.length / expectedSubmissions) * 100));
+
+                    let totalAtt = this.attendance.length;
+                    let presentAtt = this.attendance.filter(a => a.status === 'Có mặt').length;
+                    let attRate = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 100;
+
+                    this.dashboardStats = {
+                        topStudent: topStudent,
+                        avgScore: avgScore,
+                        submissionRate: subRate,
+                        attendanceRate: attRate,
+                        leaderboard: leaderboard.slice(0, 5),
+                        distribution: dist
+                    };
+                },
+
+                getPercent(val, total) {
+                    if (!total || total === 0) return 0;
+                    return Math.round((val / total) * 100);
+                },
+
+                // --- ĐIỂM DANH LỌC THEO THÁNG ---
+                getAttendanceMonths() {
+                    let months = new Set();
+                    this.attendanceDates.forEach(d => {
+                        if (d && d.length >= 7) {
+                            months.add(d.substring(0, 7)); // 'YYYY-MM'
+                        }
+                    });
+                    return Array.from(months).sort().reverse();
+                },
+
+                formatMonthDisplay(mStr) {
+                    if (!mStr) return '';
+                    let parts = mStr.split('-');
+                    return parts.length === 2 ? `${parts[1]}/${parts[0]}` : mStr;
+                },
+
+                filteredAttendanceDates() {
+                    if (this.selectedAttendanceMonth === 'Tất cả') return this.attendanceDates;
+                    return this.attendanceDates.filter(d => d.startsWith(this.selectedAttendanceMonth));
+                },
+
+                // --- BÀI TẬP VỀ NHÀ LỌC THEO THÁNG ---
+                filteredAssignments() {
+                    if (!this.selectedAssignmentMonth) return this.assignments;
+                    return this.assignments.filter(a => {
+                        if (!a.due_date) return false;
+                        return a.due_date.startsWith(this.selectedAssignmentMonth);
+                    });
                 },
 
                 async fetchAssignments() {
@@ -1110,6 +1399,8 @@
                             alert(this.isEditingAssignment ? 'Đã cập nhật bài tập và chấm lại điểm thành công!' : 'Đã tạo bài tập thành công!');
                             this.assignmentModalOpen = false;
                             await this.fetchAssignments();
+                            await this.fetchAllSubmissions();
+                            this.calculateDashboardStats();
                         } else {
                             alert('Không thể lưu bài tập!');
                         }
@@ -1125,6 +1416,8 @@
                         if (res.ok) {
                             alert('Đã xóa bài tập thành công!');
                             await this.fetchAssignments();
+                            await this.fetchAllSubmissions();
+                            this.calculateDashboardStats();
                         } else {
                             alert('Xóa thất bại!');
                         }
@@ -1169,6 +1462,8 @@
                         if (res.ok) {
                             alert(`Nộp bài thành công! Kết quả của bạn: ${data.score} Điểm`);
                             this.studentFormOpen = false;
+                            await this.fetchAllSubmissions();
+                            this.calculateDashboardStats();
                             await this.viewAssignmentSubmissions(this.activeStudentAssignment);
                         } else {
                             alert(data.detail || 'Nộp bài thất bại!');
@@ -1311,6 +1606,7 @@
                         body: JSON.stringify({ student_id: studentId, date: date, status: status })
                     });
                     await this.fetchAttendance();
+                    this.calculateDashboardStats();
                 },
                 getStatusColorClass(status) {
                     switch (status) {
@@ -1356,20 +1652,32 @@
                     await this.fetchVideos();
                 },
 
+                // --- QUẢN LÝ TÀI LIỆU PDF ---
                 async fetchDocuments() {
                     let res = await fetch('/api/documents');
                     this.documents = await res.json();
                 },
+                getDocChapters() {
+                    let chs = new Set();
+                    this.documents.forEach(d => {
+                        if (d.chapter) chs.add(d.chapter);
+                    });
+                    return Array.from(chs).sort();
+                },
                 getDocCategories() {
                     let cats = new Set();
                     this.documents.forEach(d => {
+                        if (this.selectedDocChapter !== 'Tất cả' && d.chapter !== this.selectedDocChapter) return;
                         if (d.category) cats.add(d.category);
                     });
                     return Array.from(cats).sort();
                 },
                 filteredDocuments() {
-                    if (this.selectedDocCategory === 'Tất cả') return this.documents;
-                    return this.documents.filter(d => d.category === this.selectedDocCategory);
+                    return this.documents.filter(d => {
+                        let matchChapter = (this.selectedDocChapter === 'Tất cả' || d.chapter === this.selectedDocChapter);
+                        let matchCategory = (this.selectedDocCategory === 'Tất cả' || d.category === this.selectedDocCategory);
+                        return matchChapter && matchCategory;
+                    });
                 },
                 async addDocument() {
                     if (!this.newDoc.title || !this.newDoc.drive_url) {
@@ -1381,8 +1689,41 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(this.newDoc)
                     });
-                    this.newDoc = { title: '', drive_url: '', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] };
+                    this.newDoc = { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] };
                     await this.fetchDocuments();
+                },
+                openEditDocumentModal(doc) {
+                    this.editDocForm = {
+                        id: doc.id,
+                        title: doc.title,
+                        drive_url: doc.drive_url,
+                        chapter: doc.chapter || 'Chương 1',
+                        category: doc.category || 'Bài 1',
+                        doc_date: doc.doc_date || ''
+                    };
+                    this.editDocModalOpen = true;
+                },
+                async saveEditedDocument() {
+                    if (!this.editDocForm.title || !this.editDocForm.drive_url) {
+                        alert('Vui lòng điền đầy đủ tên và đường dẫn Google Drive!');
+                        return;
+                    }
+                    try {
+                        let res = await fetch('/api/documents/' + this.editDocForm.id, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.editDocForm)
+                        });
+                        if (res.ok) {
+                            alert('Đã cập nhật thông tin tài liệu thành công!');
+                            this.editDocModalOpen = false;
+                            await this.fetchDocuments();
+                        } else {
+                            alert('Không thể cập nhật tài liệu!');
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ!');
+                    }
                 },
                 async deleteDocument(id) {
                     if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này không?')) return;
