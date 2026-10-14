@@ -13,11 +13,6 @@
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E6E1D8; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #B8502B; }
-    </style>
 </head>
 <body class="bg-[#FAF8F5] text-[#2D2926] font-sans antialiased min-h-screen" x-data="classroomApp()" x-init="initData()">
 
@@ -133,11 +128,15 @@
                         <div class="space-y-1">
                             <button @click="switchTab('videos')" :class="activeTab === 'videos' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                <span>Bài giảng & Tài liệu</span>
+                                <span>Bài giảng Video</span>
                             </button>
                             <button @click="switchTab('assignments')" :class="activeTab === 'assignments' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 <span>Bài tập về nhà</span>
+                            </button>
+                            <button @click="switchTab('documents')" :class="activeTab === 'documents' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                <span>Tài liệu PDF</span>
                             </button>
                             <button @click="switchTab('exams')" :class="activeTab === 'exams' ? 'bg-[#F7ECE7] text-[#B8502B] font-semibold' : 'text-[#57534E] hover:bg-[#FAF8F5]'" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -192,7 +191,7 @@
                                     <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="students.length"></div>
                                 </div>
                                 <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                                    <div class="text-xs text-[#78716C] font-medium">Bài giảng & Tài liệu</div>
+                                    <div class="text-xs text-[#78716C] font-medium">Video bài giảng</div>
                                     <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="videos.length"></div>
                                 </div>
                                 <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
@@ -200,8 +199,8 @@
                                     <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="assignments.length"></div>
                                 </div>
                                 <div class="bg-white p-5 rounded-2xl border border-[#E6E1D8] shadow-sm">
-                                    <div class="text-xs text-[#78716C] font-medium">Đề kiểm tra</div>
-                                    <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="exams.length"></div>
+                                    <div class="text-xs text-[#78716C] font-medium">Tài liệu & Đề thi</div>
+                                    <div class="text-2xl font-bold text-[#2D2926] mt-1" x-text="documents.length + exams.length"></div>
                                 </div>
                             </div>
 
@@ -360,81 +359,35 @@
                     </div>
                 </section>
 
-                <!-- 2. BÀI GIẢNG VIDEO & TÀI LIỆU (GỘP THEO BÀI HỌC) -->
+                <!-- 2. BÀI GIẢNG VIDEO -->
                 <section x-show="activeTab === 'videos'" class="space-y-6">
-                    <!-- BẢNG THÊM/SỬA BÀI HỌC DÀNH CHO GIÁO VIÊN -->
-                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
-                        <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3">
-                            <h3 class="font-bold text-[#2D2926] text-sm" x-text="editingLessonId ? 'Cập Nhật Bài Học & Tài Liệu' : 'Thêm Bài Học Mới (Gộp Video & Tài Liệu PDF)'"></h3>
-                            <template x-if="editingLessonId">
-                                <button @click="resetLessonForm()" class="text-xs text-[#B8502B] hover:underline font-semibold">✕ Hủy chỉnh sửa</button>
-                            </template>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Tên bài học (Title) *</label>
-                                <input type="text" x-model="lessonForm.title" placeholder="Ví dụ: Bài 1: Đơn điệu hàm số chứa m B1" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">YouTube Video ID (Video chữa bài / bài giảng) *</label>
-                                <input type="text" x-model="lessonForm.youtube_id" placeholder="ID Video YouTube (VD: dQw4w9WgXcQ)" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Đường dẫn Google Drive PDF (Tài liệu bài học)</label>
-                                <input type="text" x-model="lessonForm.drive_url" placeholder="Link Drive xem tệp PDF..." class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Chương</label>
-                                    <input type="text" x-model="lessonForm.chapter" placeholder="VD: Chương 1" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Phân loại</label>
-                                    <input type="text" x-model="lessonForm.category" placeholder="VD: Bài 1" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex justify-end pt-2">
-                            <button @click="saveLesson()" class="bg-[#B8502B] text-white px-5 py-2.5 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition shadow-sm" x-text="editingLessonId ? 'Lưu Cập Nhật' : '+ Thêm Bài Học'"></button>
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                        <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Video Bài Giảng</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID" class="border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            <button @click="addVideo()" class="bg-[#B8502B] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Thêm Video</button>
                         </div>
                     </div>
-
-                    <!-- DANH SÁCH LỰA CHỌN BÀI HỌC (ẢNH 2) -->
-                    <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
-                        <div class="border-b border-[#E6E1D8] pb-3">
-                            <h3 class="font-bold text-[#2D2926] text-base">Danh Sách Bài Học & Bài Giảng</h3>
-                            <p class="text-xs text-[#78716C] mt-0.5">Bấm vào tên bài học để mở giao diện học gồm Video chữa bài và Tài liệu PDF</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm" x-show="currentVideoId">
+                            <div class="aspect-video mb-4 rounded-xl overflow-hidden bg-black">
+                                <iframe :src="'https://www.youtube.com/embed/' + currentVideoId" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                            <h2 class="text-base font-bold text-[#2D2926]" x-text="currentVideoTitle"></h2>
                         </div>
-
-                        <div class="grid grid-cols-1 gap-3">
-                            <template x-for="v in videos" :key="v.id">
-                                <div @click="openLessonPlayerModal(v)" class="p-4 rounded-2xl border border-[#E6E1D8] bg-white hover:border-[#B8502B] hover:shadow-md transition cursor-pointer flex items-center justify-between group">
-                                    <div class="flex items-center space-x-3.5 min-w-0">
-                                        <div class="w-10 h-10 rounded-xl bg-[#F7ECE7] flex items-center justify-center text-[#B8502B] group-hover:bg-[#B8502B] group-hover:text-white transition shrink-0">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <h4 class="text-sm font-bold text-[#2D2926] group-hover:text-[#B8502B] transition truncate" x-text="v.title"></h4>
-                                            <div class="flex items-center space-x-2 text-[11px] text-[#78716C] mt-1">
-                                                <span class="bg-[#FAF8F5] border border-[#E6E1D8] px-2 py-0.5 rounded-md font-semibold text-[#B8502B]" x-text="v.chapter || 'Chương 1'"></span>
-                                                <span class="bg-[#FAF8F5] border border-[#E6E1D8] px-2 py-0.5 rounded-md font-semibold" x-text="v.category || 'Bài 1'"></span>
-                                                <span>•</span>
-                                                <span class="text-emerald-700 font-medium">Bao gồm: Video & Tài liệu PDF</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center space-x-2 shrink-0">
-                                        <button class="bg-[#FAF8F5] text-[#B8502B] text-xs px-3.5 py-1.5 rounded-xl border border-[#E6E1D8] font-bold group-hover:bg-[#B8502B] group-hover:text-white transition">Vào Học ↗</button>
-                                        <button x-show="role === 'teacher'" @click.stop="editLesson(v)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg border border-[#E6E1D8] transition" title="Sửa bài học">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-[#E6E1D8] transition" title="Xóa bài học">
+                        <div class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
+                            <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Danh Sách Bài Giảng</h3>
+                            <ul class="divide-y divide-[#E6E1D8]">
+                                <template x-for="v in videos" :key="v.id">
+                                    <li class="py-3 flex items-center justify-between hover:bg-[#FAF8F5] rounded-lg px-2">
+                                        <span @click="selectVideo(v)" class="font-medium text-xs text-[#2D2926] hover:text-[#B8502B] cursor-pointer flex-1 mr-2" x-text="v.title"></span>
+                                        <button x-show="role === 'teacher'" @click.stop="deleteVideo(v.id)" class="text-rose-600 hover:text-rose-800 p-1 rounded transition shrink-0" title="Xóa video">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
                                         </button>
-                                    </div>
-                                </div>
-                            </template>
+                                    </li>
+                                </template>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -502,7 +455,90 @@
                     </div>
                 </section>
 
-                <!-- 4. ĐỀ KIỂM TRA -->
+                <!-- 4. TÀI LIỆU PDF -->
+                <section x-show="activeTab === 'documents'" class="space-y-6">
+                    <div x-show="role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-4">
+                        <h3 class="font-bold text-[#2D2926] text-sm">Thêm Tệp Tài Liệu PDF Mới</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Tên tài liệu *</label>
+                                <input type="text" x-model="newDoc.title" placeholder="Mô tả tệp tài liệu..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Chương *</label>
+                                <input type="text" x-model="newDoc.chapter" placeholder="Ví dụ: Chương 1..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Phân loại bài học *</label>
+                                <input type="text" x-model="newDoc.category" placeholder="Ví dụ: Bài 1..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Ngày học</label>
+                                <input type="date" x-model="newDoc.doc_date" class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-[#57534E] mb-1">Đường dẫn Google Drive *</label>
+                                <input type="text" x-model="newDoc.drive_url" placeholder="Paste Drive URL..." class="w-full border border-[#E6E1D8] p-2 rounded-xl text-xs bg-[#FAF8F5]">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button @click="addDocument()" class="bg-[#B8502B] text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221] transition">Thêm Tài Liệu</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm space-y-3">
+                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 border-b border-[#E6E1D8]">
+                            <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc Chương:</span>
+                            <button @click="selectedDocChapter = 'Tất cả'; selectedDocCategory = 'Tất cả'" :class="selectedDocChapter === 'Tất cả' ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0">Tất cả chương</button>
+                            <template x-for="ch in getDocChapters()" :key="ch">
+                                <button @click="selectedDocChapter = ch; selectedDocCategory = 'Tất cả'" :class="selectedDocChapter === ch ? 'bg-[#B8502B] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0" x-text="ch"></button>
+                            </template>
+                        </div>
+
+                        <div class="flex items-center space-x-2 overflow-x-auto pt-1">
+                            <span class="text-xs font-bold text-[#78716C] mr-2 shrink-0">Lọc Bài học:</span>
+                            <button @click="selectedDocCategory = 'Tất cả'" :class="selectedDocCategory === 'Tất cả' ? 'bg-[#57534E] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0">Tất cả bài học</button>
+                            <template x-for="cat in getDocCategories()" :key="cat">
+                                <button @click="selectedDocCategory = cat" :class="selectedDocCategory === cat ? 'bg-[#57534E] text-white font-bold' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border border-[#E6E1D8]'" class="px-3 py-1 rounded-xl text-xs transition shrink-0" x-text="cat"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <template x-for="doc in filteredDocuments()" :key="doc.id">
+                            <div class="bg-white p-4 rounded-2xl border border-[#E6E1D8] shadow-sm flex items-center justify-between hover:border-[#E6CFC3] transition">
+                                <div class="flex items-center space-x-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-xl bg-[#F7ECE7] flex items-center justify-center text-[#B8502B] shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-bold text-[#2D2926] truncate" x-text="doc.title"></div>
+                                        <div class="flex items-center space-x-2 text-[11px] text-[#78716C] mt-0.5">
+                                            <span class="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" x-text="doc.chapter || 'Chương 1'"></span>
+                                            <span class="bg-[#FAF8F5] border border-[#E6E1D8] px-2 py-0.5 rounded-md font-semibold text-[#B8502B]" x-text="doc.category || 'Bài 1'"></span>
+                                            <span x-show="doc.doc_date">•</span>
+                                            <span x-show="doc.doc_date" class="font-mono" x-text="'Ngày học: ' + formatDateDisplay(doc.doc_date)"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2 shrink-0">
+                                    <a :href="doc.drive_url" target="_blank" class="bg-[#FAF8F5] text-[#B8502B] text-xs px-3 py-1.5 rounded-xl border border-[#E6E1D8] font-semibold hover:bg-[#F7ECE7] transition flex items-center space-x-1">
+                                        <span>Mở Drive</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                    <button x-show="role === 'teacher'" @click="openEditDocumentModal(doc)" class="p-1.5 text-[#78716C] hover:text-[#B8502B] hover:bg-[#F7ECE7] rounded-lg border border-slate-200 transition" title="Chỉnh sửa file">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </button>
+                                    <button x-show="role === 'teacher'" @click="deleteDocument(doc.id)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition" title="Xóa tài liệu">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 011-1h-4a1 1 0 01-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- 5. ĐỀ KIỂM TRA -->
                 <section x-show="activeTab === 'exams'" class="space-y-6">
                     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
                         <div>
@@ -559,7 +595,7 @@
                     </div>
                 </section>
 
-                <!-- 5. QUẢN LÝ HỌC SINH -->
+                <!-- 6. QUẢN LÝ HỌC SINH -->
                 <section x-show="activeTab === 'students' && role === 'teacher'" class="bg-white p-6 rounded-2xl border border-[#E6E1D8] shadow-sm">
                     <h3 class="font-bold text-[#2D2926] mb-3 text-sm">Thêm Học Sinh Mới</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
@@ -594,70 +630,38 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP HỌC BÀI GIẢNG & TÀI LIỆU (ĐÚNG THEO ẢNH 1) -->
-    <div x-show="lessonPlayerModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/70 backdrop-blur-sm flex items-center justify-center p-2">
-        <div class="bg-white w-full max-w-[98vw] h-[96vh] rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col overflow-hidden">
-            
-            <!-- HEADER TABS CHUYỂN ĐỔI (THEO NGUYÊN BẢN ẢNH 1) -->
-            <div class="bg-[#FAF8F5] border-b border-[#E6E1D8] px-4 flex items-center justify-between shrink-0 h-14">
-                <!-- 2 TAB CHÍNH -->
-                <div class="flex space-x-1 h-full items-end">
-                    <button @click="activeLessonTab = 'video'" :class="activeLessonTab === 'video' ? 'bg-[#003822] text-white font-bold border-t-2 border-[#003822]' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border-t-2 border-transparent'" class="px-6 py-3 rounded-t-xl text-sm transition flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Video chữa bài tập</span>
-                    </button>
-                    <button @click="activeLessonTab = 'document'" :class="activeLessonTab === 'document' ? 'bg-[#003822] text-white font-bold border-t-2 border-[#003822]' : 'bg-[#FAF8F5] text-[#57534E] hover:bg-[#F2ECE1] border-t-2 border-transparent'" class="px-6 py-3 rounded-t-xl text-sm transition flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Tài liệu PDF</span>
-                    </button>
+    <!-- MODAL CHỈNH SỬA TÀI LIỆU PDF -->
+    <div x-show="editDocModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-lg p-6 rounded-2xl shadow-xl border border-[#E6E1D8]">
+            <div class="flex items-center justify-between border-b border-[#E6E1D8] pb-3 mb-4">
+                <h3 class="text-base font-bold text-[#2D2926]">Chỉnh Sửa Thông Tin Tài Liệu PDF</h3>
+                <button @click="editDocModalOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Tên tài liệu *</label>
+                    <input type="text" x-model="editDocForm.title" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
                 </div>
-
-                <!-- TÊN BÀI HỌC VÀ NÚT ĐÓNG -->
-                <div class="flex items-center space-x-4 min-w-0">
-                    <span class="text-xs font-bold text-[#B8502B] uppercase bg-[#F7ECE7] px-3 py-1 rounded-full border border-[#E6CFC3] truncate" x-text="activeLessonItem ? activeLessonItem.title : ''"></span>
-                    <button @click="lessonPlayerModalOpen = false" class="text-[#78716C] hover:text-[#2D2926] font-bold text-lg px-2">✕</button>
+                <div>
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Chương *</label>
+                    <input type="text" x-model="editDocForm.chapter" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Phân loại bài học *</label>
+                    <input type="text" x-model="editDocForm.category" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Ngày học</label>
+                    <input type="date" x-model="editDocForm.doc_date" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#57534E] mb-1">Đường dẫn Google Drive *</label>
+                    <input type="text" x-model="editDocForm.drive_url" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
                 </div>
             </div>
-
-            <!-- NỘI DUNG HIỂN THỊ CỦA CÁC TAB -->
-            <div class="flex-1 bg-black overflow-hidden flex flex-col justify-center items-center">
-                
-                <!-- TAB 1: VIDEO CHỮA BÀI TẬP / BÀI GIẢNG -->
-                <div x-show="activeLessonTab === 'video'" class="w-full h-full flex flex-col">
-                    <div class="bg-white p-3 border-b border-[#E6E1D8] text-center">
-                        <h2 class="text-sm font-bold text-[#2D2926] uppercase" x-text="activeLessonItem ? activeLessonItem.title : ''"></h2>
-                    </div>
-                    <div class="flex-1 bg-black">
-                        <template x-if="activeLessonItem && activeLessonItem.youtube_id">
-                            <iframe :src="'https://www.youtube.com/embed/' + activeLessonItem.youtube_id + '?autoplay=1'" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- TAB 2: TÀI LIỆU PDF -->
-                <div x-show="activeLessonTab === 'document'" class="w-full h-full flex flex-col bg-white">
-                    <div class="p-3 border-b border-[#E6E1D8] flex items-center justify-between bg-[#FAF8F5]">
-                        <span class="text-xs font-bold text-[#2D2926]">Tài liệu PDF đính kèm</span>
-                        <template x-if="activeLessonItem && activeLessonItem.drive_url">
-                            <a :href="activeLessonItem.drive_url" target="_blank" class="text-xs text-[#B8502B] font-bold hover:underline flex items-center space-x-1">
-                                <span>Mở tab riêng</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </a>
-                        </template>
-                    </div>
-                    <div class="flex-1 bg-stone-100">
-                        <template x-if="activeLessonItem && activeLessonItem.drive_url">
-                            <iframe :src="getEmbedPdfUrl(activeLessonItem.drive_url)" class="w-full h-full border-0" frameborder="0"></iframe>
-                        </template>
-                        <template x-if="!activeLessonItem || !activeLessonItem.drive_url">
-                            <div class="flex flex-col items-center justify-center h-full text-stone-500 text-xs">
-                                <svg class="w-12 h-12 mb-2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <span>Chưa đính kèm đường dẫn tệp tài liệu PDF cho bài học này</span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
+            <div class="flex justify-end space-x-2 border-t border-[#E6E1D8] pt-4 mt-4">
+                <button @click="editDocModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#78716C] hover:bg-[#FAF8F5]">Hủy</button>
+                <button @click="saveEditedDocument()" class="bg-[#B8502B] text-white px-5 py-2 rounded-xl text-xs font-semibold hover:bg-[#9E4221]">Lưu Thay Đổi</button>
             </div>
         </div>
     </div>
@@ -670,7 +674,7 @@
                 <button @click="assignmentModalOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
             </div>
 
-            <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+            <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
                 <div>
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Tiêu đề bài tập *</label>
                     <input type="text" x-model="assignmentForm.title" placeholder="Ví dụ: Bài tập Ôn tập Hàm Số Lớp 12" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
@@ -810,7 +814,7 @@
                 <button @click="examModalOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
             </div>
 
-            <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+            <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
                 <div>
                     <label class="block text-xs font-semibold text-[#57534E] mb-1">Tiêu đề đề kiểm tra *</label>
                     <input type="text" x-model="examForm.title" placeholder="Ví dụ: Đề kiểm tra 1 tiết Đại Số Lớp 12" class="w-full border border-[#E6E1D8] p-2.5 rounded-xl text-xs bg-[#FAF8F5]">
@@ -946,7 +950,7 @@
         </div>
     </div>
 
-    <!-- MODAL LÀM BÀI CHUẨN STUDY4 -->
+    <!-- MODAL LÀM BÀI CHUẨN STUDY4 (TĂNG KÍCH THƯỚC POPUP LỚN GẦN HẾT MÀN HÌNH) -->
     <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 bg-[#2D2926]/60 backdrop-blur-sm flex items-center justify-center p-2">
         <div class="bg-white w-full max-w-[98vw] h-[96vh] rounded-2xl shadow-2xl border border-[#E6E1D8] flex flex-col overflow-hidden">
             <div class="h-14 bg-[#FAF8F5] border-b border-[#E6E1D8] px-6 flex items-center justify-between shrink-0">
@@ -955,7 +959,7 @@
                     <h3 class="text-sm font-bold text-[#2D2926] truncate" x-text="activeWorkItem ? activeWorkItem.title : ''"></h3>
                 </div>
 
-                <!-- ĐỒNG HỒ ĐẾM NGƯỢC THỜI GIAN -->
+                <!-- ĐỒNG HỒ ĐẾM NGƯỢC THỜI GIAN DÀNH CHO HỌC SINH -->
                 <template x-if="workType === 'exam' && activeWorkItem && activeWorkItem.duration_minutes > 0">
                     <div class="flex items-center space-x-2 bg-amber-50 border border-amber-300 text-amber-900 px-3 py-1 rounded-xl text-xs font-bold shadow-sm">
                         <svg class="w-4 h-4 text-amber-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -974,7 +978,7 @@
             </div>
 
             <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-[#FAF8F5]">
-                <div class="lg:col-span-7 border-r border-[#E6E1D8] flex flex-col h-full bg-white p-3 overflow-y-auto custom-scrollbar">
+                <div class="lg:col-span-7 border-r border-[#E6E1D8] flex flex-col h-full bg-white p-3 overflow-y-auto">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-bold text-[#78716C]">Đề bài PDF</span>
                         <template x-if="activeWorkItem && activeWorkItem.pdf_url">
@@ -994,7 +998,7 @@
                     </template>
                 </div>
 
-                <div class="lg:col-span-5 flex flex-col h-full bg-white p-4 overflow-y-auto custom-scrollbar">
+                <div class="lg:col-span-5 flex flex-col h-full bg-white p-4 overflow-y-auto">
                     <div class="mb-4 border-b border-[#E6E1D8] pb-2">
                         <h3 class="text-sm font-bold text-[#2D2926]">Phiếu Trả Lời Trực Tuyến</h3>
                         <p class="text-[11px] text-[#78716C]">Chọn đáp án tương ứng với từng câu hỏi bên đề bài</p>
@@ -1070,7 +1074,7 @@
                 <button @click="viewSubmissionsOpen = false" class="text-[#78716C] hover:text-[#2D2926]">✕</button>
             </div>
 
-            <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+            <div class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
                 <div class="overflow-x-auto border border-[#E6E1D8] rounded-xl">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
@@ -1130,18 +1134,10 @@
 
                 videos: [],
                 documents: [],
-                editingLessonId: null,
-                lessonForm: {
-                    title: '',
-                    youtube_id: '',
-                    drive_url: '',
-                    chapter: 'Chương 1',
-                    category: 'Bài 1'
-                },
-
-                lessonPlayerModalOpen: false,
-                activeLessonTab: 'video', // 'video' hoặc 'document'
-                activeLessonItem: null,
+                selectedDocChapter: 'Tất cả',
+                selectedDocCategory: 'Tất cả',
+                editDocModalOpen: false,
+                editDocForm: { id: null, title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: '' },
 
                 assignments: [],
                 selectedAssignmentMonth: '',
@@ -1149,6 +1145,8 @@
 
                 exams: [],
                 allExamSubmissions: [],
+                currentVideoId: '',
+                currentVideoTitle: '',
 
                 dashboardStats: {
                     avgHomeworkScore: 0,
@@ -1158,6 +1156,8 @@
                     examRankings: [],
                     visitRankings: []
                 },
+
+                newDoc: { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] },
 
                 assignmentModalOpen: false,
                 isEditingAssignment: false,
@@ -1205,6 +1205,7 @@
                 activeWorkItem: null,
                 studentAnswerSheet: { student_name: '', mc: {}, tf: {}, sa: {} },
 
+                // BIẾN BỔ SUNG CHO TÍNH NĂNG ĐẾM NGƯỢC THỜI GIAN
                 timerInterval: null,
                 remainingSeconds: 0,
                 examStartTime: null,
@@ -1215,6 +1216,7 @@
 
                 newAttendanceDate: new Date().toISOString().split('T')[0],
                 newStudent: { student_code: '', full_name: '' },
+                newVideo: { title: '', youtube_id: '' },
 
                 async initData() {
                     const savedUser = localStorage.getItem('classstu_user');
@@ -1321,8 +1323,9 @@
                         'dashboard': 'Tổng quan hệ thống',
                         'attendance': 'Quản lý điểm danh',
                         'students': 'Danh sách học sinh',
-                        'videos': 'Bài giảng & Tài liệu',
+                        'videos': 'Bài giảng Video',
                         'assignments': 'Bài tập về nhà',
+                        'documents': 'Tài liệu PDF',
                         'exams': 'Đề kiểm tra'
                     };
                     return titles[this.activeTab] || 'Quản Lý Học Tập';
@@ -1617,6 +1620,7 @@
                     this.examStartTime = Date.now();
                     this.remainingSeconds = 0;
 
+                    // KHỞI TẠO ĐỒNG HỒ ĐẾM NGƯỢC NẾU LÀ ĐỀ KIỂM TRA
                     if (type === 'exam' && item.duration_minutes && item.duration_minutes > 0) {
                         this.remainingSeconds = item.duration_minutes * 60;
                         this.timerInterval = setInterval(() => {
@@ -1777,50 +1781,25 @@
                     }
                 },
 
-                // QUẢN LÝ BÀI HỌC (GỘP VIDEO + PDF)
                 async fetchVideos() {
                     let res = await fetch('/api/videos');
                     this.videos = await res.json();
-                },
-                openLessonPlayerModal(lesson) {
-                    this.activeLessonItem = lesson;
-                    this.activeLessonTab = 'video';
-                    this.lessonPlayerModalOpen = true;
-                },
-                resetLessonForm() {
-                    this.editingLessonId = null;
-                    this.lessonForm = { title: '', youtube_id: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1' };
-                },
-                editLesson(v) {
-                    this.editingLessonId = v.id;
-                    this.lessonForm = {
-                        title: v.title,
-                        youtube_id: v.youtube_id,
-                        drive_url: v.drive_url || '',
-                        chapter: v.chapter || 'Chương 1',
-                        category: v.category || 'Bài 1'
-                    };
-                },
-                async saveLesson() {
-                    if (!this.lessonForm.title || !this.lessonForm.youtube_id) {
-                        alert('Vui lòng nhập đầy đủ tiêu đề và YouTube Video ID!');
-                        return;
+                    if (this.videos.length > 0 && !this.currentVideoId) {
+                        this.selectVideo(this.videos[0]);
                     }
-                    let url = this.editingLessonId ? '/api/videos/' + this.editingLessonId : '/api/videos';
-                    let method = this.editingLessonId ? 'PUT' : 'POST';
-                    let res = await fetch(url, {
-                        method: method,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.lessonForm)
-                    });
-                    if (res.ok) {
-                        alert(this.editingLessonId ? 'Cập nhật bài học thành công!' : 'Thêm bài học mới thành công!');
-                        this.resetLessonForm();
-                        await this.fetchVideos();
-                    }
+                },
+                selectVideo(v) {
+                    this.currentVideoId = v.youtube_id;
+                    this.currentVideoTitle = v.title;
+                },
+                async addVideo() {
+                    if (!this.newVideo.title || !this.newVideo.youtube_id) return;
+                    await fetch('/api/videos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.newVideo) });
+                    this.newVideo = { title: '', youtube_id: '' };
+                    await this.fetchVideos();
                 },
                 async deleteVideo(id) {
-                    if (!confirm('Bạn có chắc muốn xóa bài học này?')) return;
+                    if (!confirm('Xóa video này?')) return;
                     await fetch('/api/videos/' + id, { method: 'DELETE' });
                     await this.fetchVideos();
                 },
@@ -1828,6 +1807,48 @@
                 async fetchDocuments() {
                     let res = await fetch('/api/documents');
                     this.documents = await res.json();
+                },
+                getDocChapters() {
+                    let chs = new Set();
+                    this.documents.forEach(d => { if (d.chapter) chs.add(d.chapter); });
+                    return Array.from(chs).sort();
+                },
+                getDocCategories() {
+                    let cats = new Set();
+                    this.documents.forEach(d => {
+                        if (this.selectedDocChapter !== 'Tất cả' && d.chapter !== this.selectedDocChapter) return;
+                        if (d.category) cats.add(d.category);
+                    });
+                    return Array.from(cats).sort();
+                },
+                filteredDocuments() {
+                    return this.documents.filter(d => {
+                        let matchChapter = (this.selectedDocChapter === 'Tất cả' || d.chapter === this.selectedDocChapter);
+                        let matchCategory = (this.selectedDocCategory === 'Tất cả' || d.category === this.selectedDocCategory);
+                        return matchChapter && matchCategory;
+                    });
+                },
+                async addDocument() {
+                    if (!this.newDoc.title || !this.newDoc.drive_url) return;
+                    await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.newDoc) });
+                    this.newDoc = { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] };
+                    await this.fetchDocuments();
+                },
+                openEditDocumentModal(doc) {
+                    this.editDocForm = { id: doc.id, title: doc.title, drive_url: doc.drive_url, chapter: doc.chapter || 'Chương 1', category: doc.category || 'Bài 1', doc_date: doc.doc_date || '' };
+                    this.editDocModalOpen = true;
+                },
+                async saveEditedDocument() {
+                    let res = await fetch('/api/documents/' + this.editDocForm.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.editDocForm) });
+                    if (res.ok) {
+                        this.editDocModalOpen = false;
+                        await this.fetchDocuments();
+                    }
+                },
+                async deleteDocument(id) {
+                    if (!confirm('Xóa tài liệu này?')) return;
+                    await fetch('/api/documents/' + id, { method: 'DELETE' });
+                    await this.fetchDocuments();
                 }
             }
         }
