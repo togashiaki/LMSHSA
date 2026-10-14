@@ -128,7 +128,7 @@
         }
         .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); transform: translateY(-1px); }
 
-        /* ── Btn ── */
+        /* ── Buttons ── */
         .btn-primary {
             background: var(--primary);
             color: #fff;
@@ -266,13 +266,13 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .modal-header {
-            padding: 22px 24px 18px;
+            padding: 20px 24px 16px;
             border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between;
         }
         .modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
         .modal-body { padding: 24px; }
-        .modal-footer { padding: 18px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
 
         /* ── Rank card ── */
         .rank-row {
@@ -324,9 +324,6 @@
         }
         .timer-box.urgent { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
 
-        /* ── Section fade in ── */
-        [x-show] { transition: opacity 0.15s ease; }
-
         /* ── Header ── */
         .app-header {
             height: 60px;
@@ -342,7 +339,6 @@
             z-index: 10;
         }
 
-        /* ── Icon wrapper ── */
         .icon-wrap {
             width: 44px; height: 44px;
             border-radius: 12px;
@@ -350,7 +346,6 @@
             flex-shrink: 0;
         }
 
-        /* ── Attendance select ── */
         .att-select {
             width: 100%;
             padding: 6px 8px;
@@ -389,12 +384,7 @@
          class="fixed inset-0 z-40 flex items-center justify-center p-4"
          style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#0891b2 100%)">
 
-        <!-- Decorative circles -->
-        <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10" style="background:radial-gradient(circle,#fff,transparent);transform:translate(30%,-30%)"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10" style="background:radial-gradient(circle,#fff,transparent);transform:translate(-30%,30%)"></div>
-
         <div class="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
-            <!-- Logo -->
             <div class="flex flex-col items-center text-center mb-8">
                 <div class="icon-wrap mb-3" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);width:56px;height:56px;border-radius:16px;box-shadow:0 8px 24px rgba(37,99,235,0.35)">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
@@ -403,19 +393,16 @@
                 <p class="text-sm text-slate-500 mt-1">Quản lý học tập trực tuyến</p>
             </div>
 
-            <!-- Tabs -->
             <div class="flex bg-slate-100 rounded-xl p-1 mb-6">
                 <button @click="authTab='login'" :class="authTab==='login'?'bg-white text-blue-600 shadow-sm font-semibold':'text-slate-500 font-medium'" class="flex-1 py-2 rounded-lg text-sm transition-all duration-200">Đăng nhập</button>
                 <button @click="authTab='register'" :class="authTab==='register'?'bg-white text-blue-600 shadow-sm font-semibold':'text-slate-500 font-medium'" class="flex-1 py-2 rounded-lg text-sm transition-all duration-200">Tạo tài khoản</button>
             </div>
 
-            <!-- Error -->
             <div x-show="authError" class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium mb-4 border border-red-200">
                 <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
                 <span x-text="authError"></span>
             </div>
 
-            <!-- Login Form -->
             <div x-show="authTab==='login'" class="space-y-4">
                 <div>
                     <label class="form-label">Tên đăng nhập</label>
@@ -432,7 +419,6 @@
                 <p class="text-center text-xs text-slate-400">Tài khoản GV mặc định: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">admin / 123456</code></p>
             </div>
 
-            <!-- Register Form -->
             <div x-show="authTab==='register'" class="space-y-4">
                 <div>
                     <label class="form-label">Họ và tên</label>
@@ -487,41 +473,44 @@
             <!-- Nav -->
             <nav class="flex-1 p-3 space-y-5 overflow-y-auto">
                 <div>
-                    <div class="nav-group-label mb-2">Tổng quan</div>
+                    <div class="nav-group-label mb-2">Học tập & Bài giảng</div>
                     <div class="space-y-0.5">
                         <button @click="switchTab('dashboard')" :class="activeTab==='dashboard'?'active':''" class="nav-item">
-                            <svg class="w-4.5 h-4.5 flex-shrink-0" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                             Tổng quan
                         </button>
+                        <!-- TAB GỘP VIDEO & TÀI LIỆU (THEO ẢNH CONTEXT) -->
+                        <button @click="switchTab('lessons')" :class="activeTab==='lessons'?'active':''" class="nav-item">
+                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            Bài học & Tài liệu
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="nav-group-label mb-2">Kiểm tra & Luyện tập</div>
+                    <div class="space-y-0.5">
+                        <button @click="switchTab('assignments')" :class="activeTab==='assignments'?'active':''" class="nav-item">
+                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Bài tập về nhà (Nộp bài)
+                        </button>
+                        <button @click="switchTab('exams')" :class="activeTab==='exams'?'active':''" class="nav-item">
+                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Đề kiểm tra trực tuyến
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="nav-group-label mb-2">Quản lý lớp học</div>
+                    <div class="space-y-0.5">
                         <button @click="switchTab('attendance')" :class="activeTab==='attendance'?'active':''" class="nav-item">
                             <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                             Điểm danh
                         </button>
                         <button x-show="role==='teacher'" @click="switchTab('students')" :class="activeTab==='students'?'active':''" class="nav-item">
                             <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                            Học sinh
-                        </button>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="nav-group-label mb-2">Nội dung học tập</div>
-                    <div class="space-y-0.5">
-                        <button @click="switchTab('videos')" :class="activeTab==='videos'?'active':''" class="nav-item">
-                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            Bài giảng Video
-                        </button>
-                        <button @click="switchTab('documents')" :class="activeTab==='documents'?'active':''" class="nav-item">
-                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                            Tài liệu PDF
-                        </button>
-                        <button @click="switchTab('assignments')" :class="activeTab==='assignments'?'active':''" class="nav-item">
-                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            Bài tập về nhà
-                        </button>
-                        <button @click="switchTab('exams')" :class="activeTab==='exams'?'active':''" class="nav-item">
-                            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            Đề kiểm tra
+                            Danh sách học sinh
                         </button>
                     </div>
                 </div>
@@ -560,15 +549,224 @@
                 <div class="flex items-center gap-3">
                     <span class="badge" :class="role==='teacher'?'badge-blue':'badge-green'">
                         <span class="w-1.5 h-1.5 rounded-full inline-block" :class="role==='teacher'?'bg-blue-500':'bg-emerald-500'"></span>
-                        <span x-text="role==='teacher'?'Giáo viên':'Học sinh'"></span>
+                        <span x-text="role==='teacher'?'Chế độ Giáo viên':'Chế độ Học sinh'"></span>
                     </span>
                 </div>
             </header>
 
             <!-- Page content -->
-            <main class="p-6 space-y-6 max-w-6xl w-full mx-auto">
+            <main class="p-6 space-y-6 max-w-7xl w-full mx-auto">
 
-                <!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+                <!-- ═══════════════════════════════ 0. BÀI HỌC & TÀI LIỆU (THEO ẢNH CONTEXT) ═══════════════════════════════ -->
+                <section x-show="activeTab==='lessons'" class="space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                        <!-- CỘT BÊN TRÁI: DANH SÁCH BÀI HỌC (NHƯ ẢNH 1) -->
+                        <div class="lg:col-span-4 xl:col-span-4 card p-4 flex flex-col h-[calc(100vh-140px)] sticky top-20 shadow-sm border border-slate-200">
+                            <!-- Ô tìm kiếm -->
+                            <div class="relative mb-3">
+                                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <input type="text" x-model="lessonSearchQuery" placeholder="Tìm bài học..." class="form-input text-sm pl-9 py-2">
+                            </div>
+
+                            <!-- Bộ lọc theo chương -->
+                            <div class="flex items-center gap-2 mb-3">
+                                <select x-model="selectedLessonChapter" class="form-input text-xs py-2 px-2.5 bg-slate-50 flex-1 font-medium">
+                                    <option value="Tất cả">Lọc / Sắp xếp: Tất cả chương</option>
+                                    <template x-for="ch in getLessonChapters()" :key="ch">
+                                        <option :value="ch" x-text="'Chương: ' + ch"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Nút thêm bài học dành cho GV -->
+                            <div x-show="role==='teacher'" class="mb-3">
+                                <button @click="openCreateLessonModal()" class="btn-primary w-full justify-center py-2 text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    + Thêm bài học mới
+                                </button>
+                            </div>
+
+                            <!-- Danh sách bài học cuộn mượt mà -->
+                            <div class="flex-1 overflow-y-auto space-y-2 pr-1">
+                                <template x-for="(l, idx) in filteredLessons()" :key="l.id">
+                                    <div @click="selectLesson(l)"
+                                         :class="activeLesson && activeLesson.id === l.id ? 'bg-blue-50/90 border-blue-500 shadow-sm ring-1 ring-blue-500/30' : 'bg-slate-50 hover:bg-slate-100 border-slate-200'"
+                                         class="p-3 rounded-xl border transition-all cursor-pointer group flex items-center justify-between gap-2.5">
+                                        
+                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                            <!-- Badge số thứ tự: 1, 2, 3... -->
+                                            <span class="w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0 font-mono shadow-sm"
+                                                  :class="activeLesson && activeLesson.id === l.id ? 'bg-blue-600 text-white' : (idx === 0 ? 'bg-amber-500 text-white' : (idx === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-white'))"
+                                                  x-text="l.order_index || (idx + 1)"></span>
+                                            
+                                            <div class="min-w-0 flex-1">
+                                                <div class="text-xs font-bold uppercase truncate"
+                                                     :class="activeLesson && activeLesson.id === l.id ? 'text-blue-900' : 'text-slate-800'"
+                                                     x-text="l.title"></div>
+                                                <div class="text-[11px] text-slate-400 truncate mt-0.5" x-text="l.chapter || 'Chương 1'"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                                            <span class="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500"
+                                                  x-text="formatLessonDateDisplay(l.lesson_date)"></span>
+                                            
+                                            <!-- Nút sửa/xóa cho Giáo viên -->
+                                            <div x-show="role==='teacher'" class="opacity-0 group-hover:opacity-100 flex items-center transition" @click.stop>
+                                                <button @click="openEditLessonModal(l)" class="p-1 hover:text-blue-600 text-slate-400" title="Sửa bài"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                                                <button @click="deleteLesson(l.id)" class="p-1 hover:text-red-600 text-slate-400" title="Xóa bài"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div x-show="filteredLessons().length===0" class="p-8 text-center text-xs text-slate-400">
+                                    Không có bài học nào phù hợp
+                                </div>
+                            </div>
+
+                            <!-- Footer cột trái: User Name -->
+                            <div class="pt-3 border-t border-slate-100 mt-2 flex items-center justify-between text-xs text-slate-500">
+                                <div class="flex items-center gap-2 truncate">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                    <span class="font-semibold truncate" x-text="currentUser?.full_name"></span>
+                                </div>
+                                <span class="font-mono text-slate-400" x-text="filteredLessons().length + ' bài'"></span>
+                            </div>
+                        </div>
+
+                        <!-- CỘT BÊN PHẢI: CHI TIẾT BÀI HỌC VÀ 2 TAB (NHƯ ẢNH 1) -->
+                        <div class="lg:col-span-8 xl:col-span-8 space-y-4">
+
+                            <div class="card p-6 flex flex-col space-y-5" x-show="activeLesson">
+                                <!-- Header bài học -->
+                                <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1.5">
+                                            <span class="badge badge-blue text-xs uppercase tracking-wide font-bold" x-text="activeLesson?.chapter || 'Chương 1'"></span>
+                                            <span class="text-xs text-slate-400 font-medium" x-show="activeLesson?.lesson_date" x-text="formatFullDateDisplay(activeLesson?.lesson_date)"></span>
+                                        </div>
+                                        <h2 class="font-display font-bold text-2xl lg:text-3xl text-slate-900 tracking-tight" x-text="activeLesson?.title"></h2>
+                                    </div>
+
+                                    <!-- Action buttons cho GV -->
+                                    <div x-show="role==='teacher'" class="flex items-center gap-2">
+                                        <button @click="openEditLessonModal(activeLesson)" class="btn-secondary py-1.5 px-3 text-xs">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            Sửa bài học
+                                        </button>
+                                        <button @click="deleteLesson(activeLesson.id)" class="btn-danger py-1.5 px-3 text-xs">
+                                            Xóa
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Thanh 2 TAB chuyển đổi (Tab 1: Video chữa bài tập, Tab 2: Tài liệu) -->
+                                <div class="flex border-b border-slate-200 gap-2">
+                                    <button @click="lessonSubTab = 'video'"
+                                            :class="lessonSubTab === 'video' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/60' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
+                                            class="flex items-center gap-2 py-3 px-5 border-b-2 text-sm transition-all rounded-t-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        <span>Video chữa bài tập</span>
+                                    </button>
+
+                                    <button @click="lessonSubTab = 'document'"
+                                            :class="lessonSubTab === 'document' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/60' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
+                                            class="flex items-center gap-2 py-3 px-5 border-b-2 text-sm transition-all rounded-t-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span>Tài liệu</span>
+                                    </button>
+                                </div>
+
+                                <!-- NỘI DUNG TAB 1: VIDEO CHỮA BÀI TẬP -->
+                                <div x-show="lessonSubTab === 'video'" class="space-y-4">
+                                    <template x-if="activeLesson && (activeLesson.video_id || activeLesson.video_url)">
+                                        <div class="space-y-4">
+                                            <!-- Video Player 16:9 -->
+                                            <div class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 shadow-md border border-slate-200">
+                                                <iframe :src="'https://www.youtube.com/embed/' + (activeLesson.video_id || extractYoutubeIdClient(activeLesson.video_url))"
+                                                        class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                            </div>
+
+                                            <!-- Mô tả / Ghi chú bài giảng -->
+                                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200" x-show="activeLesson.description">
+                                                <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ghi chú & Hướng dẫn:</div>
+                                                <p class="text-sm text-slate-700 whitespace-pre-line leading-relaxed" x-text="activeLesson.description"></p>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!activeLesson || (!activeLesson.video_id && !activeLesson.video_url)">
+                                        <div class="p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                            </div>
+                                            <h3 class="font-display font-bold text-base text-slate-800">Chưa có video chữa bài</h3>
+                                            <p class="text-xs text-slate-500 max-w-sm mx-auto">Bài học này chưa được gắn liên kết video YouTube.</p>
+                                            <div x-show="role==='teacher'" class="pt-2">
+                                                <button @click="openEditLessonModal(activeLesson)" class="btn-primary text-xs py-2 px-4">
+                                                    + Gắn link Video YouTube
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- NỘI DUNG TAB 2: TÀI LIỆU -->
+                                <div x-show="lessonSubTab === 'document'" class="space-y-4">
+                                    <template x-if="activeLesson && activeLesson.document_url">
+                                        <div class="space-y-3">
+                                            <!-- Toolbar -->
+                                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    <span class="text-xs font-bold text-slate-700">Tài liệu học tập & đề bài</span>
+                                                </div>
+                                                <a :href="activeLesson.document_url" target="_blank" class="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5">
+                                                    <span>Mở trong tab riêng</span>
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                </a>
+                                            </div>
+
+                                            <!-- Nhúng PDF / Google Drive Preview -->
+                                            <div class="w-full h-[650px] rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+                                                <iframe :src="getEmbedPdfUrl(activeLesson.document_url)" class="w-full h-full" frameborder="0"></iframe>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!activeLesson || !activeLesson.document_url">
+                                        <div class="p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                                            <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto">
+                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </div>
+                                            <h3 class="font-display font-bold text-base text-slate-800">Chưa có tài liệu đính kèm</h3>
+                                            <p class="text-xs text-slate-500 max-w-sm mx-auto">Bài học này chưa được gắn file tài liệu hoặc Google Drive PDF.</p>
+                                            <div x-show="role==='teacher'" class="pt-2">
+                                                <button @click="openEditLessonModal(activeLesson)" class="btn-primary text-xs py-2 px-4">
+                                                    + Thêm link Google Drive / PDF
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Khi chưa chọn bài học nào -->
+                            <div class="card p-12 text-center" x-show="!activeLesson">
+                                <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                </div>
+                                <h3 class="font-display font-bold text-lg text-slate-900 mb-1">Vui lòng chọn bài học</h3>
+                                <p class="text-sm text-slate-500">Hãy chọn một bài học từ danh sách bên trái để bắt đầu học tập.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ═══════════════════════════════ 1. TỔNG QUAN ═══════════════════════════════ -->
                 <section x-show="activeTab==='dashboard'" class="space-y-6">
 
                     <!-- Teacher stats -->
@@ -588,24 +786,24 @@
                                     </div>
                                     <div class="text-xs text-slate-400 mt-2">Tổng số học sinh</div>
                                 </div>
-                                <!-- Videos -->
+                                <!-- Lessons -->
                                 <div class="stat-card">
                                     <div class="flex items-start justify-between">
                                         <div>
-                                            <div class="text-sm font-medium text-slate-500 mb-1">Video</div>
-                                            <div class="font-display font-bold text-3xl text-slate-900" x-text="videos.length"></div>
+                                            <div class="text-sm font-medium text-slate-500 mb-1">Bài học</div>
+                                            <div class="font-display font-bold text-3xl text-slate-900" x-text="lessons.length"></div>
                                         </div>
                                         <div class="icon-wrap" style="background:#ecfdf5;width:44px;height:44px;border-radius:12px">
-                                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                                         </div>
                                     </div>
-                                    <div class="text-xs text-slate-400 mt-2">Bài giảng đã đăng</div>
+                                    <div class="text-xs text-slate-400 mt-2">Bài học đã tạo</div>
                                 </div>
                                 <!-- Assignments -->
                                 <div class="stat-card">
                                     <div class="flex items-start justify-between">
                                         <div>
-                                            <div class="text-sm font-medium text-slate-500 mb-1">Bài tập</div>
+                                            <div class="text-sm font-medium text-slate-500 mb-1">Bài tập nộp</div>
                                             <div class="font-display font-bold text-3xl text-slate-900" x-text="assignments.length"></div>
                                         </div>
                                         <div class="icon-wrap" style="background:#fffbeb;width:44px;height:44px;border-radius:12px">
@@ -614,18 +812,18 @@
                                     </div>
                                     <div class="text-xs text-slate-400 mt-2">Bài tập đã giao</div>
                                 </div>
-                                <!-- Docs + Exams -->
+                                <!-- Exams -->
                                 <div class="stat-card">
                                     <div class="flex items-start justify-between">
                                         <div>
-                                            <div class="text-sm font-medium text-slate-500 mb-1">Tài liệu & Đề</div>
-                                            <div class="font-display font-bold text-3xl text-slate-900" x-text="documents.length + exams.length"></div>
+                                            <div class="text-sm font-medium text-slate-500 mb-1">Đề kiểm tra</div>
+                                            <div class="font-display font-bold text-3xl text-slate-900" x-text="exams.length"></div>
                                         </div>
                                         <div class="icon-wrap" style="background:#fdf4ff;width:44px;height:44px;border-radius:12px">
                                             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </div>
                                     </div>
-                                    <div class="text-xs text-slate-400 mt-2">Tổng tài liệu & đề thi</div>
+                                    <div class="text-xs text-slate-400 mt-2">Tổng đề thi online</div>
                                 </div>
                             </div>
 
@@ -653,8 +851,8 @@
                     <!-- Rankings -->
                     <div class="space-y-4">
                         <div>
-                            <h2 class="font-display font-bold text-xl text-slate-900">Bảng Xếp Hạng</h2>
-                            <p class="text-sm text-slate-500 mt-0.5">Thành tích học tập và mức độ tích cực tham gia</p>
+                            <h2 class="font-display font-bold text-xl text-slate-900">Bảng Xếp Hạng & Thi Đua</h2>
+                            <p class="text-sm text-slate-500 mt-0.5">Vinh danh thành tích học tập và mức độ chăm chỉ tích cực</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <!-- HW Ranking -->
@@ -731,14 +929,14 @@
                     </div>
                 </section>
 
-                <!-- ═══════════════════════════════ ĐIỂM DANH ═══════════════════════════════ -->
+                <!-- ═══════════════════════════════ 2. ĐIỂM DANH ═══════════════════════════════ -->
                 <section x-show="activeTab==='attendance'" class="space-y-5">
                     <div class="card">
                         <!-- Header -->
                         <div class="flex flex-wrap justify-between items-center gap-4 p-6 border-b border-slate-100">
                             <div>
-                                <h2 class="font-display font-bold text-lg text-slate-900">Bảng Điểm Danh</h2>
-                                <p class="text-sm text-slate-500 mt-0.5">Lọc theo tháng để quản lý chuyên cần dễ dàng hơn</p>
+                                <h2 class="font-display font-bold text-lg text-slate-900">Bảng Điểm Danh Lớp Học</h2>
+                                <p class="text-sm text-slate-500 mt-0.5">Lọc theo tháng để quản lý chuyên cần học sinh dễ dàng hơn</p>
                             </div>
                             <div class="flex flex-wrap gap-3 items-center">
                                 <!-- Month filter -->
@@ -746,7 +944,7 @@
                                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                                     <span class="text-sm font-semibold text-slate-600">Tháng:</span>
                                     <select x-model="selectedAttendanceMonth" class="bg-transparent border-none text-sm font-semibold text-slate-800 focus:outline-none cursor-pointer">
-                                        <option value="Tất cả">Tất cả</option>
+                                        <option value="Tất cả">Tất cả các tháng</option>
                                         <template x-for="m in getAttendanceMonths()" :key="m">
                                             <option :value="m" x-text="'Tháng ' + formatMonthDisplay(m)"></option>
                                         </template>
@@ -755,7 +953,7 @@
                                 <!-- Add date -->
                                 <div x-show="role==='teacher'" class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
                                     <input type="date" x-model="newAttendanceDate" class="bg-transparent border-none text-sm text-slate-700 focus:outline-none cursor-pointer">
-                                    <button @click="addAttendanceDate()" class="btn-primary py-1.5 px-3 text-sm">+ Thêm ngày</button>
+                                    <button @click="addAttendanceDate()" class="btn-primary py-1.5 px-3 text-sm">+ Thêm ngày học</button>
                                 </div>
                             </div>
                         </div>
@@ -771,7 +969,7 @@
                                             <th class="p-3 text-center text-xs border-r border-slate-700 min-w-[140px]">
                                                 <div class="flex items-center justify-center gap-1">
                                                     <span x-text="formatDateDisplay(d)" class="font-bold text-slate-200"></span>
-                                                    <button x-show="role==='teacher'" @click="deleteAttendanceDate(d)" class="text-slate-500 hover:text-red-400 p-0.5 rounded transition" title="Xóa ngày">
+                                                    <button x-show="role==='teacher'" @click="deleteAttendanceDate(d)" class="text-slate-500 hover:text-red-400 p-0.5 rounded transition" title="Xóa ngày học">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                     </button>
                                                 </div>
@@ -808,7 +1006,7 @@
                                         </tr>
                                     </template>
                                     <tr x-show="students.length===0">
-                                        <td colspan="99" class="p-8 text-center text-sm text-slate-400">Chưa có học sinh nào</td>
+                                        <td colspan="99" class="p-8 text-center text-sm text-slate-400">Chưa có học sinh nào trong danh sách</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -816,78 +1014,18 @@
                     </div>
                 </section>
 
-                <!-- ═══════════════════════════════ VIDEO BÀI GIẢNG ═══════════════════════════════ -->
-                <section x-show="activeTab==='videos'" class="space-y-5">
-                    <!-- Teacher add form -->
-                    <div x-show="role==='teacher'" class="card p-5">
-                        <h3 class="font-display font-bold text-base text-slate-900 mb-4">Thêm Video Bài Giảng</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <input type="text" x-model="newVideo.title" placeholder="Tiêu đề bài giảng..." class="form-input md:col-span-1">
-                            <input type="text" x-model="newVideo.youtube_id" placeholder="YouTube Video ID (vd: dQw4w9WgXcQ)" class="form-input md:col-span-1">
-                            <button @click="addVideo()" class="btn-primary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Thêm Video
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <!-- Player -->
-                        <div class="md:col-span-2 card p-5" x-show="currentVideoId">
-                            <div class="aspect-video rounded-xl overflow-hidden bg-slate-900 mb-4">
-                                <iframe :src="'https://www.youtube.com/embed/' + currentVideoId"
-                                        class="w-full h-full" frameborder="0" allowfullscreen></iframe>
-                            </div>
-                            <h2 class="font-display font-bold text-lg text-slate-900" x-text="currentVideoTitle"></h2>
-                        </div>
-                        <div class="md:col-span-2 card p-6 flex items-center justify-center" x-show="!currentVideoId">
-                            <div class="text-center">
-                                <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                </div>
-                                <p class="text-sm text-slate-400">Chọn video để xem bài giảng</p>
-                            </div>
-                        </div>
-
-                        <!-- Playlist -->
-                        <div class="card">
-                            <div class="p-4 border-b border-slate-100">
-                                <h3 class="font-display font-bold text-base text-slate-900">Danh sách bài giảng</h3>
-                                <p class="text-xs text-slate-400 mt-0.5" x-text="videos.length + ' video'"></p>
-                            </div>
-                            <ul class="divide-y divide-slate-100 max-h-96 overflow-y-auto">
-                                <template x-for="v in videos" :key="v.id">
-                                    <li class="flex items-center justify-between gap-3 p-3 hover:bg-slate-50 transition cursor-pointer group">
-                                        <div class="flex items-center gap-3 min-w-0 flex-1" @click="selectVideo(v)">
-                                            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition"
-                                                 :class="currentVideoId===v.youtube_id?'bg-blue-600':'bg-slate-100 group-hover:bg-blue-50'">
-                                                <svg class="w-4 h-4" :class="currentVideoId===v.youtube_id?'text-white':'text-slate-400 group-hover:text-blue-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                            </div>
-                                            <span class="text-sm font-medium truncate" :class="currentVideoId===v.youtube_id?'text-blue-600 font-semibold':'text-slate-700'" x-text="v.title"></span>
-                                        </div>
-                                        <button x-show="role==='teacher'" @click.stop="deleteVideo(v.id)" class="btn-ghost text-red-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 flex-shrink-0">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </li>
-                                </template>
-                                <li x-show="videos.length===0" class="p-8 text-center text-sm text-slate-400">Chưa có video nào</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ═══════════════════════════════ BÀI TẬP VỀ NHÀ ═══════════════════════════════ -->
+                <!-- ═══════════════════════════════ 3. BÀI TẬP VỀ NHÀ (NỘP BÀI) ═══════════════════════════════ -->
                 <section x-show="activeTab==='assignments'" class="space-y-5">
                     <!-- Toolbar -->
                     <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <h2 class="font-display font-bold text-lg text-slate-900">Bài Tập Về Nhà</h2>
-                            <p class="text-sm text-slate-500">Hệ thống giao bài, hỗ trợ PDF và chấm điểm tự động</p>
+                            <h2 class="font-display font-bold text-lg text-slate-900">Bài Tập Về Nhà (Chấm điểm tự động)</h2>
+                            <p class="text-sm text-slate-500">Giao bài tập tự luyện có chấm điểm thang 10 theo chuẩn phiếu Study4</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                <span class="text-sm font-semibold text-slate-600">Hạn nộp:</span>
+                                <span class="text-sm font-semibold text-slate-600">Lọc hạn:</span>
                                 <input type="month" x-model="selectedAssignmentMonth" class="bg-transparent border-none text-sm text-slate-700 focus:outline-none">
                                 <button x-show="selectedAssignmentMonth" @click="selectedAssignmentMonth=''" class="text-xs text-blue-600 font-semibold hover:underline">Xóa lọc</button>
                             </div>
@@ -902,45 +1040,41 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <template x-for="a in filteredAssignments()" :key="a.id">
                             <div class="card p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
-                                <!-- Status + deadline -->
                                 <div class="flex items-center justify-between">
                                     <span class="badge" :class="isAssignmentExpired(a.due_date)?'badge-red':'badge-green'">
                                         <span class="w-1.5 h-1.5 rounded-full" :class="isAssignmentExpired(a.due_date)?'bg-red-500':'bg-emerald-500'"></span>
-                                        <span x-text="isAssignmentExpired(a.due_date)?'Đã hết hạn':'Đang mở'"></span>
+                                        <span x-text="isAssignmentExpired(a.due_date)?'Đã hết hạn':'Đang mở nộp'"></span>
                                     </span>
                                     <span class="text-xs text-slate-400 font-mono" x-text="a.due_date?'Hạn: '+formatDateTimeDisplay(a.due_date):'Không giới hạn'"></span>
                                 </div>
 
-                                <!-- Title + desc -->
                                 <div>
                                     <h3 class="font-display font-bold text-base text-slate-900 mb-1" x-text="a.title"></h3>
                                     <p class="text-sm text-slate-500 whitespace-pre-line line-clamp-2" x-text="a.content"></p>
                                 </div>
 
-                                <!-- Question counts -->
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="badge badge-blue text-xs" x-text="a.mc_count + ' TN'"></span>
-                                    <span class="badge badge-amber text-xs" x-text="a.tf_count + ' Đ/S'"></span>
-                                    <span class="badge badge-gray text-xs" x-text="a.sa_count + ' TLN'"></span>
+                                    <span class="badge badge-blue text-xs" x-text="a.mc_count + ' câu TN (' + a.mc_score_per_q + 'đ/câu)'"></span>
+                                    <span class="badge badge-amber text-xs" x-text="a.tf_count + ' câu Đ/S'"></span>
+                                    <span class="badge badge-gray text-xs" x-text="a.sa_count + ' câu TLN'"></span>
                                 </div>
 
-                                <!-- Actions -->
                                 <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                                     <div class="flex gap-2">
                                         <button @click="openStudentWorkModal(a,'assignment')" class="btn-primary py-2 px-3 text-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                            <span x-text="role==='teacher'?'Xem Form':'Làm bài'"></span>
+                                            <span x-text="role==='teacher'?'Xem Form Nộp':'Làm bài / Nộp phiếu'"></span>
                                         </button>
                                         <button @click="viewSubmissionsList(a,'assignment')" class="btn-secondary py-2 px-3 text-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            <span x-text="role==='teacher'?'Bảng điểm':'Kết quả'"></span>
+                                            <span x-text="role==='teacher'?'Bảng điểm lớp':'Xem kết quả'"></span>
                                         </button>
                                     </div>
                                     <div x-show="role==='teacher'" class="flex gap-1">
-                                        <button @click="openEditAssignmentModal(a)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50">
+                                        <button @click="openEditAssignmentModal(a)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50" title="Sửa bài tập">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
-                                        <button @click="deleteAssignment(a.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50">
+                                        <button @click="deleteAssignment(a.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50" title="Xóa bài tập">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
@@ -951,102 +1085,21 @@
                             <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                             </div>
-                            <p class="text-sm text-slate-400">Chưa có bài tập nào</p>
+                            <p class="text-sm text-slate-400">Chưa có bài tập về nhà nào</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- ═══════════════════════════════ TÀI LIỆU PDF ═══════════════════════════════ -->
-                <section x-show="activeTab==='documents'" class="space-y-5">
-                    <!-- Add form (teacher) -->
-                    <div x-show="role==='teacher'" class="card p-5 space-y-4">
-                        <h3 class="font-display font-bold text-base text-slate-900">Thêm Tài Liệu Mới</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                            <div><label class="form-label">Tên tài liệu *</label><input type="text" x-model="newDoc.title" placeholder="Tên tài liệu..." class="form-input"></div>
-                            <div><label class="form-label">Chương *</label><input type="text" x-model="newDoc.chapter" placeholder="Chương 1" class="form-input"></div>
-                            <div><label class="form-label">Bài học *</label><input type="text" x-model="newDoc.category" placeholder="Bài 1" class="form-input"></div>
-                            <div><label class="form-label">Ngày học</label><input type="date" x-model="newDoc.doc_date" class="form-input"></div>
-                            <div><label class="form-label">Link Google Drive *</label><input type="text" x-model="newDoc.drive_url" placeholder="Paste Drive URL..." class="form-input"></div>
-                        </div>
-                        <div class="flex justify-end">
-                            <button @click="addDocument()" class="btn-primary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Thêm Tài Liệu
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Filter chips -->
-                    <div class="card p-4 space-y-3">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-sm font-bold text-slate-500 mr-1">Chương:</span>
-                            <button @click="selectedDocChapter='Tất cả';selectedDocCategory='Tất cả'"
-                                    :class="selectedDocChapter==='Tất cả'?'btn-primary py-1 px-3 text-sm':'btn-secondary py-1 px-3 text-sm'">Tất cả</button>
-                            <template x-for="ch in getDocChapters()" :key="ch">
-                                <button @click="selectedDocChapter=ch;selectedDocCategory='Tất cả'"
-                                        :class="selectedDocChapter===ch?'btn-primary py-1 px-3 text-sm':'btn-secondary py-1 px-3 text-sm'"
-                                        x-text="ch"></button>
-                            </template>
-                        </div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-sm font-bold text-slate-500 mr-1">Bài học:</span>
-                            <button @click="selectedDocCategory='Tất cả'"
-                                    :class="selectedDocCategory==='Tất cả'?'bg-slate-700 text-white font-semibold py-1 px-3 rounded-lg text-sm':'btn-secondary py-1 px-3 text-sm'">Tất cả</button>
-                            <template x-for="cat in getDocCategories()" :key="cat">
-                                <button @click="selectedDocCategory=cat"
-                                        :class="selectedDocCategory===cat?'bg-slate-700 text-white font-semibold py-1 px-3 rounded-lg text-sm':'btn-secondary py-1 px-3 text-sm'"
-                                        x-text="cat"></button>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Document list -->
-                    <div class="space-y-3">
-                        <template x-for="doc in filteredDocuments()" :key="doc.id">
-                            <div class="card p-4 flex items-center justify-between gap-4 hover:shadow-sm transition group">
-                                <div class="flex items-center gap-4 min-w-0">
-                                    <div class="icon-wrap flex-shrink-0" style="background:#fdf4ff;width:44px;height:44px;border-radius:12px">
-                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="font-semibold text-slate-900 truncate" x-text="doc.title"></div>
-                                        <div class="flex items-center gap-2 mt-1 flex-wrap">
-                                            <span class="badge badge-amber text-xs" x-text="doc.chapter||'Chương 1'"></span>
-                                            <span class="badge badge-blue text-xs" x-text="doc.category||'Bài 1'"></span>
-                                            <span x-show="doc.doc_date" class="text-xs text-slate-400 font-mono" x-text="'Ngày: '+formatDateDisplay(doc.doc_date)"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 flex-shrink-0">
-                                    <a :href="doc.drive_url" target="_blank" class="btn-secondary py-2 px-3 text-sm">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                        Mở Drive
-                                    </a>
-                                    <button x-show="role==='teacher'" @click="openEditDocumentModal(doc)" class="btn-ghost text-slate-400 hover:text-blue-600 hover:bg-blue-50">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </button>
-                                    <button x-show="role==='teacher'" @click="deleteDocument(doc.id)" class="btn-ghost text-slate-400 hover:text-red-600 hover:bg-red-50">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-                        <div x-show="filteredDocuments().length===0" class="card p-10 text-center">
-                            <p class="text-sm text-slate-400">Không có tài liệu nào phù hợp</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ═══════════════════════════════ ĐỀ KIỂM TRA ═══════════════════════════════ -->
+                <!-- ═══════════════════════════════ 4. ĐỀ KIỂM TRA TRỰC TUYẾN ═══════════════════════════════ -->
                 <section x-show="activeTab==='exams'" class="space-y-5">
                     <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <h2 class="font-display font-bold text-lg text-slate-900">Đề Kiểm Tra</h2>
-                            <p class="text-sm text-slate-500">Tạo đề trực tuyến với đếm giờ và chấm điểm tự động</p>
+                            <h2 class="font-display font-bold text-lg text-slate-900">Đề Kiểm Tra Trực Tuyến</h2>
+                            <p class="text-sm text-slate-500">Tạo đề thi có bấm giờ đếm ngược, tự động nộp bài và khóa đề khi hết giờ</p>
                         </div>
                         <button x-show="role==='teacher'" @click="openCreateExamModal()" class="btn-primary" style="background:linear-gradient(135deg,#059669,#047857)">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Tạo Đề Kiểm Tra
+                            Tạo Đề Kiểm Tra Mới
                         </button>
                     </div>
 
@@ -1056,7 +1109,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <span class="badge badge-green">Đề kiểm tra</span>
-                                        <span x-show="ex.duration_minutes>0" class="badge badge-amber text-xs" x-text="ex.duration_minutes + ' phút'"></span>
+                                        <span x-show="ex.duration_minutes>0" class="badge badge-amber text-xs font-mono font-bold" x-text="ex.duration_minutes + ' phút'"></span>
                                     </div>
                                     <span class="text-xs text-slate-400 font-mono" x-text="ex.due_date?'Hạn: '+formatDateTimeDisplay(ex.due_date):'Không giới hạn'"></span>
                                 </div>
@@ -1065,26 +1118,26 @@
                                     <p class="text-sm text-slate-500 whitespace-pre-line line-clamp-2" x-text="ex.content"></p>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="badge badge-blue text-xs" x-text="ex.mc_count + ' TN'"></span>
-                                    <span class="badge badge-amber text-xs" x-text="ex.tf_count + ' Đ/S'"></span>
-                                    <span class="badge badge-gray text-xs" x-text="ex.sa_count + ' TLN'"></span>
+                                    <span class="badge badge-blue text-xs" x-text="ex.mc_count + ' câu TN'"></span>
+                                    <span class="badge badge-amber text-xs" x-text="ex.tf_count + ' câu Đ/S'"></span>
+                                    <span class="badge badge-gray text-xs" x-text="ex.sa_count + ' câu TLN'"></span>
                                 </div>
                                 <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                                     <div class="flex gap-2">
                                         <button @click="openStudentWorkModal(ex,'exam')" class="btn-primary py-2 px-3 text-sm" style="background:linear-gradient(135deg,#059669,#047857)">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                            <span x-text="role==='teacher'?'Xem Form':'Làm bài'"></span>
+                                            <span x-text="role==='teacher'?'Xem Form Thi':'Vào Thi Ngay'"></span>
                                         </button>
                                         <button @click="viewSubmissionsList(ex,'exam')" class="btn-secondary py-2 px-3 text-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            Bảng điểm
+                                            Bảng điểm thi
                                         </button>
                                     </div>
                                     <div x-show="role==='teacher'" class="flex gap-1">
-                                        <button @click="openEditExamModal(ex)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50">
+                                        <button @click="openEditExamModal(ex)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50" title="Sửa đề thi">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
-                                        <button @click="deleteExam(ex.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50">
+                                        <button @click="deleteExam(ex.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50" title="Xóa đề thi">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
@@ -1092,17 +1145,17 @@
                             </div>
                         </template>
                         <div x-show="exams.length===0" class="md:col-span-2 card p-10 text-center">
-                            <p class="text-sm text-slate-400">Chưa có đề kiểm tra nào</p>
+                            <p class="text-sm text-slate-400">Chưa có đề kiểm tra trực tuyến nào</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- ═══════════════════════════════ QUẢN LÝ HỌC SINH ═══════════════════════════════ -->
+                <!-- ═══════════════════════════════ 5. QUẢN LÝ HỌC SINH (GV) ═══════════════════════════════ -->
                 <section x-show="activeTab==='students' && role==='teacher'" class="space-y-5">
                     <div class="card p-5">
-                        <h3 class="font-display font-bold text-base text-slate-900 mb-4">Thêm Học Sinh Mới</h3>
+                        <h3 class="font-display font-bold text-base text-slate-900 mb-4">Thêm Học Sinh Mới Vào Danh Sách</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh..." class="form-input">
+                            <input type="text" x-model="newStudent.student_code" placeholder="Mã học sinh (vd: HS001)..." class="form-input">
                             <input type="text" x-model="newStudent.full_name" placeholder="Họ và tên..." class="form-input">
                             <button @click="addStudent()" class="btn-primary">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -1113,7 +1166,7 @@
 
                     <div class="card overflow-hidden">
                         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                            <h3 class="font-display font-bold text-base text-slate-900">Danh sách học sinh</h3>
+                            <h3 class="font-display font-bold text-base text-slate-900">Danh sách học sinh trong lớp</h3>
                             <span class="badge badge-blue" x-text="students.length + ' học sinh'"></span>
                         </div>
                         <div class="overflow-x-auto">
@@ -1146,28 +1199,68 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════ MODAL: CHỈNH SỬA TÀI LIỆU PDF ══════════════════════════ -->
-    <div x-show="editDocModalOpen" class="modal-overlay" style="display:none">
-        <div class="modal-box max-w-lg">
+    <!-- ══════════════════════════ MODAL: TẠO / SỬA BÀI HỌC (THEO ẢNH CONTEXT) ══════════════════════════ -->
+    <div x-show="lessonModalOpen" class="modal-overlay" style="display:none">
+        <div class="modal-box max-w-xl my-8">
             <div class="modal-header">
-                <h3 class="modal-title">Chỉnh Sửa Tài Liệu PDF</h3>
-                <button @click="editDocModalOpen=false" class="btn-ghost"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <h3 class="modal-title" x-text="isEditingLesson ? 'Chỉnh Sửa Bài Học' : 'Thêm Bài Học Mới'"></h3>
+                <button @click="lessonModalOpen=false" class="btn-ghost"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <div class="modal-body space-y-4">
-                <div><label class="form-label">Tên tài liệu *</label><input type="text" x-model="editDocForm.title" class="form-input"></div>
-                <div><label class="form-label">Chương *</label><input type="text" x-model="editDocForm.chapter" class="form-input"></div>
-                <div><label class="form-label">Phân loại bài học *</label><input type="text" x-model="editDocForm.category" class="form-input"></div>
-                <div><label class="form-label">Ngày học</label><input type="date" x-model="editDocForm.doc_date" class="form-input"></div>
-                <div><label class="form-label">Đường dẫn Google Drive *</label><input type="text" x-model="editDocForm.drive_url" class="form-input"></div>
+            <div class="modal-body space-y-4 max-h-[75vh] overflow-y-auto">
+                <div>
+                    <label class="form-label">Tiêu đề bài học *</label>
+                    <input type="text" x-model="lessonForm.title" placeholder="Ví dụ: BÀI 1 TÍNH ĐƠN ĐIỆU CỦA HÀM SỐ" class="form-input font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="form-label">Số thứ tự bài (1, 2, 3...)</label>
+                        <input type="number" min="1" x-model.number="lessonForm.order_index" placeholder="1" class="form-input font-bold text-blue-600">
+                    </div>
+                    <div>
+                        <label class="form-label">Ngày học</label>
+                        <input type="date" x-model="lessonForm.lesson_date" class="form-input">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Chương / Chuyên đề</label>
+                    <input type="text" x-model="lessonForm.chapter" placeholder="Ví dụ: Chương 1: Hàm số" class="form-input">
+                </div>
+                
+                <!-- Tab 1 config: Video -->
+                <div class="rounded-xl p-4 space-y-2" style="background:#eff6ff;border:1px solid #bfdbfe">
+                    <div class="flex items-center gap-2 text-xs font-bold text-blue-800 uppercase tracking-wide">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <span>Tab 1: Video chữa bài tập (YouTube)</span>
+                    </div>
+                    <label class="form-label text-xs text-slate-600">Link YouTube hoặc YouTube ID</label>
+                    <input type="text" x-model="lessonForm.video_url" placeholder="https://www.youtube.com/watch?v=... hoặc YouTube ID" class="form-input bg-white">
+                    <p class="text-[11px] text-slate-400">Bạn có thể dán toàn bộ đường link YouTube, hệ thống sẽ tự động nhận diện video.</p>
+                </div>
+
+                <!-- Tab 2 config: Tài liệu -->
+                <div class="rounded-xl p-4 space-y-2" style="background:#fdf4ff;border:1px solid #f0abfc">
+                    <div class="flex items-center gap-2 text-xs font-bold text-purple-800 uppercase tracking-wide">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Tab 2: Tài liệu học tập (Google Drive / PDF)</span>
+                    </div>
+                    <label class="form-label text-xs text-slate-600">Đường dẫn Google Drive hoặc link PDF</label>
+                    <input type="text" x-model="lessonForm.document_url" placeholder="Paste link Google Drive hoặc file PDF..." class="form-input bg-white">
+                    <p class="text-[11px] text-slate-400">Tài liệu sẽ được nhúng để học sinh xem trực tiếp hoặc mở trong tab riêng.</p>
+                </div>
+
+                <div>
+                    <label class="form-label">Ghi chú / Hướng dẫn bài học</label>
+                    <textarea x-model="lessonForm.description" rows="3" placeholder="Nhập tóm tắt kiến thức, lời dặn học sinh..." class="form-input"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
-                <button @click="editDocModalOpen=false" class="btn-secondary">Hủy</button>
-                <button @click="saveEditedDocument()" class="btn-primary">Lưu thay đổi</button>
+                <button @click="lessonModalOpen=false" class="btn-secondary">Hủy</button>
+                <button @click="saveLesson()" class="btn-primary">Lưu Bài Học</button>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════════════════ MODAL: TẠO/SỬA BÀI TẬP ══════════════════════════ -->
+    <!-- ══════════════════════════ MODAL: TẠO/SỬA BÀI TẬP VỀ NHÀ ══════════════════════════ -->
     <div x-show="assignmentModalOpen" class="modal-overlay" style="display:none">
         <div class="modal-box max-w-3xl my-8">
             <div class="modal-header">
@@ -1175,7 +1268,7 @@
                 <button @click="assignmentModalOpen=false" class="btn-ghost"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div class="modal-body space-y-5 max-h-[72vh] overflow-y-auto">
-                <div><label class="form-label">Tiêu đề bài tập *</label><input type="text" x-model="assignmentForm.title" placeholder="Ví dụ: Bài tập Ôn tập Chương 1..." class="form-input"></div>
+                <div><label class="form-label">Tiêu đề bài tập *</label><input type="text" x-model="assignmentForm.title" placeholder="Ví dụ: Bài tập Ôn tập Hàm Số..." class="form-input"></div>
                 <div><label class="form-label">Link File PDF đề bài (Google Drive)</label><input type="text" x-model="assignmentForm.pdf_url" placeholder="Paste link Drive..." class="form-input"></div>
                 <div><label class="form-label">Mô tả / Hướng dẫn</label><textarea x-model="assignmentForm.content" rows="3" placeholder="Mô tả chi tiết..." class="form-input"></textarea></div>
                 <div><label class="form-label">Hạn nộp bài</label><input type="datetime-local" x-model="assignmentForm.due_date" class="form-input"></div>
@@ -1192,7 +1285,7 @@
 
                 <!-- Score config -->
                 <div class="rounded-xl p-4 space-y-3" style="background:#f8fafc;border:1px solid #e2e8f0">
-                    <h4 class="font-display font-bold text-sm text-slate-700">Thang điểm</h4>
+                    <h4 class="font-display font-bold text-sm text-slate-700">Thang điểm từng loại</h4>
                     <div class="grid grid-cols-2 gap-3">
                         <div><label class="form-label">Điểm 1 câu TN đúng</label><input type="number" step="0.05" x-model.number="assignmentForm.mc_score_per_q" class="form-input"></div>
                         <div><label class="form-label">Điểm 1 câu TLN đúng</label><input type="number" step="0.05" x-model.number="assignmentForm.sa_score_per_q" class="form-input"></div>
@@ -1207,7 +1300,7 @@
 
                 <!-- Answer key -->
                 <div class="space-y-4">
-                    <h4 class="font-display font-bold text-sm text-slate-800 border-b border-slate-200 pb-2">Bảng Đáp Án</h4>
+                    <h4 class="font-display font-bold text-sm text-slate-800 border-b border-slate-200 pb-2">Bảng Đáp Án Chuẩn</h4>
 
                     <template x-if="assignmentForm.mc_count > 0">
                         <div>
@@ -1216,7 +1309,7 @@
                                 <template x-for="i in assignmentForm.mc_count" :key="'mc_'+i">
                                     <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 text-sm">
                                         <span class="font-bold text-slate-700" x-text="'Câu '+i+':'"></span>
-                                        <select x-model="assignmentForm.answer_key.mc[i]" class="p-1 border border-slate-200 rounded-lg bg-white font-bold text-blue-600 text-sm focus:outline-none focus:border-blue-500">
+                                        <select x-model="assignmentForm.answer_key.mc[i]" class="p-1 border border-slate-200 rounded-lg bg-white font-bold text-blue-600 text-sm focus:outline-none">
                                             <option value="">--</option>
                                             <option value="A">A</option><option value="B">B</option>
                                             <option value="C">C</option><option value="D">D</option>
@@ -1276,7 +1369,7 @@
             <div class="modal-body space-y-5 max-h-[72vh] overflow-y-auto">
                 <div><label class="form-label">Tiêu đề đề kiểm tra *</label><input type="text" x-model="examForm.title" placeholder="Ví dụ: Đề kiểm tra 1 tiết..." class="form-input"></div>
                 <div><label class="form-label">Thời gian làm bài (phút)</label><input type="number" min="0" x-model.number="examForm.duration_minutes" class="form-input font-bold text-emerald-700"></div>
-                <div><label class="form-label">Link File PDF đề thi</label><input type="text" x-model="examForm.pdf_url" placeholder="Paste link Drive..." class="form-input"></div>
+                <div><label class="form-label">Link File PDF đề thi (Google Drive)</label><input type="text" x-model="examForm.pdf_url" placeholder="Paste link Drive..." class="form-input"></div>
                 <div><label class="form-label">Mô tả / Ghi chú</label><textarea x-model="examForm.content" rows="2" class="form-input"></textarea></div>
                 <div><label class="form-label">Hạn nộp bài</label><input type="datetime-local" x-model="examForm.due_date" class="form-input"></div>
 
@@ -1304,7 +1397,7 @@
                 </div>
 
                 <div class="space-y-4">
-                    <h4 class="font-display font-bold text-sm text-slate-800 border-b border-slate-200 pb-2">Bảng Đáp Án</h4>
+                    <h4 class="font-display font-bold text-sm text-slate-800 border-b border-slate-200 pb-2">Bảng Đáp Án Chuẩn</h4>
                     <template x-if="examForm.mc_count > 0">
                         <div>
                             <div class="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wide">I. Trắc nghiệm</div>
@@ -1360,7 +1453,7 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════ MODAL: LÀM BÀI (FULL SCREEN) ══════════════════════════ -->
+    <!-- ══════════════════════════ MODAL: LÀM BÀI / THI (FULL SCREEN) ══════════════════════════ -->
     <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-2" style="background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);display:none">
         <div class="bg-white w-full rounded-2xl shadow-2xl flex flex-col overflow-hidden" style="max-width:98vw;height:96vh">
 
@@ -1424,8 +1517,8 @@
                 <!-- Answer sheet -->
                 <div class="lg:col-span-5 flex flex-col h-full bg-white overflow-hidden">
                     <div class="p-4 border-b border-slate-100">
-                        <h3 class="font-display font-bold text-base text-slate-900">Phiếu Trả Lời</h3>
-                        <p class="text-sm text-slate-400 mt-0.5">Chọn đáp án tương ứng với từng câu hỏi</p>
+                        <h3 class="font-display font-bold text-base text-slate-900">Phiếu Trả Lời Trực Tuyến</h3>
+                        <p class="text-sm text-slate-400 mt-0.5">Chọn đáp án tương ứng với từng câu hỏi bên đề bài</p>
                     </div>
 
                     <div class="flex-1 overflow-y-auto p-4 space-y-6">
@@ -1545,7 +1638,7 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════ JAVASCRIPT ══════════════════════════ -->
+    <!-- ══════════════════════════ JAVASCRIPT APP STATE & LOGIC ══════════════════════════ -->
     <script>
         function classroomApp() {
             return {
@@ -1559,19 +1652,32 @@
                 sidebarOpen: true,
                 isLoadingContent: false,
 
-                activeTab: 'dashboard',
+                activeTab: 'lessons', // Mặc định mở tab Bài học & Tài liệu
                 students: [],
                 allUsers: [],
                 attendance: [],
                 attendanceDates: [],
                 selectedAttendanceMonth: 'Tất cả',
 
-                videos: [],
-                documents: [],
-                selectedDocChapter: 'Tất cả',
-                selectedDocCategory: 'Tất cả',
-                editDocModalOpen: false,
-                editDocForm: { id: null, title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: '' },
+                // STATE MỚI: BÀI HỌC (GỒM VIDEO CHỮA BÀI & TÀI LIỆU NHƯ ẢNH CONTEXT)
+                lessons: [],
+                activeLesson: null,
+                lessonSubTab: 'video', // 'video' hoặc 'document'
+                lessonSearchQuery: '',
+                selectedLessonChapter: 'Tất cả',
+                lessonModalOpen: false,
+                isEditingLesson: false,
+                editingLessonId: null,
+                lessonForm: {
+                    title: '',
+                    lesson_date: new Date().toISOString().split('T')[0],
+                    chapter: 'Chương 1',
+                    order_index: 1,
+                    video_url: '',
+                    video_id: '',
+                    document_url: '',
+                    description: ''
+                },
 
                 assignments: [],
                 selectedAssignmentMonth: '',
@@ -1579,8 +1685,6 @@
 
                 exams: [],
                 allExamSubmissions: [],
-                currentVideoId: '',
-                currentVideoTitle: '',
 
                 dashboardStats: {
                     avgHomeworkScore: 0,
@@ -1590,8 +1694,6 @@
                     examRankings: [],
                     visitRankings: []
                 },
-
-                newDoc: { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] },
 
                 assignmentModalOpen: false,
                 isEditingAssignment: false,
@@ -1628,7 +1730,6 @@
 
                 newAttendanceDate: new Date().toISOString().split('T')[0],
                 newStudent: { student_code: '', full_name: '' },
-                newVideo: { title: '', youtube_id: '' },
 
                 async initData() {
                     const savedUser = localStorage.getItem('classstu_user');
@@ -1712,12 +1813,11 @@
                     this.isLoadingContent = true;
                     try {
                         await Promise.all([
+                            this.fetchLessons(),
                             this.fetchStudents(),
                             this.fetchUsers(),
                             this.fetchAttendance(),
                             this.fetchAttendanceDates(),
-                            this.fetchVideos(),
-                            this.fetchDocuments(),
                             this.fetchAssignments(),
                             this.fetchAllSubmissions(),
                             this.fetchExams(),
@@ -1733,20 +1833,160 @@
                 getTabTitle() {
                     const titles = {
                         'dashboard': 'Tổng quan hệ thống',
+                        'lessons': 'Khóa học & Bài tập (Video & Tài liệu)',
                         'attendance': 'Quản lý điểm danh',
                         'students': 'Danh sách học sinh',
-                        'videos': 'Bài giảng Video',
                         'assignments': 'Bài tập về nhà',
-                        'documents': 'Tài liệu PDF',
-                        'exams': 'Đề kiểm tra'
+                        'exams': 'Đề kiểm tra trực tuyến'
                     };
                     return titles[this.activeTab] || 'Quản Lý Học Tập';
                 },
 
+                // ── LOGIC BÀI HỌC (LESSONS) ──
+                async fetchLessons() {
+                    try {
+                        let res = await fetch('/api/lessons');
+                        if (res.ok) {
+                            this.lessons = await res.json();
+                            if (this.lessons.length > 0 && !this.activeLesson) {
+                                this.activeLesson = this.lessons[0];
+                            }
+                        }
+                    } catch (e) {}
+                },
+
+                selectLesson(lesson) {
+                    this.activeLesson = lesson;
+                    this.renderMath();
+                },
+
+                getLessonChapters() {
+                    let set = new Set();
+                    this.lessons.forEach(l => { if (l.chapter) set.add(l.chapter); });
+                    return Array.from(set).sort();
+                },
+
+                filteredLessons() {
+                    return this.lessons.filter(l => {
+                        let matchQuery = !this.lessonSearchQuery || (l.title && l.title.toLowerCase().includes(this.lessonSearchQuery.toLowerCase()));
+                        let matchChapter = this.selectedLessonChapter === 'Tất cả' || l.chapter === this.selectedLessonChapter;
+                        return matchQuery && matchChapter;
+                    });
+                },
+
+                formatLessonDateDisplay(dateStr) {
+                    if (!dateStr) return '';
+                    try {
+                        let p = dateStr.split('-');
+                        if (p.length === 3) return `${p[2]}/${p[1]}`;
+                    } catch (e) {}
+                    return dateStr;
+                },
+
+                formatFullDateDisplay(dateStr) {
+                    if (!dateStr) return '';
+                    try {
+                        let d = new Date(dateStr);
+                        let days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+                        let dayName = days[d.getDay()] || '';
+                        let day = String(d.getDate()).padStart(2, '0');
+                        let month = String(d.getMonth() + 1).padStart(2, '0');
+                        let year = d.getFullYear();
+                        return `${dayName}, ${day}/${month}/${year}`;
+                    } catch (e) {
+                        return dateStr;
+                    }
+                },
+
+                extractYoutubeIdClient(url) {
+                    if (!url) return '';
+                    let text = String(url).trim();
+                    let m = text.match(/(?:v=|\/embed\/|\/watch\?v=|youtu\.be\/|\/v\/|shorts\/|^)([A-Za-z0-9_-]{11})/);
+                    return m ? m[1] : text;
+                },
+
+                openCreateLessonModal() {
+                    this.isEditingLesson = false;
+                    this.editingLessonId = null;
+                    let nextIdx = (this.lessons.length > 0) ? (Math.max(...this.lessons.map(l => l.order_index || 0)) + 1) : 1;
+                    this.lessonForm = {
+                        title: '',
+                        lesson_date: new Date().toISOString().split('T')[0],
+                        chapter: 'Chương 1',
+                        order_index: nextIdx,
+                        video_url: '',
+                        video_id: '',
+                        document_url: '',
+                        description: ''
+                    };
+                    this.lessonModalOpen = true;
+                },
+
+                openEditLessonModal(l) {
+                    this.isEditingLesson = true;
+                    this.editingLessonId = l.id;
+                    this.lessonForm = {
+                        title: l.title,
+                        lesson_date: l.lesson_date || '',
+                        chapter: l.chapter || 'Chương 1',
+                        order_index: l.order_index || 1,
+                        video_url: l.video_url || (l.video_id ? 'https://www.youtube.com/watch?v=' + l.video_id : ''),
+                        video_id: l.video_id || '',
+                        document_url: l.document_url || '',
+                        description: l.description || ''
+                    };
+                    this.lessonModalOpen = true;
+                },
+
+                async saveLesson() {
+                    if (!this.lessonForm.title) {
+                        alert('Vui lòng nhập tiêu đề bài học!');
+                        return;
+                    }
+                    let payload = {
+                        ...this.lessonForm,
+                        video_id: this.extractYoutubeIdClient(this.lessonForm.video_url)
+                    };
+                    let url = this.isEditingLesson ? '/api/lessons/' + this.editingLessonId : '/api/lessons';
+                    let method = this.isEditingLesson ? 'PUT' : 'POST';
+
+                    let res = await fetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        alert('Đã lưu bài học thành công!');
+                        this.lessonModalOpen = false;
+                        await this.fetchLessons();
+                        if (this.isEditingLesson) {
+                            this.activeLesson = this.lessons.find(l => l.id === this.editingLessonId) || this.activeLesson;
+                        } else if (this.lessons.length > 0) {
+                            this.activeLesson = this.lessons[this.lessons.length - 1];
+                        }
+                    } else {
+                        alert('Có lỗi xảy ra khi lưu bài học!');
+                    }
+                },
+
+                async deleteLesson(id) {
+                    if (!confirm('Bạn có chắc chắn muốn xóa bài học này?')) return;
+                    let res = await fetch('/api/lessons/' + id, { method: 'DELETE' });
+                    if (res.ok) {
+                        await this.fetchLessons();
+                        this.activeLesson = this.lessons.length > 0 ? this.lessons[0] : null;
+                    }
+                },
+
+                // ── HELPER UTILS ──
                 getEmbedPdfUrl(url) {
                     if (!url) return '';
                     if (url.includes('drive.google.com') && url.includes('/view')) {
                         return url.replace('/view', '/preview');
+                    }
+                    if (url.includes('drive.google.com') && !url.includes('/preview')) {
+                        return url.replace(/\/$/, '') + '/preview';
                     }
                     return url;
                 },
@@ -2153,76 +2393,6 @@
                         case 'Vắng không phép': return 'badge badge-red';
                         default: return 'badge badge-gray';
                     }
-                },
-
-                async fetchVideos() {
-                    let res = await fetch('/api/videos');
-                    this.videos = await res.json();
-                    if (this.videos.length > 0 && !this.currentVideoId) {
-                        this.selectVideo(this.videos[0]);
-                    }
-                },
-                selectVideo(v) {
-                    this.currentVideoId = v.youtube_id;
-                    this.currentVideoTitle = v.title;
-                },
-                async addVideo() {
-                    if (!this.newVideo.title || !this.newVideo.youtube_id) return;
-                    await fetch('/api/videos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.newVideo) });
-                    this.newVideo = { title: '', youtube_id: '' };
-                    await this.fetchVideos();
-                },
-                async deleteVideo(id) {
-                    if (!confirm('Xóa video này?')) return;
-                    await fetch('/api/videos/' + id, { method: 'DELETE' });
-                    await this.fetchVideos();
-                },
-
-                async fetchDocuments() {
-                    let res = await fetch('/api/documents');
-                    this.documents = await res.json();
-                },
-                getDocChapters() {
-                    let chs = new Set();
-                    this.documents.forEach(d => { if (d.chapter) chs.add(d.chapter); });
-                    return Array.from(chs).sort();
-                },
-                getDocCategories() {
-                    let cats = new Set();
-                    this.documents.forEach(d => {
-                        if (this.selectedDocChapter !== 'Tất cả' && d.chapter !== this.selectedDocChapter) return;
-                        if (d.category) cats.add(d.category);
-                    });
-                    return Array.from(cats).sort();
-                },
-                filteredDocuments() {
-                    return this.documents.filter(d => {
-                        let matchChapter = (this.selectedDocChapter === 'Tất cả' || d.chapter === this.selectedDocChapter);
-                        let matchCategory = (this.selectedDocCategory === 'Tất cả' || d.category === this.selectedDocCategory);
-                        return matchChapter && matchCategory;
-                    });
-                },
-                async addDocument() {
-                    if (!this.newDoc.title || !this.newDoc.drive_url) return;
-                    await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.newDoc) });
-                    this.newDoc = { title: '', drive_url: '', chapter: 'Chương 1', category: 'Bài 1', doc_date: new Date().toISOString().split('T')[0] };
-                    await this.fetchDocuments();
-                },
-                openEditDocumentModal(doc) {
-                    this.editDocForm = { id: doc.id, title: doc.title, drive_url: doc.drive_url, chapter: doc.chapter || 'Chương 1', category: doc.category || 'Bài 1', doc_date: doc.doc_date || '' };
-                    this.editDocModalOpen = true;
-                },
-                async saveEditedDocument() {
-                    let res = await fetch('/api/documents/' + this.editDocForm.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.editDocForm) });
-                    if (res.ok) {
-                        this.editDocModalOpen = false;
-                        await this.fetchDocuments();
-                    }
-                },
-                async deleteDocument(id) {
-                    if (!confirm('Xóa tài liệu này?')) return;
-                    await fetch('/api/documents/' + id, { method: 'DELETE' });
-                    await this.fetchDocuments();
                 }
             }
         }
