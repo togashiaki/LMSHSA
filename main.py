@@ -7,6 +7,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
 import json
+import re
 from datetime import datetime
 
 app = FastAPI(title="Hệ thống Quản lý Lớp học - LMS")
@@ -119,6 +120,18 @@ def init_db():
         time_taken INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS lessons (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        lesson_date TEXT DEFAULT '',
+        chapter VARCHAR(100) DEFAULT 'Chương 1',
+        order_index INTEGER DEFAULT 0,
+        video_url TEXT DEFAULT '',
+        video_id TEXT DEFAULT '',
+        document_url TEXT DEFAULT '',
+        description TEXT DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     """)
     
     cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS visit_count INTEGER DEFAULT 1;")
@@ -142,6 +155,13 @@ def init_db():
     cursor.execute("ALTER TABLE exams ADD COLUMN IF NOT EXISTS sa_score_per_q NUMERIC(4, 2) DEFAULT 0.50;")
 
     cursor.execute("ALTER TABLE exam_submissions ADD COLUMN IF NOT EXISTS time_taken INTEGER DEFAULT 0;")
+
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS chapter VARCHAR(100) DEFAULT 'Chương 1';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS order_index INTEGER DEFAULT 0;")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_id TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS document_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';")
 
     cursor.execute("SELECT COUNT(*) FROM users")
     res = cursor.fetchone()
@@ -605,6 +625,95 @@ def delete_video(video_id: int):
     cursor.close()
     conn.close()
     return {"message": "Đã xóa video"}
+
+# --- BÀI HỌC (GỒM VIDEO CHỮA BÀI & TÀI LIỆU) ---
+def extract_youtube_id(url_or_id: str) -> str:
+    if not url_or_id:
+        return ""
+    text = url_or_id.strip()
+    match = re.search(r'(?:v=|\/embed\/|\/watch\?v=|youtu\.be\/|\/v\/|shorts\/|^)([A-Za-z0-9_-]{11})', text)
+    if match:
+        return match.group(1)
+    return text
+
+class LessonCreate(BaseModel):
+    title: str
+    lesson_date: Optional[str] = ""
+    chapter: Optional[str] = "Chương 1"
+    order_index: Optional[int] = 0
+    video_url: Optional[str] = ""
+    video_id: Optional[str] = ""
+    document_url: Optional[str] = ""
+    description: Optional[str] = ""
+
+@app.get("/api/lessons")
+def get_lessons():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM lessons ORDER BY order_index ASC, id ASC")
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [dict(r) for r in rows]
+
+@app.post("/api/lessons")
+def create_lesson(l: LessonCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    v_id = extract_youtube_id(l.video_id or l.video_url or "")
+    cursor.execute("""
+        INSERT INTO lessons (title, lesson_date, chapter, order_index, video_url, video_id, document_url, description)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        l.title.strip(),
+        l.lesson_date or "",
+        l.chapter or "Chương 1",
+        l.order_index or 0,
+        l.video_url or "",
+        v_id,
+        l.document_url or "",
+        l.description or ""
+    ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã tạo bài học thành công"}
+
+@app.put("/api/lessons/{lesson_id}")
+def update_lesson(lesson_id: int, l: LessonCreate):
+    conn = get_db()
+    cursor = conn.cursor()
+    v_id = extract_youtube_id(l.video_id or l.video_url or "")
+    cursor.execute("""
+        UPDATE lessons
+        SET title = %s, lesson_date = %s, chapter = %s, order_index = %s,
+            video_url = %s, video_id = %s, document_url = %s, description = %s
+        WHERE id = %s
+    """, (
+        l.title.strip(),
+        l.lesson_date or "",
+        l.chapter or "Chương 1",
+        l.order_index or 0,
+        l.video_url or "",
+        v_id,
+        l.document_url or "",
+        l.description or "",
+        lesson_id
+    ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã cập nhật bài học"}
+
+@app.delete("/api/lessons/{lesson_id}")
+def delete_lesson(lesson_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM lessons WHERE id = %s", (lesson_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Đã xóa bài học"}
 
 # --- TÀI LIỆU GOOGLE DRIVE ---
 @app.get("/api/documents")
