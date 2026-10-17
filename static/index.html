@@ -84,6 +84,18 @@
             z-index: 20;
         }
 
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                z-index: 50;
+                height: 100vh;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+            }
+        }
+
         .nav-item {
             display: flex;
             align-items: center;
@@ -416,6 +428,8 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
                     Đăng nhập
                 </button>
+            </div>
+
             <div x-show="authTab==='register'" class="space-y-4">
                 <div>
                     <label class="form-label">Họ và tên</label>
@@ -443,6 +457,18 @@
 
     <!-- MAIN APP -->
     <div x-show="currentUser" class="flex h-screen overflow-hidden">
+
+        <!-- BACKDROP CHO MOBILE KHI MỞ SIDEBAR -->
+        <div x-show="sidebarOpen" 
+             @click="sidebarOpen=false" 
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden"
+             x-transition:enter="transition-opacity ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="display:none"></div>
 
         <!-- SIDEBAR -->
         <aside x-show="sidebarOpen"
@@ -552,14 +578,15 @@
             </header>
 
             <!-- Page content -->
-            <main class="p-6 space-y-6 max-w-7xl w-full mx-auto">
+            <main class="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 max-w-7xl w-full mx-auto">
 
-                <!-- ═══════════════════════════════ 0. BÀI HỌC & TÀI LIỆU (THEO ẢNH CONTEXT) ═══════════════════════════════ -->
-                <section x-show="activeTab==='lessons'" class="space-y-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- ═══════════════════════════════ 0. BÀI HỌC & TÀI LIỆU (3 TAB & TỐI ƯU MOBILE) ═══════════════════════════════ -->
+                <section x-show="activeTab==='lessons'" class="space-y-4 md:space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
 
-                        <!-- CỘT BÊN TRÁI: DANH SÁCH BÀI HỌC (NHƯ ẢNH 1) -->
-                        <div class="lg:col-span-4 xl:col-span-4 card p-4 flex flex-col h-[calc(100vh-140px)] sticky top-20 shadow-sm border border-slate-200">
+                        <!-- CỘT BÊN TRÁI: DANH SÁCH BÀI HỌC -->
+                        <div class="lg:col-span-4 xl:col-span-4 card p-3 sm:p-4 flex flex-col h-[calc(100vh-140px)] sticky top-20 shadow-sm border border-slate-200"
+                             :class="mobileLessonView === 'detail' ? 'hidden lg:flex' : 'flex'">
                             <!-- Ô tìm kiếm -->
                             <div class="relative mb-3">
                                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -606,8 +633,13 @@
                                         </div>
 
                                         <div class="flex items-center gap-1.5 flex-shrink-0">
-                                            <span class="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500"
-                                                  x-text="formatLessonDateDisplay(l.lesson_date)"></span>
+                                            <!-- Hiển thị đúng Ngày học do GV thiết lập (l.lesson_date) -->
+                                            <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 flex items-center gap-1"
+                                                  x-show="l.lesson_date"
+                                                  title="Ngày học">
+                                                <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span x-text="formatLessonDateDisplay(l.lesson_date)"></span>
+                                            </span>
                                             
                                             <!-- Nút sửa/xóa cho Giáo viên -->
                                             <div x-show="role==='teacher'" class="opacity-0 group-hover:opacity-100 flex items-center transition" @click.stop>
@@ -633,18 +665,30 @@
                             </div>
                         </div>
 
-                        <!-- CỘT BÊN PHẢI: CHI TIẾT BÀI HỌC VÀ 2 TAB (NHƯ ẢNH 1) -->
-                        <div class="lg:col-span-8 xl:col-span-8 space-y-4">
+                        <!-- CỘT BÊN PHẢI: CHI TIẾT BÀI HỌC VÀ 3 TAB -->
+                        <div class="lg:col-span-8 xl:col-span-8 space-y-4"
+                             :class="mobileLessonView === 'list' && !activeLesson ? 'hidden lg:block' : (mobileLessonView === 'list' ? 'hidden lg:block' : 'block')">
 
-                            <div class="card p-6 flex flex-col space-y-5" x-show="activeLesson">
+                            <!-- Nút quay lại danh sách trên mobile -->
+                            <div class="lg:hidden" x-show="activeLesson">
+                                <button @click="mobileLessonView = 'list'" class="btn-secondary py-2 px-3 text-xs flex items-center gap-2 w-full justify-center bg-white shadow-sm border-blue-200 text-blue-700 font-semibold hover:bg-blue-50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                                    <span>← Quay lại danh sách bài học</span>
+                                </button>
+                            </div>
+
+                            <div class="card p-4 sm:p-6 flex flex-col space-y-5" x-show="activeLesson">
                                 <!-- Header bài học -->
                                 <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
                                     <div>
                                         <div class="flex items-center gap-2 mb-1.5">
                                             <span class="badge badge-blue text-xs uppercase tracking-wide font-bold" x-text="activeLesson?.chapter || 'Chương 1'"></span>
-                                            <span class="text-xs text-slate-400 font-medium" x-show="activeLesson?.lesson_date" x-text="formatFullDateDisplay(activeLesson?.lesson_date)"></span>
+                                            <span class="text-xs text-slate-500 font-medium flex items-center gap-1" x-show="activeLesson?.lesson_date">
+                                                <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span x-text="'Ngày học: ' + formatFullDateDisplay(activeLesson?.lesson_date)"></span>
+                                            </span>
                                         </div>
-                                        <h2 class="font-display font-bold text-2xl lg:text-3xl text-slate-900 tracking-tight" x-text="activeLesson?.title"></h2>
+                                        <h2 class="font-display font-bold text-xl sm:text-2xl lg:text-3xl text-slate-900 tracking-tight" x-text="activeLesson?.title"></h2>
                                     </div>
 
                                     <!-- Action buttons cho GV -->
@@ -659,30 +703,77 @@
                                     </div>
                                 </div>
 
-                                <!-- Thanh 2 TAB chuyển đổi (Tab 1: Video chữa bài tập, Tab 2: Tài liệu) -->
-                                <div class="flex border-b border-slate-200 gap-2">
-                                    <button @click="lessonSubTab = 'video'"
-                                            :class="lessonSubTab === 'video' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/60' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
-                                            class="flex items-center gap-2 py-3 px-5 border-b-2 text-sm transition-all rounded-t-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                        <span>Video chữa bài tập</span>
+                                <!-- THANH 3 TAB CHUYỂN ĐỔI: VIDEO BÀI HỌC | VIDEO CHỮA BTVN | TÀI LIỆU -->
+                                <div class="flex border-b border-slate-200 gap-1 sm:gap-2 overflow-x-auto pb-px">
+                                    <!-- TAB 1: VIDEO BÀI HỌC -->
+                                    <button @click="lessonSubTab = 'video_lesson'"
+                                            :class="lessonSubTab === 'video_lesson' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/70' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
+                                            class="flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 border-b-2 text-xs sm:text-sm transition-all rounded-t-lg flex-shrink-0">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Video bài học</span>
                                     </button>
 
-                                    <button @click="lessonSubTab = 'document'"
-                                            :class="lessonSubTab === 'document' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/60' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
-                                            class="flex items-center gap-2 py-3 px-5 border-b-2 text-sm transition-all rounded-t-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <!-- TAB 2: VIDEO CHỮA BTVN -->
+                                    <button @click="lessonSubTab = 'video_exercise'"
+                                            :class="lessonSubTab === 'video_exercise' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/70' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
+                                            class="flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 border-b-2 text-xs sm:text-sm transition-all rounded-t-lg flex-shrink-0">
+                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        <span>Video chữa BTVN</span>
+                                    </button>
+
+                                    <!-- TAB 3: TÀI LIỆU -->
+                                    <button @click="lessonSubTab = 'documents'"
+                                            :class="lessonSubTab === 'documents' ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/70' : 'border-transparent text-slate-500 hover:text-slate-800 font-medium'"
+                                            class="flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 border-b-2 text-xs sm:text-sm transition-all rounded-t-lg flex-shrink-0">
+                                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         <span>Tài liệu</span>
+                                        <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 text-[11px] font-bold inline-flex items-center justify-center"
+                                              x-show="getActiveLessonDocs().length > 0"
+                                              x-text="getActiveLessonDocs().length"></span>
                                     </button>
                                 </div>
 
-                                <!-- NỘI DUNG TAB 1: VIDEO CHỮA BÀI TẬP -->
-                                <div x-show="lessonSubTab === 'video'" class="space-y-4">
-                                    <template x-if="activeLesson && (activeLesson.video_id || activeLesson.video_url)">
+                                <!-- NỘI DUNG TAB 1: VIDEO BÀI HỌC -->
+                                <div x-show="lessonSubTab === 'video_lesson'" class="space-y-4">
+                                    <template x-if="activeLesson && (activeLesson.lesson_video_id || activeLesson.lesson_video_url)">
                                         <div class="space-y-4">
                                             <!-- Video Player 16:9 -->
                                             <div class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 shadow-md border border-slate-200">
-                                                <iframe :src="'https://www.youtube.com/embed/' + (activeLesson.video_id || extractYoutubeIdClient(activeLesson.video_url))"
+                                                <iframe :src="'https://www.youtube.com/embed/' + (activeLesson.lesson_video_id || extractYoutubeIdClient(activeLesson.lesson_video_url))"
+                                                        class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                            </div>
+
+                                            <!-- Mô tả / Ghi chú bài giảng -->
+                                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200" x-show="activeLesson.description">
+                                                <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ghi chú & Hướng dẫn bài học:</div>
+                                                <p class="text-sm text-slate-700 whitespace-pre-line leading-relaxed" x-text="activeLesson.description"></p>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!activeLesson || (!activeLesson.lesson_video_id && !activeLesson.lesson_video_url)">
+                                        <div class="p-8 sm:p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </div>
+                                            <h3 class="font-display font-bold text-base text-slate-800">Chưa có video bài học</h3>
+                                            <p class="text-xs text-slate-500 max-w-sm mx-auto">Bài học này chưa được gắn video bài giảng lý thuyết.</p>
+                                            <div x-show="role==='teacher'" class="pt-2">
+                                                <button @click="openEditLessonModal(activeLesson)" class="btn-primary text-xs py-2 px-4">
+                                                    + Thêm link Video bài học
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- NỘI DUNG TAB 2: VIDEO CHỮA BTVN -->
+                                <div x-show="lessonSubTab === 'video_exercise'" class="space-y-4">
+                                    <template x-if="activeLesson && (activeLesson.exercise_video_id || activeLesson.exercise_video_url || activeLesson.video_id || activeLesson.video_url)">
+                                        <div class="space-y-4">
+                                            <!-- Video Player 16:9 -->
+                                            <div class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 shadow-md border border-slate-200">
+                                                <iframe :src="'https://www.youtube.com/embed/' + (activeLesson.exercise_video_id || extractYoutubeIdClient(activeLesson.exercise_video_url) || activeLesson.video_id || extractYoutubeIdClient(activeLesson.video_url))"
                                                         class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                                             </div>
 
@@ -694,47 +785,66 @@
                                         </div>
                                     </template>
 
-                                    <template x-if="!activeLesson || (!activeLesson.video_id && !activeLesson.video_url)">
-                                        <div class="p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
-                                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+                                    <template x-if="!activeLesson || (!activeLesson.exercise_video_id && !activeLesson.exercise_video_url && !activeLesson.video_id && !activeLesson.video_url)">
+                                        <div class="p-8 sm:p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                                            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                             </div>
-                                            <h3 class="font-display font-bold text-base text-slate-800">Chưa có video chữa bài</h3>
-                                            <p class="text-xs text-slate-500 max-w-sm mx-auto">Bài học này chưa được gắn liên kết video YouTube.</p>
+                                            <h3 class="font-display font-bold text-base text-slate-800">Chưa có video chữa BTVN</h3>
+                                            <p class="text-xs text-slate-500 max-w-sm mx-auto">Bài học này chưa được gắn video chữa bài tập về nhà.</p>
                                             <div x-show="role==='teacher'" class="pt-2">
                                                 <button @click="openEditLessonModal(activeLesson)" class="btn-primary text-xs py-2 px-4">
-                                                    + Gắn link Video YouTube
+                                                    + Thêm link Video chữa BTVN
                                                 </button>
                                             </div>
                                         </div>
                                     </template>
                                 </div>
 
-                                <!-- NỘI DUNG TAB 2: TÀI LIỆU -->
-                                <div x-show="lessonSubTab === 'document'" class="space-y-4">
-                                    <template x-if="activeLesson && activeLesson.document_url">
+                                <!-- NỘI DUNG TAB 3: TÀI LIỆU (HỖ TRỢ NHIỀU LINK DRIVE VÀ TÊN KHÁC NHAU) -->
+                                <div x-show="lessonSubTab === 'documents'" class="space-y-4">
+                                    <template x-if="getActiveLessonDocs().length > 0">
                                         <div class="space-y-3">
-                                            <!-- Toolbar -->
-                                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                                <div class="flex items-center gap-2">
-                                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                                    <span class="text-xs font-bold text-slate-700">Tài liệu học tập & đề bài</span>
+                                            <!-- Danh sách các tài liệu để học sinh chọn nhanh nếu có nhiều tài liệu -->
+                                            <div class="flex items-center gap-2 overflow-x-auto pb-1" x-show="getActiveLessonDocs().length > 1">
+                                                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex-shrink-0">Chọn tài liệu:</span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <template x-for="(doc, dIdx) in getActiveLessonDocs()" :key="dIdx">
+                                                        <button @click="selectedDocIndex = dIdx"
+                                                                :class="selectedDocIndex === dIdx ? 'bg-purple-600 text-white shadow-sm font-bold ring-2 ring-purple-600/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium'"
+                                                                class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                            <span x-text="doc.name || ('Tài liệu ' + (dIdx + 1))"></span>
+                                                        </button>
+                                                    </template>
                                                 </div>
-                                                <a :href="activeLesson.document_url" target="_blank" class="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5">
+                                            </div>
+
+                                            <!-- Toolbar thông tin tài liệu hiện tại -->
+                                            <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                                <div class="flex items-center gap-2 min-w-0">
+                                                    <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    </div>
+                                                    <span class="text-xs sm:text-sm font-bold text-slate-800 truncate"
+                                                          x-text="getActiveLessonDocs()[selectedDocIndex]?.name || 'Tài liệu học tập & đề bài'"></span>
+                                                </div>
+                                                <a :href="getActiveLessonDocs()[selectedDocIndex]?.url" target="_blank"
+                                                   class="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5 ml-auto flex-shrink-0">
                                                     <span>Mở trong tab riêng</span>
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                                 </a>
                                             </div>
 
                                             <!-- Nhúng PDF / Google Drive Preview -->
-                                            <div class="w-full h-[650px] rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
-                                                <iframe :src="getEmbedPdfUrl(activeLesson.document_url)" class="w-full h-full" frameborder="0"></iframe>
+                                            <div class="w-full h-[500px] sm:h-[650px] rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+                                                <iframe :src="getEmbedPdfUrl(getActiveLessonDocs()[selectedDocIndex]?.url)" class="w-full h-full" frameborder="0"></iframe>
                                             </div>
                                         </div>
                                     </template>
 
-                                    <template x-if="!activeLesson || !activeLesson.document_url">
-                                        <div class="p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                                    <template x-if="getActiveLessonDocs().length === 0">
+                                        <div class="p-8 sm:p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-3">
                                             <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto">
                                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                             </div>
@@ -751,7 +861,7 @@
                             </div>
 
                             <!-- Khi chưa chọn bài học nào -->
-                            <div class="card p-12 text-center" x-show="!activeLesson">
+                            <div class="card p-8 sm:p-12 text-center" x-show="!activeLesson">
                                 <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                                 </div>
@@ -1223,26 +1333,66 @@
                     <input type="text" x-model="lessonForm.chapter" placeholder="Ví dụ: Chương 1: Hàm số" class="form-input">
                 </div>
                 
-                <!-- Tab 1 config: Video -->
+                <!-- Tab 1 config: Video Bài Học -->
                 <div class="rounded-xl p-4 space-y-2" style="background:#eff6ff;border:1px solid #bfdbfe">
                     <div class="flex items-center gap-2 text-xs font-bold text-blue-800 uppercase tracking-wide">
-                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                        <span>Tab 1: Video chữa bài tập (YouTube)</span>
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Tab 1: Video bài học (YouTube)</span>
                     </div>
-                    <label class="form-label text-xs text-slate-600">Link YouTube hoặc YouTube ID</label>
-                    <input type="text" x-model="lessonForm.video_url" placeholder="https://www.youtube.com/watch?v=... hoặc YouTube ID" class="form-input bg-white">
-                    <p class="text-[11px] text-slate-400">Bạn có thể dán toàn bộ đường link YouTube, hệ thống sẽ tự động nhận diện video.</p>
+                    <label class="form-label text-xs text-slate-600">Link YouTube hoặc YouTube ID của bài giảng</label>
+                    <input type="text" x-model="lessonForm.lesson_video_url" placeholder="https://www.youtube.com/watch?v=... hoặc YouTube ID" class="form-input bg-white">
+                    <p class="text-[11px] text-slate-400">Dán đường link YouTube bài giảng lý thuyết.</p>
                 </div>
 
-                <!-- Tab 2 config: Tài liệu -->
-                <div class="rounded-xl p-4 space-y-2" style="background:#fdf4ff;border:1px solid #f0abfc">
-                    <div class="flex items-center gap-2 text-xs font-bold text-purple-800 uppercase tracking-wide">
-                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Tab 2: Tài liệu học tập (Google Drive / PDF)</span>
+                <!-- Tab 2 config: Video Chữa BTVN -->
+                <div class="rounded-xl p-4 space-y-2" style="background:#ecfdf5;border:1px solid #a7f3d0">
+                    <div class="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wide">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <span>Tab 2: Video chữa bài tập về nhà (YouTube)</span>
                     </div>
-                    <label class="form-label text-xs text-slate-600">Đường dẫn Google Drive hoặc link PDF</label>
-                    <input type="text" x-model="lessonForm.document_url" placeholder="Paste link Google Drive hoặc file PDF..." class="form-input bg-white">
-                    <p class="text-[11px] text-slate-400">Tài liệu sẽ được nhúng để học sinh xem trực tiếp hoặc mở trong tab riêng.</p>
+                    <label class="form-label text-xs text-slate-600">Link YouTube hoặc YouTube ID video chữa bài</label>
+                    <input type="text" x-model="lessonForm.exercise_video_url" placeholder="https://www.youtube.com/watch?v=... hoặc YouTube ID" class="form-input bg-white">
+                    <p class="text-[11px] text-slate-400">Dán đường link YouTube video giáo viên chữa bài tập về nhà.</p>
+                </div>
+
+                <!-- Tab 3 config: Danh sách Tài liệu (Nhiều tài liệu, đặt tên riêng) -->
+                <div class="rounded-xl p-4 space-y-3" style="background:#fdf4ff;border:1px solid #f0abfc">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs font-bold text-purple-800 uppercase tracking-wide">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span>Tab 3: Tài liệu học tập (Nhiều link Drive / PDF)</span>
+                        </div>
+                        <button type="button" @click="addLessonDocument()" class="btn-primary text-xs py-1 px-2.5 bg-purple-600 hover:bg-purple-700 shadow-none">
+                            + Thêm tài liệu
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-500">Bạn có thể thêm nhiều link Drive và đặt tên riêng cho từng tài liệu để học sinh dễ hiểu.</p>
+
+                    <div class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                        <template x-for="(doc, idx) in lessonForm.documents" :key="idx">
+                            <div class="p-2.5 rounded-lg bg-white border border-purple-200 space-y-2 shadow-xs">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs font-bold text-purple-700 flex items-center gap-1">
+                                        <span class="w-4 h-4 rounded-full bg-purple-100 text-purple-700 text-[10px] inline-flex items-center justify-center font-bold" x-text="idx + 1"></span>
+                                        Tài liệu <span x-text="idx + 1"></span>
+                                    </span>
+                                    <button type="button" @click="removeLessonDocument(idx)" class="text-slate-400 hover:text-red-500 p-1" title="Xóa tài liệu này" x-show="lessonForm.documents.length > 1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                    <div class="sm:col-span-5">
+                                        <label class="text-[11px] font-semibold text-slate-600 mb-0.5 block">Tên hiển thị:</label>
+                                        <input type="text" x-model="doc.name" placeholder="Ví dụ: Đề lý thuyết buổi 1..." class="form-input text-xs py-1.5 px-2 bg-slate-50">
+                                    </div>
+                                    <div class="sm:col-span-7">
+                                        <label class="text-[11px] font-semibold text-slate-600 mb-0.5 block">Link Google Drive / PDF:</label>
+                                        <input type="text" x-model="doc.url" placeholder="https://drive.google.com/..." class="form-input text-xs py-1.5 px-2 bg-slate-50">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
                 <div>
@@ -1646,20 +1796,22 @@
                 loginForm: { username: '', password: '' },
                 regForm: { username: '', password: '', full_name: '', role: 'student' },
 
-                sidebarOpen: true,
+                sidebarOpen: window.innerWidth > 768,
                 isLoadingContent: false,
 
                 activeTab: 'lessons', // Mặc định mở tab Bài học & Tài liệu
+                mobileLessonView: 'list', // 'list' | 'detail' (Tối ưu giao diện mobile)
                 students: [],
                 allUsers: [],
                 attendance: [],
                 attendanceDates: [],
                 selectedAttendanceMonth: 'Tất cả',
 
-                // STATE MỚI: BÀI HỌC (GỒM VIDEO CHỮA BÀI & TÀI LIỆU NHƯ ẢNH CONTEXT)
+                // STATE BÀI HỌC (3 TAB: VIDEO BÀI HỌC, VIDEO CHỮA BTVN, NHIỀU TÀI LIỆU)
                 lessons: [],
                 activeLesson: null,
-                lessonSubTab: 'video', // 'video' hoặc 'document'
+                lessonSubTab: 'video_lesson', // 'video_lesson' | 'video_exercise' | 'documents'
+                selectedDocIndex: 0,
                 lessonSearchQuery: '',
                 selectedLessonChapter: 'Tất cả',
                 lessonModalOpen: false,
@@ -1670,9 +1822,14 @@
                     lesson_date: new Date().toISOString().split('T')[0],
                     chapter: 'Chương 1',
                     order_index: 1,
+                    lesson_video_url: '',
+                    lesson_video_id: '',
+                    exercise_video_url: '',
+                    exercise_video_id: '',
                     video_url: '',
                     video_id: '',
                     document_url: '',
+                    documents: [{ name: 'Tài liệu lý thuyết', url: '' }],
                     description: ''
                 },
 
@@ -1741,6 +1898,9 @@
 
                 switchTab(tabName) {
                     this.activeTab = tabName;
+                    if (window.innerWidth < 768) {
+                        this.sidebarOpen = false;
+                    }
                     this.renderMath();
                 },
 
@@ -1854,6 +2014,10 @@
 
                 selectLesson(lesson) {
                     this.activeLesson = lesson;
+                    this.selectedDocIndex = 0;
+                    if (window.innerWidth < 1024) {
+                        this.mobileLessonView = 'detail';
+                    }
                     this.renderMath();
                 },
 
@@ -1874,8 +2038,8 @@
                 formatLessonDateDisplay(dateStr) {
                     if (!dateStr) return '';
                     try {
-                        let p = dateStr.split('-');
-                        if (p.length === 3) return `${p[2]}/${p[1]}`;
+                        let p = dateStr.split('T')[0].split('-');
+                        if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
                     } catch (e) {}
                     return dateStr;
                 },
@@ -1902,6 +2066,34 @@
                     return m ? m[1] : text;
                 },
 
+                getActiveLessonDocs() {
+                    if (!this.activeLesson) return [];
+                    let docs = [];
+                    if (this.activeLesson.documents_json) {
+                        try {
+                            let parsed = typeof this.activeLesson.documents_json === 'string'
+                                ? JSON.parse(this.activeLesson.documents_json)
+                                : this.activeLesson.documents_json;
+                            if (Array.isArray(parsed)) docs = parsed.filter(d => d && (d.name || d.url));
+                        } catch(e) {}
+                    }
+                    if (docs.length === 0 && this.activeLesson.document_url) {
+                        docs = [{ name: 'Tài liệu bài học', url: this.activeLesson.document_url }];
+                    }
+                    return docs;
+                },
+
+                addLessonDocument() {
+                    if (!this.lessonForm.documents) this.lessonForm.documents = [];
+                    this.lessonForm.documents.push({ name: 'Tài liệu ' + (this.lessonForm.documents.length + 1), url: '' });
+                },
+
+                removeLessonDocument(idx) {
+                    if (this.lessonForm.documents && this.lessonForm.documents.length > idx) {
+                        this.lessonForm.documents.splice(idx, 1);
+                    }
+                },
+
                 openCreateLessonModal() {
                     this.isEditingLesson = false;
                     this.editingLessonId = null;
@@ -1911,9 +2103,14 @@
                         lesson_date: new Date().toISOString().split('T')[0],
                         chapter: 'Chương 1',
                         order_index: nextIdx,
+                        lesson_video_url: '',
+                        lesson_video_id: '',
+                        exercise_video_url: '',
+                        exercise_video_id: '',
                         video_url: '',
                         video_id: '',
                         document_url: '',
+                        documents: [{ name: 'Tài liệu lý thuyết', url: '' }],
                         description: ''
                     };
                     this.lessonModalOpen = true;
@@ -1922,14 +2119,36 @@
                 openEditLessonModal(l) {
                     this.isEditingLesson = true;
                     this.editingLessonId = l.id;
+                    let docs = [];
+                    if (l.documents_json) {
+                        try {
+                            let parsed = typeof l.documents_json === 'string' ? JSON.parse(l.documents_json) : l.documents_json;
+                            if (Array.isArray(parsed)) docs = parsed.filter(d => d && (d.name || d.url));
+                        } catch (e) {}
+                    }
+                    if (docs.length === 0 && l.document_url) {
+                        docs = [{ name: 'Tài liệu bài học', url: l.document_url }];
+                    }
+                    if (docs.length === 0) {
+                        docs = [{ name: 'Tài liệu 1', url: '' }];
+                    }
+
+                    let lessonVidUrl = l.lesson_video_url || (l.lesson_video_id ? 'https://www.youtube.com/watch?v=' + l.lesson_video_id : '');
+                    let exerciseVidUrl = l.exercise_video_url || (l.exercise_video_id ? 'https://www.youtube.com/watch?v=' + l.exercise_video_id : (l.video_url || (l.video_id ? 'https://www.youtube.com/watch?v=' + l.video_id : '')));
+
                     this.lessonForm = {
-                        title: l.title,
+                        title: l.title || '',
                         lesson_date: l.lesson_date || '',
                         chapter: l.chapter || 'Chương 1',
                         order_index: l.order_index || 1,
-                        video_url: l.video_url || (l.video_id ? 'https://www.youtube.com/watch?v=' + l.video_id : ''),
+                        lesson_video_url: lessonVidUrl,
+                        lesson_video_id: l.lesson_video_id || '',
+                        exercise_video_url: exerciseVidUrl,
+                        exercise_video_id: l.exercise_video_id || l.video_id || '',
+                        video_url: exerciseVidUrl,
                         video_id: l.video_id || '',
                         document_url: l.document_url || '',
+                        documents: docs,
                         description: l.description || ''
                     };
                     this.lessonModalOpen = true;
@@ -1940,9 +2159,25 @@
                         alert('Vui lòng nhập tiêu đề bài học!');
                         return;
                     }
+                    let l_v_id = this.extractYoutubeIdClient(this.lessonForm.lesson_video_url);
+                    let ex_v_id = this.extractYoutubeIdClient(this.lessonForm.exercise_video_url);
+                    let validDocs = (this.lessonForm.documents || []).filter(d => (d.name && d.name.trim()) || (d.url && d.url.trim()));
+                    let firstDocUrl = validDocs.length > 0 ? (validDocs[0].url || '') : (this.lessonForm.document_url || '');
+
                     let payload = {
-                        ...this.lessonForm,
-                        video_id: this.extractYoutubeIdClient(this.lessonForm.video_url)
+                        title: this.lessonForm.title,
+                        lesson_date: this.lessonForm.lesson_date,
+                        chapter: this.lessonForm.chapter,
+                        order_index: this.lessonForm.order_index,
+                        lesson_video_url: this.lessonForm.lesson_video_url || '',
+                        lesson_video_id: l_v_id,
+                        exercise_video_url: this.lessonForm.exercise_video_url || '',
+                        exercise_video_id: ex_v_id,
+                        video_url: this.lessonForm.exercise_video_url || this.lessonForm.lesson_video_url || '',
+                        video_id: ex_v_id || l_v_id,
+                        document_url: firstDocUrl,
+                        documents_json: JSON.stringify(validDocs),
+                        description: this.lessonForm.description || ''
                     };
                     let url = this.isEditingLesson ? '/api/lessons/' + this.editingLessonId : '/api/lessons';
                     let method = this.isEditingLesson ? 'PUT' : 'POST';
@@ -1962,6 +2197,7 @@
                         } else if (this.lessons.length > 0) {
                             this.activeLesson = this.lessons[this.lessons.length - 1];
                         }
+                        this.selectedDocIndex = 0;
                     } else {
                         alert('Có lỗi xảy ra khi lưu bài học!');
                     }
@@ -2053,9 +2289,17 @@
                 },
 
                 calculateDashboardStats() {
+                    const isExcluded = (nameOrUsername, role) => {
+                        if (role === 'teacher') return true;
+                        if (!nameOrUsername) return false;
+                        let s = String(nameOrUsername).toLowerCase().trim();
+                        return s === 'admin' || s === 'aki' || s.includes('admin') || s.includes('aki');
+                    };
+
                     let hwMap = {};
                     let totalHwScore = 0;
                     this.allSubmissions.forEach(sub => {
+                        if (isExcluded(sub.student_name)) return;
                         let score = parseFloat(sub.score) || 0;
                         totalHwScore += score;
                         if (!hwMap[sub.student_name]) hwMap[sub.student_name] = { name: sub.student_name, total: 0, count: 0 };
@@ -2068,6 +2312,7 @@
                     let exMap = {};
                     let totalExScore = 0;
                     this.allExamSubmissions.forEach(sub => {
+                        if (isExcluded(sub.student_name)) return;
                         let score = parseFloat(sub.score) || 0;
                         totalExScore += score;
                         if (!exMap[sub.student_name]) exMap[sub.student_name] = { name: sub.student_name, total: 0, count: 0 };
@@ -2077,7 +2322,13 @@
                     let examRankings = Object.values(exMap).map(s => ({ name: s.name, avg: (s.total / s.count).toFixed(2) }));
                     examRankings.sort((a, b) => b.avg - a.avg);
 
-                    let visitRankings = [...this.allUsers].sort((a, b) => (b.visit_count || 0) - (a.visit_count || 0)).slice(0, 5);
+                    let eligibleUsers = (this.allUsers || []).filter(u => {
+                        if (!u) return false;
+                        if (u.role === 'teacher') return false;
+                        if (isExcluded(u.username, u.role) || isExcluded(u.full_name, u.role)) return false;
+                        return true;
+                    });
+                    let visitRankings = [...eligibleUsers].sort((a, b) => (b.visit_count || 0) - (a.visit_count || 0)).slice(0, 5);
                     let avgHw = this.allSubmissions.length > 0 ? (totalHwScore / this.allSubmissions.length).toFixed(1) : 0;
                     let avgEx = this.allExamSubmissions.length > 0 ? (totalExScore / this.allExamSubmissions.length).toFixed(1) : 0;
 

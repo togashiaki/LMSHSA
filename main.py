@@ -162,6 +162,11 @@ def init_db():
     cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_id TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS document_url TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS lesson_video_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS lesson_video_id TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS exercise_video_url TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS exercise_video_id TEXT DEFAULT '';")
+    cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS documents_json TEXT DEFAULT '[]';")
 
     cursor.execute("SELECT COUNT(*) FROM users")
     res = cursor.fetchone()
@@ -641,9 +646,14 @@ class LessonCreate(BaseModel):
     lesson_date: Optional[str] = ""
     chapter: Optional[str] = "Chương 1"
     order_index: Optional[int] = 0
+    lesson_video_url: Optional[str] = ""
+    lesson_video_id: Optional[str] = ""
+    exercise_video_url: Optional[str] = ""
+    exercise_video_id: Optional[str] = ""
     video_url: Optional[str] = ""
     video_id: Optional[str] = ""
     document_url: Optional[str] = ""
+    documents_json: Optional[str] = "[]"
     description: Optional[str] = ""
 
 @app.get("/api/lessons")
@@ -660,18 +670,30 @@ def get_lessons():
 def create_lesson(l: LessonCreate):
     conn = get_db()
     cursor = conn.cursor()
-    v_id = extract_youtube_id(l.video_id or l.video_url or "")
+    l_v_id = extract_youtube_id(l.lesson_video_id or l.lesson_video_url or "")
+    ex_v_id = extract_youtube_id(l.exercise_video_id or l.exercise_video_url or l.video_id or l.video_url or "")
+    v_url = l.exercise_video_url or l.video_url or l.lesson_video_url or ""
+    v_id = ex_v_id or l_v_id
+
     cursor.execute("""
-        INSERT INTO lessons (title, lesson_date, chapter, order_index, video_url, video_id, document_url, description)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO lessons (title, lesson_date, chapter, order_index,
+                             lesson_video_url, lesson_video_id,
+                             exercise_video_url, exercise_video_id,
+                             video_url, video_id, document_url, documents_json, description)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         l.title.strip(),
         l.lesson_date or "",
         l.chapter or "Chương 1",
         l.order_index or 0,
-        l.video_url or "",
+        l.lesson_video_url or "",
+        l_v_id,
+        l.exercise_video_url or "",
+        ex_v_id,
+        v_url,
         v_id,
         l.document_url or "",
+        l.documents_json or "[]",
         l.description or ""
     ))
     conn.commit()
@@ -683,20 +705,31 @@ def create_lesson(l: LessonCreate):
 def update_lesson(lesson_id: int, l: LessonCreate):
     conn = get_db()
     cursor = conn.cursor()
-    v_id = extract_youtube_id(l.video_id or l.video_url or "")
+    l_v_id = extract_youtube_id(l.lesson_video_id or l.lesson_video_url or "")
+    ex_v_id = extract_youtube_id(l.exercise_video_id or l.exercise_video_url or l.video_id or l.video_url or "")
+    v_url = l.exercise_video_url or l.video_url or l.lesson_video_url or ""
+    v_id = ex_v_id or l_v_id
+
     cursor.execute("""
         UPDATE lessons
         SET title = %s, lesson_date = %s, chapter = %s, order_index = %s,
-            video_url = %s, video_id = %s, document_url = %s, description = %s
+            lesson_video_url = %s, lesson_video_id = %s,
+            exercise_video_url = %s, exercise_video_id = %s,
+            video_url = %s, video_id = %s, document_url = %s, documents_json = %s, description = %s
         WHERE id = %s
     """, (
         l.title.strip(),
         l.lesson_date or "",
         l.chapter or "Chương 1",
         l.order_index or 0,
-        l.video_url or "",
+        l.lesson_video_url or "",
+        l_v_id,
+        l.exercise_video_url or "",
+        ex_v_id,
+        v_url,
         v_id,
         l.document_url or "",
+        l.documents_json or "[]",
         l.description or "",
         lesson_id
     ))
