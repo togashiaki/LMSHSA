@@ -481,15 +481,38 @@
                class="sidebar">
 
             <!-- Brand -->
-            <div class="p-5 border-b border-slate-100">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="icon-wrap" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);width:40px;height:40px;border-radius:11px;box-shadow:0 4px 12px rgba(37,99,235,0.3)">
+                    <div class="icon-wrap" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);width:38px;height:38px;border-radius:11px;box-shadow:0 4px 12px rgba(37,99,235,0.3)">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
                     <div>
                         <div class="font-display font-bold text-sm text-slate-900 leading-tight">LMS Portal</div>
-                        <div class="text-xs text-slate-400">Quản lý học tập</div>
+                        <div class="text-[11px] text-slate-400">Quản lý học tập</div>
                     </div>
+                </div>
+                <!-- Nút đóng sidebar trên mobile -->
+                <button @click="sidebarOpen=false" class="md:hidden p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- TÀI KHOẢN NGƯỜI DÙNG Ở ĐẦU SIDEBAR (DỄ DÀNG ĐĂNG XUẤT TRÊN ĐIỆN THOẠI) -->
+            <div class="p-3 bg-slate-50 border-b border-slate-100">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 shadow-xs">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-xs"
+                             :style="role==='teacher'?'background:linear-gradient(135deg,#2563eb,#1d4ed8)':'background:linear-gradient(135deg,#10b981,#059669)'"
+                             x-text="role==='teacher'?'GV':'HS'"></div>
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold text-slate-900 truncate" x-text="currentUser?.full_name"></div>
+                            <div class="text-[11px] text-slate-400" x-text="role==='teacher'?'Giáo viên':'Học sinh'"></div>
+                        </div>
+                    </div>
+                    <button @click="logout()" class="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold flex items-center gap-1 transition flex-shrink-0" title="Đăng xuất">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Đăng xuất</span>
+                    </button>
                 </div>
             </div>
 
@@ -538,42 +561,38 @@
                     </div>
                 </div>
             </nav>
-
-            <!-- User footer -->
-            <div class="p-3 border-t border-slate-100">
-                <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                             :style="role==='teacher'?'background:linear-gradient(135deg,#2563eb,#1d4ed8)':'background:linear-gradient(135deg,#10b981,#059669)'"
-                             x-text="role==='teacher'?'GV':'HS'"></div>
-                        <div class="min-w-0">
-                            <div class="text-sm font-semibold text-slate-900 truncate" x-text="currentUser?.full_name"></div>
-                            <div class="text-xs text-slate-400" x-text="role==='teacher'?'Giáo viên':'Học sinh'"></div>
-                        </div>
-                    </div>
-                    <button @click="logout()" class="btn-ghost text-red-500 hover:bg-red-50 hover:text-red-600" title="Đăng xuất">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    </button>
-                </div>
-            </div>
         </aside>
 
         <!-- MAIN CONTENT -->
         <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
             <!-- Header -->
-            <header class="app-header">
-                <div class="flex items-center gap-3">
-                    <button @click="sidebarOpen=!sidebarOpen" class="btn-ghost" title="Toggle Sidebar">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <header class="app-header px-3 sm:px-6 py-2.5 sm:py-3 bg-white border-b border-slate-200 sticky top-0 z-20 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <button @click="sidebarOpen=!sidebarOpen" class="btn-ghost p-1.5" title="Mở menu danh mục">
+                        <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
-                    <h1 class="font-display font-bold text-lg text-slate-900" x-text="getTabTitle()"></h1>
+                    <h1 class="font-display font-bold text-sm sm:text-base lg:text-lg text-slate-900 truncate" x-text="getTabTitle()"></h1>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="badge" :class="role==='teacher'?'badge-blue':'badge-green'">
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <!-- Badge vai trò -->
+                    <span class="badge hidden sm:inline-flex" :class="role==='teacher'?'badge-blue':'badge-green'">
                         <span class="w-1.5 h-1.5 rounded-full inline-block" :class="role==='teacher'?'bg-blue-500':'bg-emerald-500'"></span>
-                        <span x-text="role==='teacher'?'Chế độ Giáo viên':'Chế độ Học sinh'"></span>
+                        <span x-text="role==='teacher'?'Giáo viên':'Học sinh'"></span>
                     </span>
+
+                    <!-- Nút tài khoản & Đăng xuất trực tiếp trên Header (Rất tiện cho học sinh dùng điện thoại) -->
+                    <div class="flex items-center gap-1.5 bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200 pl-2 pr-1.5 py-1 rounded-xl transition">
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                             :style="role==='teacher'?'background:linear-gradient(135deg,#2563eb,#1d4ed8)':'background:linear-gradient(135deg,#10b981,#059669)'"
+                             x-text="role==='teacher'?'GV':'HS'"></div>
+                        <span class="text-xs font-semibold text-slate-800 max-w-[85px] sm:max-w-[130px] truncate" x-text="currentUser?.full_name"></span>
+                        <button @click="logout()" class="p-1 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center gap-1 text-xs font-medium transition" title="Đăng xuất khỏi tài khoản">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            <span class="hidden md:inline">Đăng xuất</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -1122,21 +1141,23 @@
                 </section>
 
                 <!-- ═══════════════════════════════ 3. BÀI TẬP VỀ NHÀ (NỘP BÀI) ═══════════════════════════════ -->
-                <section x-show="activeTab==='assignments'" class="space-y-5">
+                <section x-show="activeTab==='assignments'" class="space-y-4 sm:space-y-5">
                     <!-- Toolbar -->
-                    <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
+                    <div class="card p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                         <div>
-                            <h2 class="font-display font-bold text-lg text-slate-900">Bài Tập Về Nhà (Chấm điểm tự động)</h2>
-                            <p class="text-sm text-slate-500">Giao bài tập tự luyện có chấm điểm thang 10 theo chuẩn phiếu Study4</p>
+                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Bài Tập Về Nhà (Chấm điểm tự động)</h2>
+                            <p class="text-xs sm:text-sm text-slate-500">Giao bài tập tự luyện có chấm điểm thang 10 theo chuẩn phiếu Study4</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                <span class="text-sm font-semibold text-slate-600">Lọc hạn:</span>
-                                <input type="month" x-model="selectedAssignmentMonth" class="bg-transparent border-none text-sm text-slate-700 focus:outline-none">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+                            <div class="flex items-center justify-between sm:justify-start gap-2 bg-slate-50 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200">
+                                <div class="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-600">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Lọc hạn:</span>
+                                </div>
+                                <input type="month" x-model="selectedAssignmentMonth" class="bg-transparent border-none text-xs sm:text-sm text-slate-700 focus:outline-none">
                                 <button x-show="selectedAssignmentMonth" @click="selectedAssignmentMonth=''" class="text-xs text-blue-600 font-semibold hover:underline">Xóa lọc</button>
                             </div>
-                            <button x-show="role==='teacher'" @click="openCreateAssignmentModal()" class="btn-primary">
+                            <button x-show="role==='teacher'" @click="openCreateAssignmentModal()" class="btn-primary justify-center py-2 sm:py-2.5 text-xs sm:text-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 Tạo Bài Tập
                             </button>
@@ -1144,51 +1165,51 @@
                     </div>
 
                     <!-- Assignment cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                         <template x-for="a in filteredAssignments()" :key="a.id">
-                            <div class="card p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
-                                <div class="flex items-center justify-between">
-                                    <span class="badge" :class="isAssignmentExpired(a.due_date)?'badge-red':'badge-green'">
+                            <div class="card p-4 sm:p-5 flex flex-col gap-3 sm:gap-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="badge text-[11px] sm:text-xs" :class="isAssignmentExpired(a.due_date)?'badge-red':'badge-green'">
                                         <span class="w-1.5 h-1.5 rounded-full" :class="isAssignmentExpired(a.due_date)?'bg-red-500':'bg-emerald-500'"></span>
                                         <span x-text="isAssignmentExpired(a.due_date)?'Đã hết hạn':'Đang mở nộp'"></span>
                                     </span>
-                                    <span class="text-xs text-slate-400 font-mono" x-text="a.due_date?'Hạn: '+formatDateTimeDisplay(a.due_date):'Không giới hạn'"></span>
+                                    <span class="text-[11px] sm:text-xs text-slate-400 font-mono truncate" x-text="a.due_date?'Hạn: '+formatDateTimeDisplay(a.due_date):'Không giới hạn'"></span>
                                 </div>
 
                                 <div>
-                                    <h3 class="font-display font-bold text-base text-slate-900 mb-1" x-text="a.title"></h3>
-                                    <p class="text-sm text-slate-500 whitespace-pre-line line-clamp-2" x-text="a.content"></p>
+                                    <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 mb-1" x-text="a.title"></h3>
+                                    <p class="text-xs sm:text-sm text-slate-500 whitespace-pre-line line-clamp-2" x-text="a.content"></p>
                                 </div>
 
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="badge badge-blue text-xs" x-text="a.mc_count + ' câu TN (' + a.mc_score_per_q + 'đ/câu)'"></span>
-                                    <span class="badge badge-amber text-xs" x-text="a.tf_count + ' câu Đ/S'"></span>
-                                    <span class="badge badge-gray text-xs" x-text="a.sa_count + ' câu TLN'"></span>
+                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                    <span class="badge badge-blue text-[11px] sm:text-xs" x-text="a.mc_count + ' câu TN (' + a.mc_score_per_q + 'đ/câu)'"></span>
+                                    <span class="badge badge-amber text-[11px] sm:text-xs" x-text="a.tf_count + ' câu Đ/S'"></span>
+                                    <span class="badge badge-gray text-[11px] sm:text-xs" x-text="a.sa_count + ' câu TLN'"></span>
                                 </div>
 
-                                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                                    <div class="flex gap-2">
-                                        <button @click="openStudentWorkModal(a,'assignment')" class="btn-primary py-2 px-3 text-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                            <span x-text="role==='teacher'?'Xem Form Nộp':'Làm bài / Nộp phiếu'"></span>
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-100">
+                                    <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                                        <button @click="openStudentWorkModal(a,'assignment')" class="btn-primary py-2 px-3 text-xs sm:text-sm justify-center flex-1">
+                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                            <span x-text="role==='teacher'?'Xem Form Nộp':'Làm bài ngay'"></span>
                                         </button>
-                                        <button @click="viewSubmissionsList(a,'assignment')" class="btn-secondary py-2 px-3 text-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            <span x-text="role==='teacher'?'Bảng điểm lớp':'Xem kết quả'"></span>
+                                        <button @click="viewSubmissionsList(a,'assignment')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1">
+                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                            <span x-text="role==='teacher'?'Bảng điểm lớp':'Xem điểm'"></span>
                                         </button>
                                     </div>
-                                    <div x-show="role==='teacher'" class="flex gap-1">
-                                        <button @click="openEditAssignmentModal(a)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50" title="Sửa bài tập">
+                                    <div x-show="role==='teacher'" class="flex items-center justify-end gap-1 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                                        <button @click="openEditAssignmentModal(a)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50 p-1.5" title="Sửa bài tập">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
-                                        <button @click="deleteAssignment(a.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50" title="Xóa bài tập">
+                                        <button @click="deleteAssignment(a.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50 p-1.5" title="Xóa bài tập">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </template>
-                        <div x-show="filteredAssignments().length===0" class="md:col-span-2 card p-10 text-center">
+                        <div x-show="filteredAssignments().length===0" class="md:col-span-2 card p-8 sm:p-10 text-center">
                             <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                             </div>
@@ -1198,60 +1219,60 @@
                 </section>
 
                 <!-- ═══════════════════════════════ 4. ĐỀ KIỂM TRA TRỰC TUYẾN ═══════════════════════════════ -->
-                <section x-show="activeTab==='exams'" class="space-y-5">
-                    <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
+                <section x-show="activeTab==='exams'" class="space-y-4 sm:space-y-5">
+                    <div class="card p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                         <div>
-                            <h2 class="font-display font-bold text-lg text-slate-900">Đề Kiểm Tra Trực Tuyến</h2>
-                            <p class="text-sm text-slate-500">Tạo đề thi có bấm giờ đếm ngược, tự động nộp bài và khóa đề khi hết giờ</p>
+                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Đề Kiểm Tra Trực Tuyến</h2>
+                            <p class="text-xs sm:text-sm text-slate-500">Tạo đề thi có bấm giờ đếm ngược, tự động nộp bài và khóa đề khi hết giờ</p>
                         </div>
-                        <button x-show="role==='teacher'" @click="openCreateExamModal()" class="btn-primary" style="background:linear-gradient(135deg,#059669,#047857)">
+                        <button x-show="role==='teacher'" @click="openCreateExamModal()" class="btn-primary justify-center py-2 sm:py-2.5 text-xs sm:text-sm" style="background:linear-gradient(135deg,#059669,#047857)">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Tạo Đề Kiểm Tra Mới
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                         <template x-for="ex in exams" :key="ex.id">
-                            <div class="card p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="badge badge-green">Đề kiểm tra</span>
-                                        <span x-show="ex.duration_minutes>0" class="badge badge-amber text-xs font-mono font-bold" x-text="ex.duration_minutes + ' phút'"></span>
+                            <div class="card p-4 sm:p-5 flex flex-col gap-3 sm:gap-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-1.5 sm:gap-2">
+                                        <span class="badge badge-green text-[11px] sm:text-xs">Đề kiểm tra</span>
+                                        <span x-show="ex.duration_minutes>0" class="badge badge-amber text-[11px] sm:text-xs font-mono font-bold" x-text="ex.duration_minutes + ' phút'"></span>
                                     </div>
-                                    <span class="text-xs text-slate-400 font-mono" x-text="ex.due_date?'Hạn: '+formatDateTimeDisplay(ex.due_date):'Không giới hạn'"></span>
+                                    <span class="text-[11px] sm:text-xs text-slate-400 font-mono truncate" x-text="ex.due_date?'Hạn: '+formatDateTimeDisplay(ex.due_date):'Không giới hạn'"></span>
                                 </div>
                                 <div>
-                                    <h3 class="font-display font-bold text-base text-slate-900 mb-1" x-text="ex.title"></h3>
-                                    <p class="text-sm text-slate-500 whitespace-pre-line line-clamp-2" x-text="ex.content"></p>
+                                    <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 mb-1" x-text="ex.title"></h3>
+                                    <p class="text-xs sm:text-sm text-slate-500 whitespace-pre-line line-clamp-2" x-text="ex.content"></p>
                                 </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="badge badge-blue text-xs" x-text="ex.mc_count + ' câu TN'"></span>
-                                    <span class="badge badge-amber text-xs" x-text="ex.tf_count + ' câu Đ/S'"></span>
-                                    <span class="badge badge-gray text-xs" x-text="ex.sa_count + ' câu TLN'"></span>
+                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                    <span class="badge badge-blue text-[11px] sm:text-xs" x-text="ex.mc_count + ' câu TN'"></span>
+                                    <span class="badge badge-amber text-[11px] sm:text-xs" x-text="ex.tf_count + ' câu Đ/S'"></span>
+                                    <span class="badge badge-gray text-[11px] sm:text-xs" x-text="ex.sa_count + ' câu TLN'"></span>
                                 </div>
-                                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                                    <div class="flex gap-2">
-                                        <button @click="openStudentWorkModal(ex,'exam')" class="btn-primary py-2 px-3 text-sm" style="background:linear-gradient(135deg,#059669,#047857)">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-100">
+                                    <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                                        <button @click="openStudentWorkModal(ex,'exam')" class="btn-primary py-2 px-3 text-xs sm:text-sm justify-center flex-1" style="background:linear-gradient(135deg,#059669,#047857)">
+                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             <span x-text="role==='teacher'?'Xem Form Thi':'Vào Thi Ngay'"></span>
                                         </button>
-                                        <button @click="viewSubmissionsList(ex,'exam')" class="btn-secondary py-2 px-3 text-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            Bảng điểm thi
+                                        <button @click="viewSubmissionsList(ex,'exam')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1">
+                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                            <span x-text="role==='teacher'?'Bảng điểm thi':'Xem điểm'"></span>
                                         </button>
                                     </div>
-                                    <div x-show="role==='teacher'" class="flex gap-1">
-                                        <button @click="openEditExamModal(ex)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50" title="Sửa đề thi">
+                                    <div x-show="role==='teacher'" class="flex items-center justify-end gap-1 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                                        <button @click="openEditExamModal(ex)" class="btn-ghost text-slate-500 hover:text-blue-600 hover:bg-blue-50 p-1.5" title="Sửa đề thi">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
-                                        <button @click="deleteExam(ex.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50" title="Xóa đề thi">
+                                        <button @click="deleteExam(ex.id)" class="btn-ghost text-slate-500 hover:text-red-600 hover:bg-red-50 p-1.5" title="Xóa đề thi">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </template>
-                        <div x-show="exams.length===0" class="md:col-span-2 card p-10 text-center">
+                        <div x-show="exams.length===0" class="md:col-span-2 card p-8 sm:p-10 text-center">
                             <p class="text-sm text-slate-400">Chưa có đề kiểm tra trực tuyến nào</p>
                         </div>
                     </div>
@@ -1600,90 +1621,142 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════ MODAL: LÀM BÀI / THI (FULL SCREEN) ══════════════════════════ -->
-    <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-2" style="background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);display:none">
-        <div class="bg-white w-full rounded-2xl shadow-2xl flex flex-col overflow-hidden" style="max-width:98vw;height:96vh">
+    <!-- ══════════════════════════ MODAL: LÀM BÀI / THI (FULL SCREEN & TỐI ƯU MOBILE) ══════════════════════════ -->
+    <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-2" style="background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);display:none">
+        <div class="bg-white w-full h-full sm:h-[96vh] sm:rounded-2xl sm:max-w-[98vw] flex flex-col overflow-hidden shadow-2xl">
 
             <!-- Top bar -->
-            <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-white flex-shrink-0">
-                <div class="flex items-center gap-3 min-w-0">
-                    <span class="badge text-sm font-bold"
-                          :class="workType==='exam'?'badge-green':'badge-blue'"
-                          x-text="workType==='exam'?'ĐỀ KIỂM TRA':'BÀI TẬP VỀ NHÀ'"></span>
-                    <h3 class="font-display font-bold text-base text-slate-900 truncate" x-text="activeWorkItem?.title"></h3>
-                </div>
-
-                <div class="flex items-center gap-4 flex-shrink-0">
-                    <!-- Timer -->
-                    <template x-if="workType==='exam' && activeWorkItem && activeWorkItem.duration_minutes > 0">
-                        <div class="timer-box" :class="remainingSeconds < 300 ? 'urgent' : ''">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>Còn lại:</span>
-                            <span class="font-mono text-base" x-text="formatTimerDisplay(remainingSeconds)"></span>
-                        </div>
-                    </template>
-
-                    <!-- Student name -->
-                    <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-                        <span class="text-sm font-medium text-slate-500">Học sinh:</span>
-                        <input type="text" x-model="studentAnswerSheet.student_name" placeholder="Nhập họ tên..." class="bg-transparent border-none text-sm font-bold text-blue-600 focus:outline-none w-40">
+            <div class="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-slate-200 bg-white flex-shrink-0 flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="badge text-xs sm:text-sm font-bold flex-shrink-0"
+                              :class="workType==='exam'?'badge-green':'badge-blue'"
+                              x-text="workType==='exam'?'ĐỀ KIỂM TRA':'BÀI TẬP VỀ NHÀ'"></span>
+                        <h3 class="font-display font-bold text-sm sm:text-base text-slate-900 truncate" x-text="activeWorkItem?.title"></h3>
                     </div>
 
-                    <button @click="closeStudentWorkModal()" class="btn-secondary py-2 px-3 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Đóng
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <!-- Timer nếu là đề kiểm tra -->
+                        <template x-if="workType==='exam' && activeWorkItem && activeWorkItem.duration_minutes > 0">
+                            <div class="timer-box text-xs sm:text-sm py-1 px-2.5" :class="remainingSeconds < 300 ? 'urgent' : ''">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="hidden sm:inline">Còn:</span>
+                                <span class="font-mono font-bold text-sm sm:text-base" x-text="formatTimerDisplay(remainingSeconds)"></span>
+                            </div>
+                        </template>
+
+                        <!-- Nút đóng -->
+                        <button @click="closeStudentWorkModal()" class="btn-secondary py-1.5 px-2.5 text-xs sm:text-sm flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <span class="hidden sm:inline">Đóng</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 text-xs">
+                    <!-- Student name input -->
+                    <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200 flex-1 sm:flex-initial">
+                        <span class="text-slate-500 font-medium flex-shrink-0">Họ tên:</span>
+                        <input type="text" x-model="studentAnswerSheet.student_name" placeholder="Nhập họ và tên..." class="bg-transparent border-none font-bold text-blue-600 focus:outline-none w-full sm:w-48 text-xs sm:text-sm">
+                    </div>
+
+                    <!-- Tiến độ làm bài -->
+                    <div class="flex items-center gap-1.5 flex-shrink-0 text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
+                        <span>Đã làm:</span>
+                        <span class="font-bold font-mono text-blue-600" x-text="getAnsweredCount().answered + '/' + getAnsweredCount().total"></span>
+                    </div>
+                </div>
+
+                <!-- THANH CHUYỂN TAB MOBILE: ĐỀ BÀI PDF VS PHIẾU LÀM BÀI -->
+                <div class="lg:hidden flex bg-slate-100 p-1 rounded-xl gap-1">
+                    <button @click="mobileWorkView = 'pdf'"
+                            :class="mobileWorkView === 'pdf' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-slate-600 font-medium'"
+                            class="flex-1 py-1.5 text-xs rounded-lg flex items-center justify-center gap-1.5 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>1. Đề bài PDF</span>
+                    </button>
+                    <button @click="mobileWorkView = 'sheet'"
+                            :class="mobileWorkView === 'sheet' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-slate-600 font-medium'"
+                            class="flex-1 py-1.5 text-xs rounded-lg flex items-center justify-center gap-1.5 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <span>2. Phiếu làm bài</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                              :class="getAnsweredCount().answered > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'"
+                              x-text="getAnsweredCount().answered + '/' + getAnsweredCount().total"></span>
                     </button>
                 </div>
             </div>
 
             <!-- Content: PDF + Answer sheet -->
-            <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden" style="background:#f8fafc">
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0 overflow-hidden relative" style="background:#f8fafc">
 
-                <!-- PDF viewer -->
-                <div class="lg:col-span-7 border-r border-slate-200 flex flex-col h-full bg-white p-3">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-bold text-slate-500">Đề bài PDF</span>
+                <!-- Cột PDF viewer -->
+                <div class="lg:col-span-7 border-r border-slate-200 flex-col h-full bg-white p-2 sm:p-3 overflow-hidden relative"
+                     :class="mobileWorkView === 'sheet' ? 'hidden lg:flex' : 'flex'">
+                    <div class="flex items-center justify-between mb-2 flex-shrink-0">
+                        <span class="text-xs sm:text-sm font-bold text-slate-600">Đề bài PDF</span>
                         <template x-if="activeWorkItem && activeWorkItem.pdf_url">
-                            <a :href="activeWorkItem.pdf_url" target="_blank" class="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
-                                Mở tab riêng
+                            <a :href="activeWorkItem.pdf_url" target="_blank" class="text-xs sm:text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                                <span>Mở tab riêng</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
                         </template>
                     </div>
                     <template x-if="activeWorkItem && activeWorkItem.pdf_url">
-                        <iframe :src="getEmbedPdfUrl(activeWorkItem.pdf_url)" class="w-full flex-1 min-h-0 rounded-xl border border-slate-200" style="min-height:400px" frameborder="0"></iframe>
+                        <iframe :src="getEmbedPdfUrl(activeWorkItem.pdf_url)" class="w-full flex-1 rounded-xl border border-slate-200" frameborder="0"></iframe>
                     </template>
                     <template x-if="!activeWorkItem || !activeWorkItem.pdf_url">
-                        <div class="flex-1 p-6 bg-slate-50 rounded-xl border border-slate-200 overflow-y-auto">
-                            <p class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Nội dung đề bài</p>
-                            <p class="text-sm text-slate-700 whitespace-pre-line leading-relaxed" x-text="activeWorkItem?.content||'Không có tệp PDF đính kèm'"></p>
+                        <div class="flex-1 p-4 sm:p-6 bg-slate-50 rounded-xl border border-slate-200 overflow-y-auto">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Nội dung đề bài</p>
+                            <p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed" x-text="activeWorkItem?.content||'Không có tệp PDF đính kèm'"></p>
                         </div>
                     </template>
+
+                    <!-- Nút nổi chuyển sang phiếu làm bài trên mobile -->
+                    <div class="lg:hidden p-2.5 bg-white border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0 shadow-md">
+                        <span class="text-xs text-slate-600">Đã trả lời: <strong class="text-blue-600 font-bold" x-text="getAnsweredCount().answered + '/' + getAnsweredCount().total"></strong> câu</span>
+                        <button @click="mobileWorkView = 'sheet'" class="btn-primary py-2 px-3.5 text-xs flex items-center gap-1.5 shadow-md">
+                            <span>Điền phiếu trả lời</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Answer sheet -->
-                <div class="lg:col-span-5 flex flex-col h-full bg-white overflow-hidden">
-                    <div class="p-4 border-b border-slate-100">
-                        <h3 class="font-display font-bold text-base text-slate-900">Phiếu Trả Lời Trực Tuyến</h3>
-                        <p class="text-sm text-slate-400 mt-0.5">Chọn đáp án tương ứng với từng câu hỏi bên đề bài</p>
+                <!-- Cột Phiếu làm bài (Answer sheet) -->
+                <div class="lg:col-span-5 flex-col h-full bg-white overflow-hidden"
+                     :class="mobileWorkView === 'pdf' ? 'hidden lg:flex' : 'flex'">
+                    <div class="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between gap-2 flex-shrink-0">
+                        <div>
+                            <h3 class="font-display font-bold text-sm sm:text-base text-slate-900">Phiếu Trả Lời Trực Tuyến</h3>
+                            <p class="text-xs text-slate-400 mt-0.5" x-text="'Đã trả lời: ' + getAnsweredCount().answered + ' / ' + getAnsweredCount().total + ' câu'"></p>
+                        </div>
+                        <button @click="mobileWorkView = 'pdf'" class="lg:hidden btn-secondary py-1.5 px-2.5 text-xs flex items-center gap-1 text-blue-600 border-blue-200 bg-blue-50/50">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            <span>Xem đề bài</span>
+                        </button>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                    <div class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 sm:space-y-6">
                         <!-- MC -->
                         <template x-if="activeWorkItem && activeWorkItem.mc_count > 0">
                             <div class="space-y-3">
-                                <div class="text-xs font-bold text-blue-600 uppercase tracking-wider pb-1 border-b border-blue-100">I. Trắc Nghiệm</div>
+                                <div class="text-xs font-bold text-blue-600 uppercase tracking-wider pb-1 border-b border-blue-100 flex items-center justify-between">
+                                    <span>I. Trắc Nghiệm</span>
+                                    <span class="text-[11px] text-slate-400 font-normal" x-text="activeWorkItem.mc_count + ' câu' + (activeWorkItem.mc_score_per_q ? ' (' + activeWorkItem.mc_score_per_q + 'đ/câu)' : '')"></span>
+                                </div>
                                 <template x-for="i in activeWorkItem.mc_count" :key="i">
-                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                                    <div class="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                                         <div class="flex items-center justify-between">
-                                            <span class="text-sm font-bold text-slate-800" x-text="'Câu '+i"></span>
-                                            <span class="text-xs text-slate-400" x-text="studentAnswerSheet.mc[i]?'Đã chọn: '+studentAnswerSheet.mc[i]:'Chưa chọn'"></span>
+                                            <span class="text-xs sm:text-sm font-bold text-slate-800" x-text="'Câu '+i"></span>
+                                            <span class="text-[11px] sm:text-xs font-semibold"
+                                                  :class="studentAnswerSheet.mc[i] ? 'text-blue-600' : 'text-slate-400'"
+                                                  x-text="studentAnswerSheet.mc[i] ? 'Đã chọn: ' + studentAnswerSheet.mc[i] : 'Chưa chọn'"></span>
                                         </div>
                                         <div class="grid grid-cols-4 gap-2">
                                             <template x-for="opt in ['A','B','C','D']" :key="opt">
                                                 <button @click="studentAnswerSheet.mc[i]=opt"
                                                         :class="studentAnswerSheet.mc[i]===opt?'selected':''"
-                                                        class="ans-btn" x-text="opt"></button>
+                                                        class="ans-btn py-2 text-sm" x-text="opt"></button>
                                             </template>
                                         </div>
                                     </div>
@@ -1694,17 +1767,20 @@
                         <!-- TF -->
                         <template x-if="activeWorkItem && activeWorkItem.tf_count > 0">
                             <div class="space-y-2">
-                                <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider pb-1 border-b border-emerald-100">II. Đúng / Sai</div>
+                                <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider pb-1 border-b border-emerald-100 flex items-center justify-between">
+                                    <span>II. Đúng / Sai</span>
+                                    <span class="text-[11px] text-slate-400 font-normal" x-text="activeWorkItem.tf_count + ' câu lớn (4 ý)'"></span>
+                                </div>
                                 <template x-for="q in getTfSubQuestions(activeWorkItem.tf_count)" :key="q">
-                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
-                                        <span class="text-sm font-bold text-slate-800" x-text="'Câu '+q"></span>
-                                        <div class="flex gap-2">
+                                    <div class="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+                                        <span class="text-xs sm:text-sm font-bold text-slate-800" x-text="'Câu '+q"></span>
+                                        <div class="flex gap-1.5 sm:gap-2">
                                             <button @click="studentAnswerSheet.tf[q]='Đúng'"
                                                     :class="studentAnswerSheet.tf[q]==='Đúng'?'bg-emerald-600 text-white border-emerald-600 font-bold':'bg-white text-slate-600 border-slate-300 hover:border-emerald-400'"
-                                                    class="px-4 py-1.5 rounded-lg text-sm border font-semibold transition">Đúng</button>
+                                                    class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm border font-semibold transition">Đúng</button>
                                             <button @click="studentAnswerSheet.tf[q]='Sai'"
                                                     :class="studentAnswerSheet.tf[q]==='Sai'?'bg-red-600 text-white border-red-600 font-bold':'bg-white text-slate-600 border-slate-300 hover:border-red-400'"
-                                                    class="px-4 py-1.5 rounded-lg text-sm border font-semibold transition">Sai</button>
+                                                    class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm border font-semibold transition">Sai</button>
                                         </div>
                                     </div>
                                 </template>
@@ -1714,23 +1790,27 @@
                         <!-- SA -->
                         <template x-if="activeWorkItem && activeWorkItem.sa_count > 0">
                             <div class="space-y-2">
-                                <div class="text-xs font-bold text-slate-600 uppercase tracking-wider pb-1 border-b border-slate-200">III. Trả Lời Ngắn</div>
+                                <div class="text-xs font-bold text-slate-600 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center justify-between">
+                                    <span>III. Trả Lời Ngắn</span>
+                                    <span class="text-[11px] text-slate-400 font-normal" x-text="activeWorkItem.sa_count + ' câu'"></span>
+                                </div>
                                 <template x-for="i in activeWorkItem.sa_count" :key="i">
-                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                                        <label class="block text-sm font-bold text-slate-800" x-text="'Câu '+i+':'"></label>
-                                        <input type="text" x-model="studentAnswerSheet.sa[i]" placeholder="Nhập kết quả..." class="form-input text-sm">
+                                    <div class="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                                        <label class="block text-xs sm:text-sm font-bold text-slate-800" x-text="'Câu '+i+':'"></label>
+                                        <input type="text" x-model="studentAnswerSheet.sa[i]" placeholder="Nhập đáp số..." class="form-input text-xs sm:text-sm py-1.5 bg-white">
                                     </div>
                                 </template>
                             </div>
                         </template>
                     </div>
 
-                    <!-- Submit -->
-                    <div class="p-4 border-t border-slate-200 flex justify-end gap-3">
-                        <button @click="closeStudentWorkModal()" class="btn-secondary">Hủy</button>
-                        <button @click="submitStudentWork()" class="btn-primary px-6" :style="workType==='exam'?'background:linear-gradient(135deg,#059669,#047857)':''">
+                    <!-- Submit footer -->
+                    <div class="p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0 bg-white">
+                        <button @click="closeStudentWorkModal()" class="btn-secondary py-2 px-3 text-xs sm:text-sm">Hủy</button>
+                        <button @click="submitStudentWork()" class="btn-primary py-2.5 px-5 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-initial justify-center font-bold"
+                                :style="workType==='exam'?'background:linear-gradient(135deg,#059669,#047857)':''">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Nộp Bài Ngay
+                            <span>Nộp Bài Ngay</span>
                         </button>
                     </div>
                 </div>
@@ -1738,18 +1818,18 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════ MODAL: BẢNG ĐIỂM ══════════════════════════ -->
-    <div x-show="viewSubmissionsOpen" class="modal-overlay" style="display:none">
-        <div class="modal-box max-w-4xl my-8">
-            <div class="modal-header">
-                <div>
-                    <h3 class="modal-title" x-text="activeViewItem?'Bảng điểm: '+activeViewItem.title:'Kết Quả'"></h3>
-                    <p class="text-sm text-slate-400 mt-0.5">Danh sách bài làm và điểm quy đổi thang 10</p>
+    <!-- ══════════════════════════ MODAL: BẢNG ĐIỂM (TỐI ƯU MOBILE) ══════════════════════════ -->
+    <div x-show="viewSubmissionsOpen" class="modal-overlay p-2 sm:p-4" style="display:none">
+        <div class="modal-box max-w-4xl w-full my-auto max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="modal-header p-3.5 sm:p-5 flex-shrink-0">
+                <div class="min-w-0 pr-2">
+                    <h3 class="modal-title text-base sm:text-lg truncate" x-text="activeViewItem?'Bảng điểm: '+activeViewItem.title:'Kết Quả'"></h3>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5 truncate" x-text="'Tổng cộng: ' + currentSubmissions.length + ' bài nộp'"></p>
                 </div>
-                <button @click="viewSubmissionsOpen=false" class="btn-ghost"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <button @click="viewSubmissionsOpen=false" class="btn-ghost flex-shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <div class="p-0 max-h-[70vh] overflow-y-auto">
-                <table class="data-table">
+            <div class="flex-1 overflow-x-auto overflow-y-auto p-0">
+                <table class="data-table min-w-[550px]">
                     <thead>
                         <tr>
                             <th>Họ tên học sinh</th>
@@ -1763,13 +1843,13 @@
                     <tbody>
                         <template x-for="sub in currentSubmissions" :key="sub.id">
                             <tr>
-                                <td class="font-semibold text-slate-800" x-text="sub.student_name"></td>
-                                <td class="text-slate-400 text-sm font-mono" x-text="sub.created_at?formatDateTimeDisplay(sub.created_at):''"></td>
-                                <td class="text-center font-bold text-amber-600" x-show="workType==='exam'" x-text="formatDurationDisplay(sub.time_taken)"></td>
-                                <td class="text-center font-bold text-slate-700" x-text="sub.raw_score + ' / ' + sub.max_score"></td>
-                                <td class="text-center font-bold text-lg" :class="sub.score>=5?'text-emerald-600':'text-red-600'" x-text="sub.score + 'đ'"></td>
+                                <td class="font-semibold text-slate-800 text-xs sm:text-sm" x-text="sub.student_name"></td>
+                                <td class="text-slate-400 text-xs font-mono" x-text="sub.created_at?formatDateTimeDisplay(sub.created_at):''"></td>
+                                <td class="text-center font-bold text-amber-600 text-xs sm:text-sm" x-show="workType==='exam'" x-text="formatDurationDisplay(sub.time_taken)"></td>
+                                <td class="text-center font-bold text-slate-700 text-xs sm:text-sm" x-text="sub.raw_score + ' / ' + sub.max_score"></td>
+                                <td class="text-center font-bold text-base sm:text-lg" :class="sub.score>=5?'text-emerald-600':'text-red-600'" x-text="sub.score + 'đ'"></td>
                                 <td class="text-right" x-show="role==='teacher'">
-                                    <button @click="deleteSubmission(sub.id)" class="btn-danger text-xs py-1 px-2">Xóa bài</button>
+                                    <button @click="deleteSubmission(sub.id)" class="btn-danger text-xs py-1 px-2">Xóa</button>
                                 </td>
                             </tr>
                         </template>
@@ -1779,8 +1859,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="modal-footer">
-                <button @click="viewSubmissionsOpen=false" class="btn-secondary">Đóng</button>
+            <div class="modal-footer p-3 sm:p-4 flex-shrink-0">
+                <button @click="viewSubmissionsOpen=false" class="btn-secondary w-full sm:w-auto justify-center">Đóng</button>
             </div>
         </div>
     </div>
@@ -1871,6 +1951,7 @@
 
                 studentWorkModalOpen: false,
                 workType: 'assignment',
+                mobileWorkView: 'pdf', // 'pdf' | 'sheet' (Dành cho điện thoại chuyển tab)
                 activeWorkItem: null,
                 studentAnswerSheet: { student_name: '', mc: {}, tf: {}, sa: {} },
 
@@ -2489,10 +2570,20 @@
                     this.calculateDashboardStats();
                 },
 
+                getAnsweredCount() {
+                    if (!this.activeWorkItem) return { answered: 0, total: 0 };
+                    let mc = Object.keys(this.studentAnswerSheet?.mc || {}).filter(k => this.studentAnswerSheet.mc[k]).length;
+                    let tf = Object.keys(this.studentAnswerSheet?.tf || {}).filter(k => this.studentAnswerSheet.tf[k]).length;
+                    let sa = Object.keys(this.studentAnswerSheet?.sa || {}).filter(k => this.studentAnswerSheet.sa[k] && String(this.studentAnswerSheet.sa[k]).trim()).length;
+                    let total = (this.activeWorkItem.mc_count || 0) + ((this.activeWorkItem.tf_count || 0) * 4) + (this.activeWorkItem.sa_count || 0);
+                    return { answered: mc + tf + sa, total: total };
+                },
+
                 openStudentWorkModal(item, type) {
                     if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
                     this.workType = type;
                     this.activeWorkItem = item;
+                    this.mobileWorkView = item.pdf_url ? 'pdf' : 'sheet';
                     this.studentAnswerSheet = {
                         student_name: this.currentUser ? this.currentUser.full_name : '',
                         mc: {}, tf: {}, sa: {}
