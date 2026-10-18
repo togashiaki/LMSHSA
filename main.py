@@ -8,6 +8,8 @@ from psycopg2.extras import RealDictCursor
 import os
 import json
 import re
+import math
+import statistics as stats_lib
 from datetime import datetime
 
 app = FastAPI(title="Hệ thống Quản lý Lớp học - LMS")
@@ -168,6 +170,24 @@ def init_db():
     cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS exercise_video_id TEXT DEFAULT '';")
     cursor.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS documents_json TEXT DEFAULT '[]';")
 
+    # Dọn dẹp các bản ghi cũ vô tình bị lưu đúp link video bài học sang video chữa BTVN
+    cursor.execute("""
+        UPDATE lessons
+        SET exercise_video_url = '', exercise_video_id = '', video_url = '', video_id = ''
+        WHERE (exercise_video_url = lesson_video_url OR video_url = lesson_video_url
+               OR video_id = lesson_video_id OR exercise_video_id = lesson_video_id)
+          AND lesson_video_url IS NOT NULL AND lesson_video_url != '';
+    """)
+    # Các bài chỉ có link ở cột cũ video_url/video_id (khi chưa tách 2 loại video) mà chưa có video bài học:
+    # chuyển sang video chữa BTVN nếu chưa có, tránh mất dữ liệu cũ (không đụng tới các bài đã tách đúng)
+    cursor.execute("""
+        UPDATE lessons
+        SET exercise_video_url = video_url, exercise_video_id = video_id
+        WHERE COALESCE(lesson_video_url, '') = '' AND COALESCE(lesson_video_id, '') = ''
+          AND COALESCE(exercise_video_url, '') = '' AND COALESCE(exercise_video_id, '') = ''
+          AND (COALESCE(video_url, '') != '' OR COALESCE(video_id, '') != '');
+    """)
+
     cursor.execute("SELECT COUNT(*) FROM users")
     res = cursor.fetchone()
     user_count = res['count'] if res else 0
@@ -295,7 +315,13 @@ def build_detailed_breakdown(
     student_answers_raw: str,
     mc_count: int,
     tf_count: int,
-    sa_count: int
+    sa_count: int,
+    mc_score_per_q: float = 0.25,
+    tf_score_1: float = 0.10,
+    tf_score_2: float = 0.25,
+    tf_score_3: float = 0.50,
+    tf_score_4: float = 1.00,
+    sa_score_per_q: float = 0.50
 ) -> Dict[str, Any]:
     try:
         key = json.loads(answer_key_raw or "{}")
@@ -318,7 +344,8 @@ def build_detailed_breakdown(
             "question": f"Câu {i}",
             "student_answer": s_ans,
             "correct_answer": c_ans,
-            "is_correct": is_corr
+            "is_correct": is_corr,
+            "score": float(mc_score_per_q) if is_corr else 0.0
         })
 
     tf_detail = []
@@ -326,20 +353,38 @@ def build_detailed_breakdown(
     tf_ans = ans.get("tf", {})
     for i in range(1, tf_count + 1):
         sub_list = []
+        correct_in_this_q = 0
+        has_key = False
         for sub in ['a', 'b', 'c', 'd']:
             sub_q = f"{i}{sub}"
             c_ans = tf_key.get(sub_q, "")
             s_ans = tf_ans.get(sub_q, "")
+            if c_ans:
+                has_key = True
             is_corr = bool(c_ans and str(s_ans).strip() == str(c_ans).strip())
+            if is_corr:
+                correct_in_this_q += 1
             sub_list.append({
                 "sub_question": f"Ý {sub}",
                 "student_answer": s_ans,
                 "correct_answer": c_ans,
                 "is_correct": is_corr
             })
+        pts = 0.0
+        if has_key:
+            if correct_in_this_q == 1:
+                pts = float(tf_score_1)
+            elif correct_in_this_q == 2:
+                pts = float(tf_score_2)
+            elif correct_in_this_q == 3:
+                pts = float(tf_score_3)
+            elif correct_in_this_q == 4:
+                pts = float(tf_score_4)
         tf_detail.append({
             "question": f"Câu {i}",
-            "subs": sub_list
+            "subs": sub_list,
+            "correct_subs_count": correct_in_this_q,
+            "score": pts
         })
 
     sa_detail = []
@@ -356,10 +401,201 @@ def build_detailed_breakdown(
             "question": f"Câu {i}",
             "student_answer": s_ans,
             "correct_answer": c_ans,
-            "is_correct": is_corr
+            "is_correct": is_corr,
+            "score": float(sa_score_per_q) if is_corr else 0.0
         })
 
     return {"mc": mc_detail, "tf": tf_detail, "sa": sa_detail}
+
+def compute_item_statistics(item: dict, submissions: list) -> dict:
+    total_submissions = len(submissions)
+    max_possible_raw = float((item.get("mc_count") or 0) * float(item.get("mc_score_per_q") or 0.25) +
+                             (item.get("tf_count") or 0) * float(item.get("tf_score_4") or 1.0) +
+                             (item.get("sa_count") or 0) * float(item.get("sa_score_per_q") or 0.5))
+    if max_possible_raw <= 0:
+        max_possible_raw = 10.0
+
+    if total_submissions == 0:
+        return {
+            "total_submissions": 0,
+            "avg_raw_score": 0.0,
+            "avg_score": 0.0,
+            "median_raw_score": 0.0,
+            "median_score": 0.0,
+            "min_raw_score": 0.0,
+            "max_raw_score": 0.0,
+            "min_score": 0.0,
+            "max_score": 0.0,
+            "max_possible_raw": round(max_possible_raw, 2),
+            "score_distribution": [],
+            "frequently_missed": [],
+            "high_correct": [],
+            "all_questions": []
+        }
+
+    raw_scores = [float(s.get("raw_score") or 0.0) for s in submissions]
+    scores_10 = [float(s.get("score") or 0.0) for s in submissions]
+
+    sub_max_raw = float(submissions[0].get("max_score") or 0.0)
+    if sub_max_raw > 0:
+        max_possible_raw = sub_max_raw
+
+    avg_raw = round(sum(raw_scores) / total_submissions, 2)
+    avg_10 = round(sum(scores_10) / total_submissions, 2)
+
+    try:
+        med_raw = round(float(stats_lib.median(raw_scores)), 2)
+        med_10 = round(float(stats_lib.median(scores_10)), 2)
+    except Exception:
+        med_raw = avg_raw
+        med_10 = avg_10
+
+    min_raw = min(raw_scores)
+    max_raw = max(raw_scores)
+    min_10 = min(scores_10)
+    max_10 = max(scores_10)
+
+    # Bảng tần số điểm (Tần số theo điểm số đạt được - Points scored)
+    raw_counts = {}
+    for r in raw_scores:
+        key = int(r) if r.is_integer() else r
+        raw_counts[key] = raw_counts.get(key, 0) + 1
+
+    # Nếu khoảng điểm nằm trong phạm vi vừa phải (<= 30 đơn vị), tạo dải điểm liên tục để biểu đồ hiển thị giống Ảnh 1
+    distribution = []
+    min_int = int(math.floor(min_raw))
+    max_int = int(math.ceil(max_raw))
+    # Hiển thị từ min_int đến max_int hoặc max_possible_raw nếu khoảng hợp lý
+    range_span = max_int - min_int
+    if 0 <= range_span <= 30 and all(r.is_integer() for r in raw_scores):
+        target_max = min(max_int + 2, int(math.ceil(max_possible_raw))) if max_possible_raw >= max_int else max_int
+        target_min = max(0, min_int - 1)
+        for val in range(target_min, target_max + 1):
+            cnt = raw_counts.get(val, 0)
+            distribution.append({
+                "score": val,
+                "count": cnt,
+                "percentage": round((cnt / total_submissions) * 100, 1)
+            })
+    else:
+        for k in sorted(raw_counts.keys()):
+            distribution.append({
+                "score": k,
+                "count": raw_counts[k],
+                "percentage": round((raw_counts[k] / total_submissions) * 100, 1)
+            })
+
+    # Phân tích câu hỏi: Đúng / Sai
+    try:
+        key_obj = json.loads(item.get("answer_key") or "{}")
+    except Exception:
+        key_obj = {}
+
+    mc_key = key_obj.get("mc", {})
+    tf_key = key_obj.get("tf", {})
+    sa_key = key_obj.get("sa", {})
+
+    parsed_subs = []
+    for s in submissions:
+        try:
+            ans_obj = json.loads(s.get("answer_text") or "{}")
+        except Exception:
+            ans_obj = {}
+        parsed_subs.append(ans_obj)
+
+    mc_count = int(item.get("mc_count") or 0)
+    tf_count = int(item.get("tf_count") or 0)
+    sa_count = int(item.get("sa_count") or 0)
+
+    questions_stat = []
+
+    # 1. Trắc nghiệm (Câu 1 .. N)
+    for i in range(1, mc_count + 1):
+        q_str = str(i)
+        c_ans = str(mc_key.get(q_str, "")).strip().upper()
+        corr_cnt = 0
+        for p in parsed_subs:
+            s_ans = str(p.get("mc", {}).get(q_str, "")).strip().upper()
+            if c_ans and s_ans == c_ans:
+                corr_cnt += 1
+        pct = round(corr_cnt / total_submissions * 100, 1)
+        questions_stat.append({
+            "id": f"mc_{i}",
+            "section": "Trắc nghiệm",
+            "question_label": f"Phần trắc nghiệm (Câu {i})",
+            "correct_count": corr_cnt,
+            "total_count": total_submissions,
+            "percentage": pct,
+            "correct_answer": c_ans
+        })
+
+    # 2. Đúng / Sai (Câu i ý a, b, c, d) - hiển thị giống hệt Ảnh 1: "Phần Đúng/Sai (Câu 14b)"
+    for i in range(1, tf_count + 1):
+        for sub in ['a', 'b', 'c', 'd']:
+            sub_q = f"{i}{sub}"
+            c_ans = str(tf_key.get(sub_q, "")).strip()
+            corr_cnt = 0
+            for p in parsed_subs:
+                s_ans = str(p.get("tf", {}).get(sub_q, "")).strip()
+                if c_ans and s_ans == c_ans:
+                    corr_cnt += 1
+            pct = round(corr_cnt / total_submissions * 100, 1)
+            questions_stat.append({
+                "id": f"tf_{sub_q}",
+                "section": "Đúng/Sai",
+                "question_label": f"Phần Đúng/Sai (Câu {i}{sub})",
+                "correct_count": corr_cnt,
+                "total_count": total_submissions,
+                "percentage": pct,
+                "correct_answer": c_ans
+            })
+
+    # 3. Trả lời ngắn / Điền số (Câu 1 .. N)
+    for i in range(1, sa_count + 1):
+        q_str = str(i)
+        c_ans = str(sa_key.get(q_str, "")).strip().lower().replace(",", ".")
+        corr_cnt = 0
+        for p in parsed_subs:
+            s_ans = str(p.get("sa", {}).get(q_str, "")).strip().lower().replace(",", ".")
+            if c_ans and s_ans == c_ans and c_ans != "":
+                corr_cnt += 1
+        pct = round(corr_cnt / total_submissions * 100, 1)
+        questions_stat.append({
+            "id": f"sa_{i}",
+            "section": "Trả lời ngắn",
+            "question_label": f"Phần Trả lời ngắn (Câu {i})",
+            "correct_count": corr_cnt,
+            "total_count": total_submissions,
+            "percentage": pct,
+            "correct_answer": sa_key.get(q_str, "")
+        })
+
+    # Các câu hay bị sai (Frequently missed questions):
+    # Sắp xếp tăng dần theo tỷ lệ đúng (ít người làm đúng nhất lên đầu)
+    missed_candidates = [q for q in questions_stat if q["correct_count"] < total_submissions]
+    missed_candidates.sort(key=lambda x: (x["correct_count"], x["percentage"]))
+
+    # Các câu làm đúng nhiều (High mastery questions):
+    # Sắp xếp giảm dần theo tỷ lệ đúng (nhiều người làm đúng nhất lên đầu)
+    high_candidates = [q for q in questions_stat if q["correct_count"] > 0]
+    high_candidates.sort(key=lambda x: (-x["correct_count"], -x["percentage"]))
+
+    return {
+        "total_submissions": total_submissions,
+        "avg_raw_score": avg_raw,
+        "avg_score": avg_10,
+        "median_raw_score": med_raw,
+        "median_score": med_10,
+        "min_raw_score": min_raw,
+        "max_raw_score": max_raw,
+        "min_score": min_10,
+        "max_score": max_10,
+        "max_possible_raw": round(max_possible_raw, 2),
+        "score_distribution": distribution,
+        "frequently_missed": missed_candidates[:15],
+        "high_correct": high_candidates[:15],
+        "all_questions": questions_stat
+    }
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -671,9 +907,9 @@ def create_lesson(l: LessonCreate):
     conn = get_db()
     cursor = conn.cursor()
     l_v_id = extract_youtube_id(l.lesson_video_id or l.lesson_video_url or "")
-    ex_v_id = extract_youtube_id(l.exercise_video_id or l.exercise_video_url or l.video_id or l.video_url or "")
-    v_url = l.exercise_video_url or l.video_url or l.lesson_video_url or ""
-    v_id = ex_v_id or l_v_id
+    ex_v_id = extract_youtube_id(l.exercise_video_id or l.exercise_video_url or "")
+    v_url = l.exercise_video_url or ""
+    v_id = ex_v_id or ""
 
     cursor.execute("""
         INSERT INTO lessons (title, lesson_date, chapter, order_index,
@@ -706,9 +942,9 @@ def update_lesson(lesson_id: int, l: LessonCreate):
     conn = get_db()
     cursor = conn.cursor()
     l_v_id = extract_youtube_id(l.lesson_video_id or l.lesson_video_url or "")
-    ex_v_id = extract_youtube_id(l.exercise_video_id or l.exercise_video_url or l.video_id or l.video_url or "")
-    v_url = l.exercise_video_url or l.video_url or l.lesson_video_url or ""
-    v_id = ex_v_id or l_v_id
+    ex_v_id = extract_youtube_id(l.exercise_video_id or l.exercise_video_url or "")
+    v_url = l.exercise_video_url or ""
+    v_id = ex_v_id or ""
 
     cursor.execute("""
         UPDATE lessons
@@ -936,12 +1172,29 @@ def get_submissions(assignment_id: Optional[int] = None):
         res.append(item)
     return res
 
+@app.get("/api/assignments/{assignment_id}/statistics")
+def get_assignment_statistics(assignment_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM assignments WHERE id = %s", (assignment_id,))
+    item = cursor.fetchone()
+    if not item:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Bài tập không tồn tại!")
+    cursor.execute("SELECT * FROM submissions WHERE assignment_id = %s ORDER BY id DESC", (assignment_id,))
+    subs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return compute_item_statistics(dict(item), [dict(s) for s in subs])
+
 @app.get("/api/submissions/{submission_id}/detail")
 def get_submission_detail(submission_id: int):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT s.*, a.answer_key, a.mc_count, a.tf_count, a.sa_count, a.title as assignment_title
+        SELECT s.*, a.answer_key, a.mc_count, a.tf_count, a.sa_count, a.title as assignment_title,
+               a.mc_score_per_q, a.tf_score_1, a.tf_score_2, a.tf_score_3, a.tf_score_4, a.sa_score_per_q
         FROM submissions s
         JOIN assignments a ON s.assignment_id = a.id
         WHERE s.id = %s
@@ -957,9 +1210,18 @@ def get_submission_detail(submission_id: int):
         sub["answer_text"],
         sub["mc_count"] or 0,
         sub["tf_count"] or 0,
-        sub["sa_count"] or 0
+        sub["sa_count"] or 0,
+        mc_score_per_q=float(sub.get("mc_score_per_q") or 0.25),
+        tf_score_1=float(sub.get("tf_score_1") or 0.10),
+        tf_score_2=float(sub.get("tf_score_2") or 0.25),
+        tf_score_3=float(sub.get("tf_score_3") or 0.50),
+        tf_score_4=float(sub.get("tf_score_4") or 1.00),
+        sa_score_per_q=float(sub.get("sa_score_per_q") or 0.50)
     )
     result = dict(sub)
+    result["raw_score"] = float(result["raw_score"]) if result.get("raw_score") is not None else 0.0
+    result["max_score"] = float(result["max_score"]) if result.get("max_score") is not None else 0.0
+    result["score"] = float(result["score"]) if result.get("score") is not None else 0.0
     result["breakdown"] = breakdown
     return result
 
@@ -1158,7 +1420,8 @@ def get_exam_submission_detail(submission_id: int):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT s.*, e.answer_key, e.mc_count, e.tf_count, e.sa_count, e.title as exam_title
+        SELECT s.*, e.answer_key, e.mc_count, e.tf_count, e.sa_count, e.title as exam_title,
+               e.mc_score_per_q, e.tf_score_1, e.tf_score_2, e.tf_score_3, e.tf_score_4, e.sa_score_per_q
         FROM exam_submissions s
         JOIN exams e ON s.exam_id = e.id
         WHERE s.id = %s
@@ -1168,17 +1431,45 @@ def get_exam_submission_detail(submission_id: int):
     conn.close()
     if not sub:
         raise HTTPException(status_code=404, detail="Bài nộp không tồn tại!")
-    
+
     breakdown = build_detailed_breakdown(
         sub["answer_key"],
         sub["answer_text"],
         sub["mc_count"] or 0,
         sub["tf_count"] or 0,
-        sub["sa_count"] or 0
+        sub["sa_count"] or 0,
+        mc_score_per_q=float(sub.get("mc_score_per_q") or 0.25),
+        tf_score_1=float(sub.get("tf_score_1") or 0.10),
+        tf_score_2=float(sub.get("tf_score_2") or 0.25),
+        tf_score_3=float(sub.get("tf_score_3") or 0.50),
+        tf_score_4=float(sub.get("tf_score_4") or 1.00),
+        sa_score_per_q=float(sub.get("sa_score_per_q") or 0.50)
     )
     result = dict(sub)
+    result["raw_score"] = float(result["raw_score"]) if result.get("raw_score") is not None else 0.0
+    result["max_score"] = float(result["max_score"]) if result.get("max_score") is not None else 0.0
+    result["score"] = float(result["score"]) if result.get("score") is not None else 0.0
+    for k in ["mc_score_per_q", "tf_score_1", "tf_score_2", "tf_score_3", "tf_score_4", "sa_score_per_q"]:
+        if result.get(k) is not None:
+            result[k] = float(result[k])
     result["breakdown"] = breakdown
     return result
+
+@app.get("/api/exams/{exam_id}/statistics")
+def get_exam_statistics(exam_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM exams WHERE id = %s", (exam_id,))
+    item = cursor.fetchone()
+    if not item:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Đề thi không tồn tại!")
+    cursor.execute("SELECT * FROM exam_submissions WHERE exam_id = %s ORDER BY id DESC", (exam_id,))
+    subs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return compute_item_statistics(dict(item), [dict(s) for s in subs])
 
 @app.delete("/api/exam_submissions/{submission_id}")
 def delete_exam_submission(submission_id: int):
