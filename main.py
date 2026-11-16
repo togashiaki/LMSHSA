@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -13,6 +13,10 @@ import statistics as stats_lib
 from datetime import datetime
 
 app = FastAPI(title="Hệ thống Quản lý Lớp học - LMS")
+
+@app.api_route("/ping", methods=["GET", "HEAD"])
+async def ping():
+    return Response(content="OK", media_type="text/plain", status_code=200)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -1265,11 +1269,21 @@ def create_submission(s: SubmissionCreate):
         sa_score_per_q=assign.get("sa_score_per_q", 0.50)
     )
 
-    cursor.execute("""
-        INSERT INTO submissions (assignment_id, student_name, answer_text, raw_score, max_score, score)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (s.assignment_id, s.student_name, s.answer_text, raw_score, max_score, score_10))
-    
+    # Upsert: nếu học sinh đã nộp rồi thì cập nhật, chưa thì insert mới
+    cursor.execute("SELECT id FROM submissions WHERE assignment_id = %s AND student_name = %s",
+                   (s.assignment_id, s.student_name))
+    existing = cursor.fetchone()
+    if existing:
+        cursor.execute("""
+            UPDATE submissions SET answer_text=%s, raw_score=%s, max_score=%s, score=%s, created_at=CURRENT_TIMESTAMP
+            WHERE id=%s
+        """, (s.answer_text, raw_score, max_score, score_10, existing["id"]))
+    else:
+        cursor.execute("""
+            INSERT INTO submissions (assignment_id, student_name, answer_text, raw_score, max_score, score)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (s.assignment_id, s.student_name, s.answer_text, raw_score, max_score, score_10))
+
     conn.commit()
     cursor.close()
     conn.close()
@@ -1512,11 +1526,21 @@ def create_exam_submission(s: ExamSubmissionCreate):
         sa_score_per_q=ex.get("sa_score_per_q", 0.50)
     )
 
-    cursor.execute("""
-        INSERT INTO exam_submissions (exam_id, student_name, answer_text, raw_score, max_score, score, time_taken)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (s.exam_id, s.student_name, s.answer_text, raw_score, max_score, score_10, s.time_taken or 0))
-    
+    # Upsert: nếu học sinh đã nộp rồi thì cập nhật, chưa thì insert mới
+    cursor.execute("SELECT id FROM exam_submissions WHERE exam_id = %s AND student_name = %s",
+                   (s.exam_id, s.student_name))
+    existing = cursor.fetchone()
+    if existing:
+        cursor.execute("""
+            UPDATE exam_submissions SET answer_text=%s, raw_score=%s, max_score=%s, score=%s, time_taken=%s, created_at=CURRENT_TIMESTAMP
+            WHERE id=%s
+        """, (s.answer_text, raw_score, max_score, score_10, s.time_taken or 0, existing["id"]))
+    else:
+        cursor.execute("""
+            INSERT INTO exam_submissions (exam_id, student_name, answer_text, raw_score, max_score, score, time_taken)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (s.exam_id, s.student_name, s.answer_text, raw_score, max_score, score_10, s.time_taken or 0))
+
     conn.commit()
     cursor.close()
     conn.close()

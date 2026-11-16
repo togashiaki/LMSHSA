@@ -8,7 +8,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -21,8 +21,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-                        display: ['DM Sans', 'ui-sans-serif', 'system-ui'],
+                        sans: ['Be Vietnam Pro', 'ui-sans-serif', 'system-ui'],
+                        display: ['Be Vietnam Pro', 'ui-sans-serif', 'system-ui'],
                     },
                     colors: {
                         primary: {
@@ -38,34 +38,36 @@
     </script>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-light: #eff6ff;
-            --primary-dark: #1d4ed8;
-            --success: #10b981;
-            --success-light: #ecfdf5;
-            --warning: #f59e0b;
-            --warning-light: #fffbeb;
-            --danger: #ef4444;
-            --danger-light: #fef2f2;
+            --primary: #3b5bdb;
+            --primary-light: #eef2ff;
+            --primary-dark: #2f4ac0;
+            --success: #12b886;
+            --success-light: #e6fcf5;
+            --warning: #f59f00;
+            --warning-light: #fff9db;
+            --danger: #fa5252;
+            --danger-light: #fff5f5;
             --surface: #ffffff;
-            --bg: #F8FAFC;
-            --border: #E2E8F0;
-            --text: #0F172A;
-            --subtle: #475569;
-            --muted: #94A3B8;
-            --sidebar-w: 260px;
+            --bg: #f8f9fa;
+            --border: #e9ecef;
+            --text: #212529;
+            --subtle: #495057;
+            --muted: #868e96;
+            --sidebar-w: 256px;
         }
+
+        [x-cloak] { display: none !important; }
 
         * { box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Be Vietnam Pro', sans-serif;
             background: var(--bg);
             color: var(--text);
             -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, h3, h4, h5, .font-display { font-family: 'DM Sans', sans-serif; }
+        h1, h2, h3, h4, h5, .font-display { font-family: 'Be Vietnam Pro', sans-serif; }
 
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -155,7 +157,7 @@
             gap: 6px;
             transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
         }
-        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 2px 12px rgba(37,99,235,0.25); }
+        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 2px 10px rgba(59,91,219,0.2); }
         .btn-primary:active { transform: scale(0.98); }
 
         .btn-secondary {
@@ -207,7 +209,7 @@
             border-radius: 10px;
             padding: 9px 13px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Be Vietnam Pro', sans-serif;
             color: var(--text);
             background: var(--bg);
             outline: none;
@@ -282,7 +284,7 @@
             border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between;
         }
-        .modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+        .modal-title { font-family: 'Be Vietnam Pro', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
         .modal-body { padding: 24px; }
         .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
 
@@ -391,23 +393,23 @@
 
     <!-- LOGIN SCREEN -->
     <div x-show="!currentUser"
+         x-cloak
          x-transition:enter="transition opacity ease-out duration-300"
          x-transition:leave="transition opacity ease-in duration-200"
          class="fixed inset-0 z-40 flex items-center justify-center p-4"
-         style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#0891b2 100%)">
+         style="background: #f1f3f5">
 
-        <div class="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
-            <div class="flex flex-col items-center text-center mb-8">
-                <div class="icon-wrap mb-3" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);width:56px;height:56px;border-radius:16px;box-shadow:0 8px 24px rgba(37,99,235,0.35)">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <div class="relative bg-white w-full max-w-md rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center mb-3 shadow-xs">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 </div>
-                <h1 class="font-display font-bold text-2xl text-slate-900">Hệ thống LMS</h1>
-                <p class="text-sm text-slate-500 mt-1">Quản lý học tập trực tuyến</p>
+                <h1 class="font-display font-bold text-xl text-slate-900">Hệ thống LMS</h1>
             </div>
 
             <div class="flex bg-slate-100 rounded-xl p-1 mb-6">
-                <button @click="authTab='login'" :class="authTab==='login'?'bg-white text-blue-600 shadow-sm font-semibold':'text-slate-500 font-medium'" class="flex-1 py-2 rounded-lg text-sm transition-all duration-200">Đăng nhập</button>
-                <button @click="authTab='register'" :class="authTab==='register'?'bg-white text-blue-600 shadow-sm font-semibold':'text-slate-500 font-medium'" class="flex-1 py-2 rounded-lg text-sm transition-all duration-200">Tạo tài khoản</button>
+                <button @click="authTab='login'" :class="authTab==='login'?'bg-white text-slate-900 shadow-xs font-semibold':'text-slate-500 font-medium'" class="flex-1 py-2 rounded-lg text-sm transition">Đăng nhập</button>
+                <button @click="authTab='register'" :class="authTab==='register'?'bg-white text-slate-900 shadow-xs font-semibold':'text-slate-500 font-medium'" class="flex-1 py-2 rounded-lg text-sm transition">Tạo tài khoản</button>
             </div>
 
             <div x-show="authError" class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium mb-4 border border-red-200">
@@ -460,15 +462,15 @@
 
         <!-- BACKDROP CHO MOBILE KHI MỞ SIDEBAR -->
         <div x-show="sidebarOpen" 
+             x-cloak
              @click="sidebarOpen=false" 
-             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden"
+             class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 md:hidden"
              x-transition:enter="transition-opacity ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
              x-transition:leave="transition-opacity ease-in duration-150"
              x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             style="display:none"></div>
+             x-transition:leave-end="opacity-0"></div>
 
         <!-- SIDEBAR -->
         <aside x-show="sidebarOpen"
@@ -482,14 +484,11 @@
 
             <!-- Brand -->
             <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrap" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);width:38px;height:38px;border-radius:11px;box-shadow:0 4px 12px rgba(37,99,235,0.3)">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
-                    <div>
-                        <div class="font-display font-bold text-sm text-slate-900 leading-tight">LMS Portal</div>
-                        <div class="text-[11px] text-slate-400">Quản lý học tập</div>
-                    </div>
+                    <div class="font-display font-bold text-sm text-slate-900 leading-tight">LMS Portal</div>
                 </div>
                 <!-- Nút đóng sidebar trên mobile -->
                 <button @click="sidebarOpen=false" class="md:hidden p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
@@ -501,11 +500,11 @@
             <div class="p-3 bg-slate-50 border-b border-slate-100">
                 <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 shadow-xs">
                     <div class="flex items-center gap-2 min-w-0">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-xs"
-                             :style="role==='teacher'?'background:linear-gradient(135deg,#2563eb,#1d4ed8)':'background:linear-gradient(135deg,#10b981,#059669)'"
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                             :class="role==='teacher'?'bg-indigo-600':'bg-emerald-600'"
                              x-text="role==='teacher'?'GV':'HS'"></div>
                         <div class="min-w-0">
-                            <div class="text-xs font-bold text-slate-900 truncate" x-text="currentUser?.full_name"></div>
+                            <div class="text-xs font-semibold text-slate-900 truncate" x-text="currentUser?.full_name"></div>
                             <div class="text-[11px] text-slate-400" x-text="role==='teacher'?'Giáo viên':'Học sinh'"></div>
                         </div>
                     </div>
@@ -582,13 +581,13 @@
                         <span x-text="role==='teacher'?'Giáo viên':'Học sinh'"></span>
                     </span>
 
-                    <!-- Nút tài khoản & Đăng xuất trực tiếp trên Header (Rất tiện cho học sinh dùng điện thoại) -->
-                    <div class="flex items-center gap-1.5 bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200 pl-2 pr-1.5 py-1 rounded-xl transition">
+                    <!-- Nút tài khoản & Đăng xuất trực tiếp trên Header -->
+                    <div class="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 pl-2 pr-1.5 py-1 rounded-xl">
                         <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-                             :style="role==='teacher'?'background:linear-gradient(135deg,#2563eb,#1d4ed8)':'background:linear-gradient(135deg,#10b981,#059669)'"
+                             :class="role==='teacher'?'bg-indigo-600':'bg-emerald-600'"
                              x-text="role==='teacher'?'GV':'HS'"></div>
                         <span class="text-xs font-semibold text-slate-800 max-w-[85px] sm:max-w-[130px] truncate" x-text="currentUser?.full_name"></span>
-                        <button @click="logout()" class="p-1 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center gap-1 text-xs font-medium transition" title="Đăng xuất khỏi tài khoản">
+                        <button @click="logout()" class="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center gap-1 text-xs transition" title="Đăng xuất khỏi tài khoản">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                             <span class="hidden md:inline">Đăng xuất</span>
                         </button>
@@ -977,8 +976,7 @@
                     <!-- Rankings -->
                     <div class="space-y-4">
                         <div>
-                            <h2 class="font-display font-bold text-xl text-slate-900">Bảng Xếp Hạng & Thi Đua</h2>
-                            <p class="text-sm text-slate-500 mt-0.5">Vinh danh thành tích học tập và mức độ chăm chỉ tích cực</p>
+                            <h2 class="font-display font-bold text-lg sm:text-xl text-slate-900">Bảng xếp hạng</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <!-- HW Ranking -->
@@ -1059,10 +1057,9 @@
                 <section x-show="activeTab==='attendance'" class="space-y-5">
                     <div class="card">
                         <!-- Header -->
-                        <div class="flex flex-wrap justify-between items-center gap-4 p-6 border-b border-slate-100">
+                        <div class="flex flex-wrap justify-between items-center gap-3 sm:gap-4 p-4 sm:p-6 border-b border-slate-100">
                             <div>
-                                <h2 class="font-display font-bold text-lg text-slate-900">Bảng Điểm Danh Lớp Học</h2>
-                                <p class="text-sm text-slate-500 mt-0.5">Lọc theo tháng để quản lý chuyên cần học sinh dễ dàng hơn</p>
+                                <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Điểm danh lớp học</h2>
                             </div>
                             <div class="flex flex-wrap gap-3 items-center">
                                 <!-- Month filter -->
@@ -1145,8 +1142,7 @@
                     <!-- Toolbar -->
                     <div class="card p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                         <div>
-                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Bài Tập Về Nhà (Chấm điểm tự động)</h2>
-                            <p class="text-xs sm:text-sm text-slate-500">Giao bài tập tự luyện có chấm điểm thang 10 theo chuẩn phiếu Study4</p>
+                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Bài tập về nhà</h2>
                         </div>
                         <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
                             <div class="flex items-center justify-between sm:justify-start gap-2 bg-slate-50 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200">
@@ -1193,13 +1189,13 @@
                                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             <span x-text="role==='teacher'?'Xem Form Nộp':'Làm bài ngay'"></span>
                                         </button>
-                                        <button x-show="role==='teacher'" @click="openStatistics(a,'assignment')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1 col-span-2 sm:col-span-1 text-blue-700 border-blue-200 bg-blue-50/60">
-                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <button x-show="role==='teacher'" @click="openStatistics(a,'assignment')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1 col-span-2 sm:col-span-1 text-slate-700 border-slate-200">
+                                            <svg class="w-4 h-4 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             <span>Thống kê</span>
                                         </button>
                                         <button @click="viewSubmissionsList(a,'assignment')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1">
-                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            <span x-text="role==='teacher'?'Bảng điểm lớp':'Xem điểm'"></span>
+                                            <svg class="w-4 h-4 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                            <span x-text="role==='teacher'?'Bảng điểm lớp':'Xem kết quả'"></span>
                                         </button>
                                     </div>
                                     <div x-show="role==='teacher'" class="flex items-center justify-end gap-1 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
@@ -1226,10 +1222,9 @@
                 <section x-show="activeTab==='exams'" class="space-y-4 sm:space-y-5">
                     <div class="card p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                         <div>
-                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Đề Kiểm Tra Trực Tuyến</h2>
-                            <p class="text-xs sm:text-sm text-slate-500">Tạo đề thi có bấm giờ đếm ngược, tự động nộp bài và khóa đề khi hết giờ</p>
+                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Đề kiểm tra trực tuyến</h2>
                         </div>
-                        <button x-show="role==='teacher'" @click="openCreateExamModal()" class="btn-primary justify-center py-2 sm:py-2.5 text-xs sm:text-sm" style="background:linear-gradient(135deg,#059669,#047857)">
+                        <button x-show="role==='teacher'" @click="openCreateExamModal()" class="btn-primary justify-center py-2 sm:py-2.5 text-xs sm:text-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Tạo Đề Kiểm Tra Mới
                         </button>
@@ -1256,17 +1251,17 @@
                                 </div>
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-100">
                                     <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
-                                        <button @click="openStudentWorkModal(ex,'exam')" class="btn-primary py-2 px-3 text-xs sm:text-sm justify-center flex-1" style="background:linear-gradient(135deg,#059669,#047857)">
+                                        <button @click="openStudentWorkModal(ex,'exam')" class="btn-primary py-2 px-3 text-xs sm:text-sm justify-center flex-1">
                                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             <span x-text="role==='teacher'?'Xem Form Thi':'Vào Thi Ngay'"></span>
                                         </button>
-                                        <button x-show="role==='teacher'" @click="openStatistics(ex,'exam')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1 col-span-2 sm:col-span-1 text-emerald-700 border-emerald-200 bg-emerald-50/60">
-                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <button x-show="role==='teacher'" @click="openStatistics(ex,'exam')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1 col-span-2 sm:col-span-1 text-slate-700 border-slate-200">
+                                            <svg class="w-4 h-4 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             <span>Thống kê</span>
                                         </button>
                                         <button @click="viewSubmissionsList(ex,'exam')" class="btn-secondary py-2 px-3 text-xs sm:text-sm justify-center flex-1">
-                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            <span x-text="role==='teacher'?'Bảng điểm thi':'Xem điểm'"></span>
+                                            <svg class="w-4 h-4 flex-shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                            <span x-text="role==='teacher'?'Bảng điểm thi':'Xem kết quả'"></span>
                                         </button>
                                     </div>
                                     <div x-show="role==='teacher'" class="flex items-center justify-end gap-1 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
@@ -1336,7 +1331,7 @@
     </div>
 
     <!-- ══════════════════════════ MODAL: TẠO / SỬA BÀI HỌC (THEO ẢNH CONTEXT) ══════════════════════════ -->
-    <div x-show="lessonModalOpen" class="modal-overlay" style="display:none">
+    <div x-show="lessonModalOpen" x-cloak class="modal-overlay">
         <div class="modal-box max-w-xl my-8">
             <div class="modal-header">
                 <h3 class="modal-title" x-text="isEditingLesson ? 'Chỉnh Sửa Bài Học' : 'Thêm Bài Học Mới'"></h3>
@@ -1437,7 +1432,7 @@
     </div>
 
     <!-- ══════════════════════════ MODAL: TẠO/SỬA BÀI TẬP VỀ NHÀ ══════════════════════════ -->
-    <div x-show="assignmentModalOpen" class="modal-overlay" style="display:none">
+    <div x-show="assignmentModalOpen" x-cloak class="modal-overlay">
         <div class="modal-box max-w-3xl my-8">
             <div class="modal-header">
                 <h3 class="modal-title" x-text="isEditingAssignment?'Chỉnh Sửa Bài Tập':'Tạo Bài Tập Về Nhà Mới'"></h3>
@@ -1536,7 +1531,7 @@
     </div>
 
     <!-- ══════════════════════════ MODAL: TẠO/SỬA ĐỀ KIỂM TRA ══════════════════════════ -->
-    <div x-show="examModalOpen" class="modal-overlay" style="display:none">
+    <div x-show="examModalOpen" x-cloak class="modal-overlay">
         <div class="modal-box max-w-3xl my-8">
             <div class="modal-header">
                 <h3 class="modal-title" x-text="isEditingExam?'Chỉnh Sửa Đề Kiểm Tra':'Tạo Đề Kiểm Tra Mới'"></h3>
@@ -1624,13 +1619,13 @@
             </div>
             <div class="modal-footer">
                 <button @click="examModalOpen=false" class="btn-secondary">Hủy</button>
-                <button @click="saveExam()" class="btn-primary" style="background:linear-gradient(135deg,#059669,#047857)">Lưu Đề Thi</button>
+                <button @click="saveExam()" class="btn-primary">Lưu Đề Thi</button>
             </div>
         </div>
     </div>
 
     <!-- ══════════════════════════ MODAL: LÀM BÀI / THI (FULL SCREEN & TỐI ƯU MOBILE) ══════════════════════════ -->
-    <div x-show="studentWorkModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-2" style="background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);display:none">
+    <div x-show="studentWorkModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-2" style="background:rgba(15,23,42,0.7);backdrop-filter:blur(6px)">
         <div class="bg-white w-full h-full sm:h-[96vh] sm:rounded-2xl sm:max-w-[98vw] flex flex-col overflow-hidden shadow-2xl">
 
             <!-- Top bar -->
@@ -1665,7 +1660,7 @@
                     <!-- Student name input -->
                     <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200 flex-1 sm:flex-initial">
                         <span class="text-slate-500 font-medium flex-shrink-0">Họ tên:</span>
-                        <input type="text" x-model="studentAnswerSheet.student_name" placeholder="Nhập họ và tên..." class="bg-transparent border-none font-bold text-blue-600 focus:outline-none w-full sm:w-48 text-xs sm:text-sm">
+                        <input type="text" x-model="studentAnswerSheet.student_name" :readonly="role==='student'" placeholder="Nhập họ và tên..." class="bg-transparent border-none font-bold text-slate-800 focus:outline-none w-full sm:w-48 text-xs sm:text-sm">
                     </div>
 
                     <!-- Tiến độ làm bài -->
@@ -1815,8 +1810,7 @@
                     <!-- Submit footer -->
                     <div class="p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0 bg-white">
                         <button @click="closeStudentWorkModal()" class="btn-secondary py-2 px-3 text-xs sm:text-sm">Hủy</button>
-                        <button @click="submitStudentWork()" class="btn-primary py-2.5 px-5 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-initial justify-center font-bold"
-                                :style="workType==='exam'?'background:linear-gradient(135deg,#059669,#047857)':''">
+                        <button @click="submitStudentWork()" class="btn-primary py-2.5 px-5 sm:px-6 text-xs sm:text-sm flex-1 sm:flex-initial justify-center font-bold">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span>Nộp Bài Ngay</span>
                         </button>
@@ -1827,12 +1821,12 @@
     </div>
 
     <!-- ══════════════════════════ MODAL: BẢNG ĐIỂM (TỐI ƯU MOBILE) ══════════════════════════ -->
-    <div x-show="viewSubmissionsOpen" class="modal-overlay p-2 sm:p-4" style="display:none">
+    <div x-show="viewSubmissionsOpen" x-cloak class="modal-overlay p-2 sm:p-4">
         <div class="modal-box max-w-4xl w-full my-auto max-h-[92vh] flex flex-col overflow-hidden">
             <div class="modal-header p-3.5 sm:p-5 flex-shrink-0">
                 <div class="min-w-0 pr-2">
-                    <h3 class="modal-title text-base sm:text-lg truncate" x-text="activeViewItem?'Bảng điểm: '+activeViewItem.title:'Kết Quả'"></h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5 truncate" x-text="'Tổng cộng: ' + currentSubmissions.length + ' bài nộp'"></p>
+                    <h3 class="modal-title text-base sm:text-lg truncate" x-text="activeViewItem ? ((role==='teacher' ? 'Bảng điểm: ' : 'Kết quả bài làm: ') + activeViewItem.title) : 'Kết quả'"></h3>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5 truncate" x-text="role==='teacher' ? ('Tổng cộng ' + currentSubmissions.length + ' bài nộp') : 'Kết quả của bạn'"></p>
                 </div>
                 <button @click="viewSubmissionsOpen=false" class="btn-ghost flex-shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
@@ -1845,24 +1839,24 @@
                             <th class="text-center" x-show="workType==='exam'">Thời gian làm</th>
                             <th class="text-center">Điểm gốc</th>
                             <th class="text-center">Thang 10</th>
-                            <th class="text-right" x-show="role==='teacher'">Thao tác</th>
+                            <th class="text-right">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="sub in currentSubmissions" :key="sub.id">
+                        <template x-for="sub in (role==='teacher' ? currentSubmissions : currentSubmissions.filter(s => s.student_name && currentUser && s.student_name.trim().toLowerCase() === currentUser.full_name.trim().toLowerCase()))" :key="sub.id">
                             <tr>
                                 <td class="font-semibold text-slate-800 text-xs sm:text-sm" x-text="sub.student_name"></td>
                                 <td class="text-slate-400 text-xs font-mono" x-text="sub.created_at?formatDateTimeDisplay(sub.created_at):''"></td>
                                 <td class="text-center font-bold text-amber-600 text-xs sm:text-sm" x-show="workType==='exam'" x-text="formatDurationDisplay(sub.time_taken)"></td>
                                 <td class="text-center font-bold text-slate-700 text-xs sm:text-sm" x-text="sub.raw_score + ' / ' + sub.max_score"></td>
                                 <td class="text-center font-bold text-base sm:text-lg" :class="sub.score>=5?'text-emerald-600':'text-red-600'" x-text="sub.score + 'đ'"></td>
-                                <td class="text-right whitespace-nowrap" x-show="role==='teacher'">
-                                    <button @click="openSubmissionDetail(sub)" class="btn-secondary text-xs py-1 px-2 mr-1">Xem bài làm</button>
-                                    <button @click="deleteSubmission(sub.id)" class="btn-danger text-xs py-1 px-2">Xóa</button>
+                                <td class="text-right whitespace-nowrap">
+                                    <button @click="openSubmissionDetail(sub)" class="btn-secondary text-xs py-1 px-2.5">Xem bài làm</button>
+                                    <button x-show="role==='teacher'" @click="deleteSubmission(sub.id)" class="btn-danger text-xs py-1 px-2 ml-1">Xóa</button>
                                 </td>
                             </tr>
                         </template>
-                        <tr x-show="currentSubmissions.length===0">
+                        <tr x-show="(role==='teacher' ? currentSubmissions : currentSubmissions.filter(s => s.student_name && currentUser && s.student_name.trim().toLowerCase() === currentUser.full_name.trim().toLowerCase())).length===0">
                             <td colspan="6" class="text-center py-10 text-sm text-slate-400">Chưa có bài nộp nào</td>
                         </tr>
                     </tbody>
@@ -1875,7 +1869,7 @@
     </div>
 
     <!-- ══════════════════════════ MODAL: THỐNG KÊ LỚP ══════════════════════════ -->
-    <div x-show="statsModalOpen" class="modal-overlay p-2 sm:p-4" style="display:none">
+    <div x-show="statsModalOpen" x-cloak class="modal-overlay p-2 sm:p-4">
         <div class="modal-box max-w-5xl w-full my-auto max-h-[94vh] flex flex-col overflow-hidden">
             <div class="modal-header p-3.5 sm:p-5 flex-shrink-0">
                 <div class="min-w-0 pr-2">
@@ -2049,7 +2043,7 @@
     </div>
 
     <!-- ══════════════════════════ MODAL: CHI TIẾT BÀI LÀM CỦA TỪNG HỌC SINH ══════════════════════════ -->
-    <div x-show="submissionDetailOpen" class="modal-overlay p-2 sm:p-4" style="display:none;z-index:60">
+    <div x-show="submissionDetailOpen" x-cloak class="modal-overlay p-2 sm:p-4" style="z-index:60">
         <div class="modal-box max-w-3xl w-full my-auto max-h-[94vh] flex flex-col overflow-hidden">
             <div class="modal-header p-3.5 sm:p-5 flex-shrink-0">
                 <div class="min-w-0 pr-2">
